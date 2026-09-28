@@ -37,7 +37,7 @@
     "links": [
       {
         "displayName": "Runbook: cloudsql",
-        "url": "https://github.com/LoopKitchen/agent-sessions/blob/main/examples/deploy-gcp/README.md#runbook-cloudsql"
+        "url": "https://github.com/loopai-hq/agent-sessions/blob/main/examples/deploy-gcp/README.md#runbook-cloudsql"
       }
     ]
   },

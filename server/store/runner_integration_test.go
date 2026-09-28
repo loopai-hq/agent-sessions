@@ -20,8 +20,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/event"
-	"github.com/LoopKitchen/agent-sessions/server/store/derive"
+	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/server/store/derive"
 )
 
 // dumpDerived renders every row the runner derives, in a fixed order, minus
@@ -99,8 +99,8 @@ func runnerSeed(t *testing.T, s *Store) {
 	fc := fileChange("s-run-a-file", "s-run-a", dvEmail, "/tmp/x.go", "package x\n", 90, dv0.Add(30*time.Second), true)
 	// The same PR named by two events: occurrences count events that
 	// mention a URL, and two batches would have accumulated to two as well.
-	link := hookAt("s-run-a-link", "s-run-a", dvEmail, event.AssistantTurn, 91, dv0.Add(31*time.Second), "see https://github.com/LoopKitchen/agent-sessions/pull/7")
-	again := hookAt("s-run-a-link-2", "s-run-a", dvEmail, event.AssistantTurn, 92, dv0.Add(32*time.Second), "merged https://github.com/LoopKitchen/agent-sessions/pull/7")
+	link := hookAt("s-run-a-link", "s-run-a", dvEmail, event.AssistantTurn, 91, dv0.Add(31*time.Second), "see https://github.com/loopai-hq/agent-sessions/pull/7")
+	again := hookAt("s-run-a-link-2", "s-run-a", dvEmail, event.AssistantTurn, 92, dv0.Add(32*time.Second), "merged https://github.com/loopai-hq/agent-sessions/pull/7")
 	ingestBatch(t, s, fc, link, again)
 }
 
@@ -174,7 +174,7 @@ func TestIntegrationTheVersionedPassIsResumableIdempotentAndSingleWinner(t *test
 	if n := countRows(t, `SELECT count(*) FROM artifacts WHERE session_id = 's-run-a' AND path = '/tmp/x.go' AND version_count = 1`); n != 1 {
 		t.Errorf("artifacts of s-run-a after the pass = %d matching rows, want 1", n)
 	}
-	if n := countRows(t, `SELECT occurrences FROM links WHERE session_id = 's-run-a' AND url = 'https://github.com/LoopKitchen/agent-sessions/pull/7'`); n != 2 {
+	if n := countRows(t, `SELECT occurrences FROM links WHERE session_id = 's-run-a' AND url = 'https://github.com/loopai-hq/agent-sessions/pull/7'`); n != 2 {
 		t.Errorf("the PR link is counted %d times, want 2: occurrences are recounted from the whole session, never accumulated across passes", n)
 	}
 

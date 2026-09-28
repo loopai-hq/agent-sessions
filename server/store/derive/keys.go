@@ -15,8 +15,8 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/LoopKitchen/agent-sessions/internal/event"
-	"github.com/LoopKitchen/agent-sessions/internal/normalize"
+	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/normalize"
 )
 
 // Keys are the cross-origin identities an event carries: the values that let

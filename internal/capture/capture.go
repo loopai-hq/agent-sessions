@@ -33,8 +33,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/backfill"
-	"github.com/LoopKitchen/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/backfill"
+	"github.com/loopai-hq/agent-sessions/internal/event"
 )
 
 // HookEvent is the payload Claude Code delivers on stdin. Fields we do not use

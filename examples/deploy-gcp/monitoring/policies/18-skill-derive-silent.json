@@ -95,7 +95,7 @@
     "links": [
       {
         "displayName": "Runbook: skill invocations",
-        "url": "https://github.com/LoopKitchen/agent-sessions/blob/main/examples/deploy-gcp/README.md#runbook-skill-invocations"
+        "url": "https://github.com/loopai-hq/agent-sessions/blob/main/examples/deploy-gcp/README.md#runbook-skill-invocations"
       }
     ]
   },

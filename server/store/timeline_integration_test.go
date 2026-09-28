@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/event"
 )
 
 func seedThread(t *testing.T, s *Store, email, sid, agent string, at time.Time, n int) {

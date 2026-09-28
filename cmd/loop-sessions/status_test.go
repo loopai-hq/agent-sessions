@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/config"
-	"github.com/LoopKitchen/agent-sessions/internal/spool"
+	"github.com/loopai-hq/agent-sessions/internal/config"
+	"github.com/loopai-hq/agent-sessions/internal/spool"
 )
 
 // The whole of this file defends one property: `status` is run when something is

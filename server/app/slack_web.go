@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/LoopKitchen/agent-sessions/server/slack"
-	"github.com/LoopKitchen/agent-sessions/server/web"
+	"github.com/loopai-hq/agent-sessions/server/slack"
+	"github.com/loopai-hq/agent-sessions/server/web"
 )
 
 // slackWeb adapts the mirror's facade to the dashboard's port, translating

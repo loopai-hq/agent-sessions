@@ -3,7 +3,7 @@ package backfill
 import (
 	"testing"
 
-	"github.com/LoopKitchen/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/event"
 )
 
 // Transcript records say how the harness was started; the walker lifts it onto

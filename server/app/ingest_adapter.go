@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/LoopKitchen/agent-sessions/internal/health"
-	"github.com/LoopKitchen/agent-sessions/server/auth"
-	"github.com/LoopKitchen/agent-sessions/server/ingest"
-	"github.com/LoopKitchen/agent-sessions/server/store"
+	"github.com/loopai-hq/agent-sessions/internal/health"
+	"github.com/loopai-hq/agent-sessions/server/auth"
+	"github.com/loopai-hq/agent-sessions/server/ingest"
+	"github.com/loopai-hq/agent-sessions/server/store"
 )
 
 // ---------------------------------------------------------------------------

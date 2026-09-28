@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/event"
-	"github.com/LoopKitchen/agent-sessions/server/store"
+	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/server/store"
 )
 
 func TestIntegrationGroupVisibilityAndResolution(t *testing.T) {

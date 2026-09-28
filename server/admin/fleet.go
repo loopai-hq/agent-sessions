@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/health"
+	"github.com/loopai-hq/agent-sessions/internal/health"
 )
 
 // Device is an enrolled machine. Revoked devices are carried rather than

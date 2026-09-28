@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/LoopKitchen/agent-sessions/internal/event"
-	"github.com/LoopKitchen/agent-sessions/internal/health"
-	"github.com/LoopKitchen/agent-sessions/internal/scrub"
+	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/health"
+	"github.com/loopai-hq/agent-sessions/internal/scrub"
 )
 
 // ServerCaughtPrefix marks a redaction this server made rather than the agent.

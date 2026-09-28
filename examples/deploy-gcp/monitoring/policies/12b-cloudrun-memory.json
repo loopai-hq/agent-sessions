@@ -38,7 +38,7 @@
     "links": [
       {
         "displayName": "Runbook: ingest 5xx",
-        "url": "https://github.com/LoopKitchen/agent-sessions/blob/main/examples/deploy-gcp/README.md#runbook-ingest-5xx"
+        "url": "https://github.com/loopai-hq/agent-sessions/blob/main/examples/deploy-gcp/README.md#runbook-ingest-5xx"
       }
     ]
   },

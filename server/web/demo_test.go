@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/event"
 )
 
 // TestServeDemo serves the dashboard against the in-memory fake so the pages

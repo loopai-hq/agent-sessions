@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/server/store/derive"
+	"github.com/loopai-hq/agent-sessions/server/store/derive"
 )
 
 func TestIntegrationEventKeysOverALargeCorpus(t *testing.T) {

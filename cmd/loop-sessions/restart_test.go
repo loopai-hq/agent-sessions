@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/upgrade"
+	"github.com/loopai-hq/agent-sessions/internal/upgrade"
 )
 
 // writeBinary lands content at path the way the upgrade does, by renaming a

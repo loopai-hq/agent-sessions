@@ -20,8 +20,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/LoopKitchen/agent-sessions/internal/event"
-	"github.com/LoopKitchen/agent-sessions/internal/spool"
+	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/spool"
 )
 
 // Sink adapts a spool to the interface capture and backfill emit into.

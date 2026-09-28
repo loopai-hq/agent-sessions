@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/event"
-	"github.com/LoopKitchen/agent-sessions/server/store/derive"
+	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/server/store/derive"
 )
 
 // The point of capture_version. A re-walk produces the same ids, so without a
@@ -159,7 +159,7 @@ func TestIntegrationTheDerivationRebuildRunsOnceAndThenStopsRunning(t *testing.T
 
 	ctx := context.Background()
 	batch := session(t, email, sid)
-	batch[0].Event.Text = "see https://github.com/LoopKitchen/agent-sessions/pull/4"
+	batch[0].Event.Text = "see https://github.com/loopai-hq/agent-sessions/pull/4"
 	if _, err := s.UpsertEvents(ctx, batch); err != nil {
 		t.Fatalf("ingest: %v", err)
 	}

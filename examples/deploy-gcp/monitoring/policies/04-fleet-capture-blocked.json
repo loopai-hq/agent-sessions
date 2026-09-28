@@ -38,7 +38,7 @@
     "links": [
       {
         "displayName": "Runbook: capture blocked",
-        "url": "https://github.com/LoopKitchen/agent-sessions/blob/main/examples/deploy-gcp/README.md#runbook-capture-blocked"
+        "url": "https://github.com/loopai-hq/agent-sessions/blob/main/examples/deploy-gcp/README.md#runbook-capture-blocked"
       },
       {
         "displayName": "/admin/fleet",

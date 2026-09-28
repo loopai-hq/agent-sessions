@@ -17,9 +17,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/event"
-	"github.com/LoopKitchen/agent-sessions/internal/normalize"
-	"github.com/LoopKitchen/agent-sessions/server/store/derive"
+	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/normalize"
+	"github.com/loopai-hq/agent-sessions/server/store/derive"
 )
 
 // contentEventTypes are the event types that mean something happened in a

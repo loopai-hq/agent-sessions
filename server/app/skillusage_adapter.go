@@ -13,9 +13,9 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/LoopKitchen/agent-sessions/server/api"
-	"github.com/LoopKitchen/agent-sessions/server/skillusage"
-	"github.com/LoopKitchen/agent-sessions/server/store"
+	"github.com/loopai-hq/agent-sessions/server/api"
+	"github.com/loopai-hq/agent-sessions/server/skillusage"
+	"github.com/loopai-hq/agent-sessions/server/store"
 )
 
 // newSkillUsage builds the skill-invocation route over the store and the

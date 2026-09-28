@@ -28,7 +28,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/LoopKitchen/agent-sessions/internal/health"
+	"github.com/loopai-hq/agent-sessions/internal/health"
 	"log/slog"
 	"time"
 )

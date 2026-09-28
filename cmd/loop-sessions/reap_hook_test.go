@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/LoopKitchen/agent-sessions/internal/capture"
-	"github.com/LoopKitchen/agent-sessions/internal/config"
-	"github.com/LoopKitchen/agent-sessions/internal/health"
-	"github.com/LoopKitchen/agent-sessions/internal/spool"
+	"github.com/loopai-hq/agent-sessions/internal/capture"
+	"github.com/loopai-hq/agent-sessions/internal/config"
+	"github.com/loopai-hq/agent-sessions/internal/health"
+	"github.com/loopai-hq/agent-sessions/internal/spool"
 	"strings"
 )
 

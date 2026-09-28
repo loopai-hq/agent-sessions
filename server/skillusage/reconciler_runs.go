@@ -23,9 +23,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/server/auth"
-	"github.com/LoopKitchen/agent-sessions/server/ingest"
-	"github.com/LoopKitchen/agent-sessions/server/store"
+	"github.com/loopai-hq/agent-sessions/server/auth"
+	"github.com/loopai-hq/agent-sessions/server/ingest"
+	"github.com/loopai-hq/agent-sessions/server/store"
 )
 
 // ReconcilerRunsPath is the route the two reconcilers have compiled in.

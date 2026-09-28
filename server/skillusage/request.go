@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/server/ingest"
-	"github.com/LoopKitchen/agent-sessions/server/store"
+	"github.com/loopai-hq/agent-sessions/server/ingest"
+	"github.com/loopai-hq/agent-sessions/server/store"
 )
 
 // request is the wire body (design 4b). Every field is a pointer so an

@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/config"
-	"github.com/LoopKitchen/agent-sessions/internal/discovery"
-	"github.com/LoopKitchen/agent-sessions/internal/enroll"
-	"github.com/LoopKitchen/agent-sessions/internal/event"
-	"github.com/LoopKitchen/agent-sessions/internal/hooks"
+	"github.com/loopai-hq/agent-sessions/internal/config"
+	"github.com/loopai-hq/agent-sessions/internal/discovery"
+	"github.com/loopai-hq/agent-sessions/internal/enroll"
+	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/hooks"
 )
 
 // LaunchAgentLabel names the per-user agent. It contains both "agent-sessions"

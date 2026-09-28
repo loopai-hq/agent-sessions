@@ -16,10 +16,10 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 
-	"github.com/LoopKitchen/agent-sessions/server/auth"
-	"github.com/LoopKitchen/agent-sessions/server/ingest"
-	"github.com/LoopKitchen/agent-sessions/server/slack"
-	"github.com/LoopKitchen/agent-sessions/server/store"
+	"github.com/loopai-hq/agent-sessions/server/auth"
+	"github.com/loopai-hq/agent-sessions/server/ingest"
+	"github.com/loopai-hq/agent-sessions/server/slack"
+	"github.com/loopai-hq/agent-sessions/server/store"
 )
 
 // This file answers one question and it is the question this codebase has got

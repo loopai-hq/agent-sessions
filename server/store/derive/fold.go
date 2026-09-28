@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/event"
-	"github.com/LoopKitchen/agent-sessions/internal/normalize"
+	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/normalize"
 )
 
 // Row is the column projection of one stored event: everything the fold

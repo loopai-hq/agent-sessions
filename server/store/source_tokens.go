@@ -25,7 +25,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/server/auth"
+	"github.com/loopai-hq/agent-sessions/server/auth"
 )
 
 // SourceTokenPrefix marks a source token, four characters like the device

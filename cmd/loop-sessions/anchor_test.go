@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/daemon"
-	"github.com/LoopKitchen/agent-sessions/internal/spool"
+	"github.com/loopai-hq/agent-sessions/internal/daemon"
+	"github.com/loopai-hq/agent-sessions/internal/spool"
 )
 
 const anchorPrompt = "0deb775f-3848-4adb-9cdc-a246b25137bd"

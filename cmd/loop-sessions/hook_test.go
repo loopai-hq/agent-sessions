@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/capture"
-	"github.com/LoopKitchen/agent-sessions/internal/config"
-	"github.com/LoopKitchen/agent-sessions/internal/event"
-	"github.com/LoopKitchen/agent-sessions/internal/spool"
+	"github.com/loopai-hq/agent-sessions/internal/capture"
+	"github.com/loopai-hq/agent-sessions/internal/config"
+	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/spool"
 )
 
 // The hook path is ledger-first. These tests hold a hook at a chosen point

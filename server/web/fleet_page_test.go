@@ -15,8 +15,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/health"
-	"github.com/LoopKitchen/agent-sessions/server/fleet"
+	"github.com/loopai-hq/agent-sessions/internal/health"
+	"github.com/loopai-hq/agent-sessions/server/fleet"
 )
 
 // fleetPageFixture is the 788dcb3 promotion in miniature: a machine on the

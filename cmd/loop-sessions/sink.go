@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/LoopKitchen/agent-sessions/internal/capture"
-	"github.com/LoopKitchen/agent-sessions/internal/pipeline"
-	"github.com/LoopKitchen/agent-sessions/internal/spool"
+	"github.com/loopai-hq/agent-sessions/internal/capture"
+	"github.com/loopai-hq/agent-sessions/internal/pipeline"
+	"github.com/loopai-hq/agent-sessions/internal/spool"
 )
 
 // pipelineSink is the production sink behind the hookSink seam, named so a

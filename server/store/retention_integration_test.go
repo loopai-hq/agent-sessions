@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/event"
 )
 
 // retentionClock is the "now" every sweep in this file is given. Stating it

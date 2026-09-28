@@ -34,8 +34,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/discovery"
-	"github.com/LoopKitchen/agent-sessions/internal/spool"
+	"github.com/loopai-hq/agent-sessions/internal/discovery"
+	"github.com/loopai-hq/agent-sessions/internal/spool"
 )
 
 // SchemaVersion is bumped when the wire shape of Report changes. It is present

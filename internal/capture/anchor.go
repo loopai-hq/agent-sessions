@@ -4,8 +4,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/backfill"
-	"github.com/LoopKitchen/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/backfill"
+	"github.com/loopai-hq/agent-sessions/internal/event"
 )
 
 // StopTailWaits is how long the daemon waits for a turn's answer to reach the

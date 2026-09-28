@@ -17,14 +17,14 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/LoopKitchen/agent-sessions/server/admin"
-	"github.com/LoopKitchen/agent-sessions/server/api"
-	"github.com/LoopKitchen/agent-sessions/server/auth"
-	"github.com/LoopKitchen/agent-sessions/server/fleet"
-	"github.com/LoopKitchen/agent-sessions/server/ingest"
-	"github.com/LoopKitchen/agent-sessions/server/slack"
-	"github.com/LoopKitchen/agent-sessions/server/store"
-	"github.com/LoopKitchen/agent-sessions/server/web"
+	"github.com/loopai-hq/agent-sessions/server/admin"
+	"github.com/loopai-hq/agent-sessions/server/api"
+	"github.com/loopai-hq/agent-sessions/server/auth"
+	"github.com/loopai-hq/agent-sessions/server/fleet"
+	"github.com/loopai-hq/agent-sessions/server/ingest"
+	"github.com/loopai-hq/agent-sessions/server/slack"
+	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/agent-sessions/server/web"
 )
 
 const (

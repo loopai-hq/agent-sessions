@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/LoopKitchen/agent-sessions/internal/spool"
+	"github.com/loopai-hq/agent-sessions/internal/spool"
 )
 
 // Every config written before the disk guard was rewritten carries

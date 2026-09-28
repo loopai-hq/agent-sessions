@@ -15,10 +15,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/capture"
-	"github.com/LoopKitchen/agent-sessions/internal/config"
-	"github.com/LoopKitchen/agent-sessions/internal/daemon"
-	"github.com/LoopKitchen/agent-sessions/internal/spool"
+	"github.com/loopai-hq/agent-sessions/internal/capture"
+	"github.com/loopai-hq/agent-sessions/internal/config"
+	"github.com/loopai-hq/agent-sessions/internal/daemon"
+	"github.com/loopai-hq/agent-sessions/internal/spool"
 )
 
 // TestAnInstalledAgentDrainsItsSpoolWithNobodyDoingAnything is the test that
@@ -299,7 +299,7 @@ func (s *ingestServer) sessionCount(sessionID string) int {
 func buildAgent(t *testing.T) string {
 	t.Helper()
 	bin := filepath.Join(t.TempDir(), "loop-sessions")
-	cmd := exec.Command("go", "build", "-o", bin, "github.com/LoopKitchen/agent-sessions/cmd/loop-sessions")
+	cmd := exec.Command("go", "build", "-o", bin, "github.com/loopai-hq/agent-sessions/cmd/loop-sessions")
 	if out, err := cmd.CombinedOutput(); err != nil {
 		t.Fatalf("build the agent: %v\n%s", err, out)
 	}

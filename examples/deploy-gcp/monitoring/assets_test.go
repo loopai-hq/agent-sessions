@@ -16,7 +16,7 @@ import (
 	"testing"
 	"unicode"
 
-	"github.com/LoopKitchen/agent-sessions/server/fleet"
+	"github.com/loopai-hq/agent-sessions/server/fleet"
 )
 
 // policy is the part of the Monitoring v3 AlertPolicy shape these assertions

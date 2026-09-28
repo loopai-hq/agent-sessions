@@ -12,8 +12,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/LoopKitchen/agent-sessions/internal/event"
-	"github.com/LoopKitchen/agent-sessions/internal/spool"
+	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/spool"
 )
 
 // syntheticKey is a fixture shaped like an Anthropic key and is not one. It

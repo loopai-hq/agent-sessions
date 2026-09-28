@@ -29,14 +29,14 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/config"
-	"github.com/LoopKitchen/agent-sessions/internal/daemon"
-	"github.com/LoopKitchen/agent-sessions/internal/discovery"
-	"github.com/LoopKitchen/agent-sessions/internal/event"
-	"github.com/LoopKitchen/agent-sessions/internal/health"
-	"github.com/LoopKitchen/agent-sessions/internal/hooks"
-	"github.com/LoopKitchen/agent-sessions/internal/spool"
-	"github.com/LoopKitchen/agent-sessions/internal/upgrade"
+	"github.com/loopai-hq/agent-sessions/internal/config"
+	"github.com/loopai-hq/agent-sessions/internal/daemon"
+	"github.com/loopai-hq/agent-sessions/internal/discovery"
+	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/health"
+	"github.com/loopai-hq/agent-sessions/internal/hooks"
+	"github.com/loopai-hq/agent-sessions/internal/spool"
+	"github.com/loopai-hq/agent-sessions/internal/upgrade"
 )
 
 // Version is stamped at build time. BuildDate is stamped by `make release`
