@@ -4,7 +4,7 @@ go 1.26
 
 require (
 	github.com/jackc/pgx/v5 v5.9.2
-	github.com/yuin/goldmark v1.7.16
+	github.com/yuin/goldmark v1.8.6
 )
 
 require (
