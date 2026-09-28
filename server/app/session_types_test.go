@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/LoopKitchen/agent-sessions/server/store"
-	"github.com/LoopKitchen/agent-sessions/server/web"
+	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/agent-sessions/server/web"
 )
 
 // The store is the single authority on which values session_type may hold.

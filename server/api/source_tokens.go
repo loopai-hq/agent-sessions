@@ -24,7 +24,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/server/auth"
+	"github.com/loopai-hq/agent-sessions/server/auth"
 )
 
 // The values the server fixes on a laptop token. The origin is hook

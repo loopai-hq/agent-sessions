@@ -8,11 +8,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/LoopKitchen/agent-sessions/server/admin"
-	"github.com/LoopKitchen/agent-sessions/server/api"
-	"github.com/LoopKitchen/agent-sessions/server/auth"
-	"github.com/LoopKitchen/agent-sessions/server/store"
-	"github.com/LoopKitchen/agent-sessions/server/web"
+	"github.com/loopai-hq/agent-sessions/server/admin"
+	"github.com/loopai-hq/agent-sessions/server/api"
+	"github.com/loopai-hq/agent-sessions/server/auth"
+	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/agent-sessions/server/web"
 )
 
 // authPrincipals is the roster read that stands behind every authenticated

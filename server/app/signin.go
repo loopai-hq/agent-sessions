@@ -15,9 +15,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/server/auth"
-	"github.com/LoopKitchen/agent-sessions/server/store"
-	"github.com/LoopKitchen/agent-sessions/server/web"
+	"github.com/loopai-hq/agent-sessions/server/auth"
+	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/agent-sessions/server/web"
 )
 
 const (

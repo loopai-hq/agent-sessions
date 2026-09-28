@@ -23,9 +23,9 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"github.com/LoopKitchen/agent-sessions/internal/health"
-	"github.com/LoopKitchen/agent-sessions/server/admin"
-	"github.com/LoopKitchen/agent-sessions/server/store"
+	"github.com/loopai-hq/agent-sessions/internal/health"
+	"github.com/loopai-hq/agent-sessions/server/admin"
+	"github.com/loopai-hq/agent-sessions/server/store"
 )
 
 // ---------------------------------------------------------------------------

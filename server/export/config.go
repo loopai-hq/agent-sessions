@@ -13,8 +13,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/LoopKitchen/agent-sessions/server/app"
-	"github.com/LoopKitchen/agent-sessions/server/store"
+	"github.com/loopai-hq/agent-sessions/server/app"
+	"github.com/loopai-hq/agent-sessions/server/store"
 )
 
 // Config is what the job reads from its environment. The database names are

@@ -41,7 +41,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/server/auth"
+	"github.com/loopai-hq/agent-sessions/server/auth"
 )
 
 // Role is the authorization level. Two values, per DEC-7: the manager hierarchy

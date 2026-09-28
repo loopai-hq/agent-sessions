@@ -31,7 +31,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/backfill"
+	"github.com/loopai-hq/agent-sessions/internal/backfill"
 )
 
 // Tool identifies a supported agent harness.

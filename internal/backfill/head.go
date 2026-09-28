@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/event"
 )
 
 // Bounded reads of a transcript's two ends.

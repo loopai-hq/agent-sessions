@@ -22,7 +22,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/skilllog"
+	"github.com/loopai-hq/agent-sessions/internal/skilllog"
 )
 
 // ---------------------------------------------------------------- closed enums

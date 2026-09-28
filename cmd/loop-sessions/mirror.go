@@ -29,7 +29,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/config"
+	"github.com/loopai-hq/agent-sessions/internal/config"
 )
 
 func runMirror(args []string) error {

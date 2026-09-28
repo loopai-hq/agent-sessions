@@ -16,8 +16,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/server/app"
-	"github.com/LoopKitchen/agent-sessions/server/export"
+	"github.com/loopai-hq/agent-sessions/server/app"
+	"github.com/loopai-hq/agent-sessions/server/export"
 )
 
 // version is stamped at build time by examples/deploy-gcp/Dockerfile

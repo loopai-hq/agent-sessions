@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/health"
+	"github.com/loopai-hq/agent-sessions/internal/health"
 )
 
 // HealthSnapshot is the newest health report from one machine.

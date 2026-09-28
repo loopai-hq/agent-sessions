@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/event"
 )
 
 // Capture version 4: anchors, provable lineage only, the legacy layout, slash

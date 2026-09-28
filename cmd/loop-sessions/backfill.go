@@ -48,13 +48,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/backfill"
-	"github.com/LoopKitchen/agent-sessions/internal/config"
-	"github.com/LoopKitchen/agent-sessions/internal/discovery"
-	"github.com/LoopKitchen/agent-sessions/internal/event"
-	"github.com/LoopKitchen/agent-sessions/internal/pipeline"
-	"github.com/LoopKitchen/agent-sessions/internal/scrub"
-	"github.com/LoopKitchen/agent-sessions/internal/spool"
+	"github.com/loopai-hq/agent-sessions/internal/backfill"
+	"github.com/loopai-hq/agent-sessions/internal/config"
+	"github.com/loopai-hq/agent-sessions/internal/discovery"
+	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/pipeline"
+	"github.com/loopai-hq/agent-sessions/internal/scrub"
+	"github.com/loopai-hq/agent-sessions/internal/spool"
 )
 
 const (

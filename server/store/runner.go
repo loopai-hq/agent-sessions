@@ -33,9 +33,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/event"
-	"github.com/LoopKitchen/agent-sessions/internal/normalize"
-	"github.com/LoopKitchen/agent-sessions/server/store/derive"
+	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/internal/normalize"
+	"github.com/loopai-hq/agent-sessions/server/store/derive"
 )
 
 // deriveLockKey serialises versioned batches across instances. It is the

@@ -38,7 +38,7 @@
     "links": [
       {
         "displayName": "Runbook: live Slack threads",
-        "url": "https://github.com/LoopKitchen/agent-sessions/blob/main/examples/deploy-gcp/README.md#runbook-live-slack-threads"
+        "url": "https://github.com/loopai-hq/agent-sessions/blob/main/examples/deploy-gcp/README.md#runbook-live-slack-threads"
       }
     ]
   },

@@ -19,8 +19,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/event"
-	"github.com/LoopKitchen/agent-sessions/server/store/derive"
+	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/agent-sessions/server/store/derive"
 )
 
 const skillIntDevice = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"

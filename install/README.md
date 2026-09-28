@@ -107,7 +107,7 @@ same commit produces byte-identical output on any machine. You can rebuild from
 source and compare hashes:
 
 ```sh
-git clone https://github.com/LoopKitchen/agent-sessions && cd agent-sessions
+git clone https://github.com/loopai-hq/agent-sessions && cd agent-sessions
 make release
 shasum -a 256 dist/loop-sessions_darwin_arm64
 ```

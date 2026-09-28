@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/config"
-	"github.com/LoopKitchen/agent-sessions/internal/health"
-	"github.com/LoopKitchen/agent-sessions/internal/hooks"
-	"github.com/LoopKitchen/agent-sessions/internal/spool"
+	"github.com/loopai-hq/agent-sessions/internal/config"
+	"github.com/loopai-hq/agent-sessions/internal/health"
+	"github.com/loopai-hq/agent-sessions/internal/hooks"
+	"github.com/loopai-hq/agent-sessions/internal/spool"
 )
 
 // TestAHealthReportArrivesWithTheDeviceCredentialAndThisMachinesQueue is the

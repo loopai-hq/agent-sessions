@@ -6,7 +6,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/internal/upgrade"
+	"github.com/loopai-hq/agent-sessions/internal/upgrade"
 )
 
 // A daemon follows an upgrade of its own binary by restarting in place.

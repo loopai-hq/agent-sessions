@@ -12,7 +12,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/LoopKitchen/agent-sessions/server/store"
+	"github.com/loopai-hq/agent-sessions/server/store"
 )
 
 // The reconciler-runs route's properties, observed without a database:

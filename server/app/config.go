@@ -17,8 +17,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/LoopKitchen/agent-sessions/server/store"
-	"github.com/LoopKitchen/agent-sessions/server/store/derive"
+	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/agent-sessions/server/store/derive"
 )
 
 // Config is this service's entire deployment surface.

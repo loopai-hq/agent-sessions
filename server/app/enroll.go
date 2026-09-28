@@ -15,8 +15,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/LoopKitchen/agent-sessions/server/auth"
-	"github.com/LoopKitchen/agent-sessions/server/store"
+	"github.com/loopai-hq/agent-sessions/server/auth"
+	"github.com/loopai-hq/agent-sessions/server/store"
 )
 
 // EnrollCompletePath is where internal/enroll sends the Firebase ID token its

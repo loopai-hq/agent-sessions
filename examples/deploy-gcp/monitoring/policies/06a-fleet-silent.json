@@ -38,7 +38,7 @@
     "links": [
       {
         "displayName": "Runbook: silent",
-        "url": "https://github.com/LoopKitchen/agent-sessions/blob/main/examples/deploy-gcp/README.md#runbook-silent"
+        "url": "https://github.com/loopai-hq/agent-sessions/blob/main/examples/deploy-gcp/README.md#runbook-silent"
       },
       {
         "displayName": "/admin/fleet",
