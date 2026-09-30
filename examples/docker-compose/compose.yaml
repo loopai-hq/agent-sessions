@@ -1,0 +1,84 @@
+# The loop-sessions server and its Postgres, on one machine, with one command.
+#
+#   cp .env.example .env      # then fill in the values it asks for
+#   docker compose up -d --build
+#   curl -sf http://127.0.0.1:8080/readyz
+#
+# The server runs its own migrations at boot, so a fresh Postgres becomes a
+# working schema without a separate step. README.md in this directory walks
+# through the values .env needs and what to do once the server answers.
+#
+# This is the smallest deployment that works, not a hardened one: the server
+# listens on plain HTTP on the loopback interface. Put TLS in front of it
+# before anyone else can reach it (see README.md, "Going further").
+
+name: loop-sessions
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:?set DATABASE_NAME in .env}
+      POSTGRES_USER: ${DATABASE_USER:?set DATABASE_USER in .env}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?set DATABASE_PASSWORD in .env}
+    volumes:
+      # Everything the server stores lives here: sessions, events, the
+      # search index, the roster. Back it up (README.md, "Backups").
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # pg_isready answers before the server is ready to take connections
+      # during the very first initialisation, which is why the server also
+      # pings once at its own boot before migrating. -d with the database
+      # name keeps the probe off the default database.
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  server:
+    # The published image, built by the repository's release workflow on
+    # every tag (linux/amd64; on an arm64 host let Compose build it instead,
+    # or run it under emulation). `docker compose pull server` fetches it.
+    image: ghcr.io/loopai-hq/loop-sessions-server:${SERVER_IMAGE_TAG:-latest}
+    # The alternative: build from the repository you are standing in. With
+    # both keys present Compose builds when the image is not already local,
+    # and `docker compose up --build` always builds, so a checkout works
+    # before any release exists and a released image works without Go.
+    build:
+      context: ../..
+      args:
+        VERSION: ${SERVER_VERSION:-dev}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      # Every variable the server reads. .env.example documents each one;
+      # copy it to .env and fill it in. The file is listed in .gitignore
+      # here because it holds the session key and the database password.
+      - .env
+    environment:
+      # Postgres is reached over the Compose network by service name, so
+      # these two are fixed here rather than asked for in .env.
+      DATABASE_HOST: db
+      DATABASE_PORT: "5432"
+      # The port the server listens on inside the container. Fixed here as
+      # well, because the `ports:` line below maps to it: env_file forwards
+      # everything in .env, so a PORT set there would otherwise move the
+      # listener and leave the published port pointing at nothing. The host
+      # side of the mapping is HOST_PORT.
+      PORT: "8080"
+    ports:
+      # Loopback only. HOST_PORT in .env picks the host port (default 8080);
+      # PUBLIC_URL there must match what a browser will type, which for the
+      # default is http://127.0.0.1:8080.
+      - "127.0.0.1:${HOST_PORT:-8080}:8080"
+    # No container-side healthcheck: the image is distroless (no shell, no
+    # curl). Probe it from the host instead: GET /readyz answers 200 once
+    # migrations have run and the database is reachable; /livez never
+    # touches the database.
+
+volumes:
+  pgdata:
