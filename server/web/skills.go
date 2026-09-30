@@ -41,11 +41,13 @@ type SkillQuery struct {
 // The port's rows, one per 6.2 document row; the store's shapes as the
 // page reads them.
 
+// SkillTotals is the summary's KPI row: counts over the window, as the page reads it.
 type SkillTotals struct {
 	Invocations, Skills, People, Sessions         int64
 	User, Agent, Success, Error, Started, Claimed int64
 }
 
+// SkillBucketRow is the invocations in one time bucket for one platform, trigger and trust, as the page reads it.
 type SkillBucketRow struct {
 	Bucket                   time.Time
 	Platform, Trigger, Trust string
@@ -58,6 +60,7 @@ type SkillCopy struct {
 	Invocations               int64
 }
 
+// SkillSkillRow is one skill lineage and its use over the window, as the page reads it.
 type SkillSkillRow struct {
 	Lineage, SourceRepo, Plugin, Skill              string
 	Invocations, People, Sessions, User, Agent, Err int64
@@ -79,11 +82,13 @@ func (r SkillSkillRow) Name() string {
 // no last use.
 func (r SkillSkillRow) Folded() bool { return r.Lineage == "other" }
 
+// SkillPlatformRow is the invocations on one platform for one origin and trust, as the page reads it.
 type SkillPlatformRow struct {
 	Platform, Origin, Trust     string
 	Invocations, Skills, People int64
 }
 
+// SkillPersonRow is one person's skill use over the window, as the page reads it.
 type SkillPersonRow struct {
 	Email               string
 	Invocations, Skills int64
@@ -91,11 +96,13 @@ type SkillPersonRow struct {
 	Platforms           []string
 }
 
+// SkillRepoRow is the invocations of one lineage in one repository, as the page reads it.
 type SkillRepoRow struct {
 	Repo, Lineage string
 	Invocations   int64
 }
 
+// SkillSummary is the summary document: the window, the totals and every breakdown, as the page reads it.
 type SkillSummary struct {
 	From, To   time.Time
 	Totals     SkillTotals
@@ -106,6 +113,7 @@ type SkillSummary struct {
 	ByRepo     []SkillRepoRow
 }
 
+// SkillUnusedRow is a catalog entry nobody ran in the window, as the page reads it.
 type SkillUnusedRow struct {
 	SourceRepo, Plugin, Skill, Lineage, AuthoredBy string
 	Mirrored, Installable                          bool
@@ -115,10 +123,12 @@ type SkillUnusedRow struct {
 	StaleMirror                                    bool
 }
 
+// SkillSuggestion is the catalog entry an unknown name most likely meant, as the page reads it.
 type SkillSuggestion struct {
 	SourceRepo, Plugin, Skill string
 }
 
+// SkillUnknownRow is a skill name no catalog entry resolves, with how often it was seen, as the page reads it.
 type SkillUnknownRow struct {
 	RawName, Platform, Origin string
 	Count                     int64
@@ -126,6 +136,7 @@ type SkillUnknownRow struct {
 	Suggested                 *SkillSuggestion
 }
 
+// SkillPruningRow is the pruning report's row: a catalog entry and the action proposed for it, as the page reads it.
 type SkillPruningRow struct {
 	SourceRepo, Plugin, Skill, AuthoredBy, AuthorEvidence string
 	LastUsedAt                                            *time.Time
@@ -134,6 +145,7 @@ type SkillPruningRow struct {
 	StaleMirror                                           bool
 }
 
+// SkillComplianceRow is the compliance report's row: beacon rows against reconciler rows for one day, platform and lineage, as the page reads it.
 type SkillComplianceRow struct {
 	Day               time.Time
 	Platform, Lineage string

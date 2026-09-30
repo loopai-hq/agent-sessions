@@ -56,8 +56,11 @@ const SchemaVersion = 2
 type Level string
 
 const (
-	LevelInfo     Level = "info"
+	// LevelInfo is something a person chose, such as a pause: nothing to fix.
+	LevelInfo Level = "info"
+	// LevelDegraded means data is delayed or at risk.
 	LevelDegraded Level = "degraded"
+	// LevelCritical means data is being lost.
 	LevelCritical Level = "critical"
 )
 
@@ -673,7 +676,6 @@ func derive(in Inputs, r Report, th Thresholds, at time.Time, diskErr error) []C
 	return cs
 }
 
-// spoolConditions derives everything that depends on trustworthy spool numbers.
 // NotLosses names the counters the spool carries in its Dropped map that are
 // not losses. That map is the durable place for "this many of X happened,
 // across every process that ever wrote to this directory", and recovery
@@ -726,6 +728,7 @@ func NotLossReasons() []string {
 	return out
 }
 
+// spoolConditions derives everything that depends on trustworthy spool numbers.
 func spoolConditions(in Inputs, r Report, th Thresholds, at time.Time) []Condition {
 	var cs []Condition
 	add := func(level Level, kind, detail string, since time.Time) {

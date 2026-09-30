@@ -61,16 +61,16 @@ func scopeEmails(v Viewer, requested []string) []string {
 	return []string{v.Email}
 }
 
-// DailyUsage returns per-day totals over [from, to), bucketed in tz.
-//
-// The zone matters and is the caller's, not the database's: a day boundary drawn
-// in UTC puts every evening session in Bengaluru on tomorrow's bar, and the
-// person reading the chart knows which day they worked.
 // bucketUnits are the units DailyUsage may truncate to. A whitelist because the
 // unit is interpolated into date_trunc's argument position via parameter, but
 // validating it here turns a typo into a named error instead of a Postgres one.
 var bucketUnits = map[string]bool{"hour": true, "day": true}
 
+// DailyUsage returns per-day totals over [from, to), bucketed in tz.
+//
+// The zone matters and is the caller's, not the database's: a day boundary drawn
+// in UTC puts every evening session in Bengaluru on tomorrow's bar, and the
+// person reading the chart knows which day they worked.
 func (s *Store) DailyUsage(ctx context.Context, v Viewer, from, to time.Time, tz, unit string, emails, types []string) ([]DayUsage, error) {
 	emails = scopeEmails(v, emails)
 	if err := validZone(tz); err != nil {

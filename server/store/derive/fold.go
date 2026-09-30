@@ -64,11 +64,16 @@ const (
 type Outcome string
 
 const (
-	OutcomeAnswered         Outcome = "answered"
-	OutcomeInterrupted      Outcome = "interrupted"
+	// OutcomeAnswered is a prompt that got its answer.
+	OutcomeAnswered Outcome = "answered"
+	// OutcomeInterrupted is a prompt whose answer the person cut short.
+	OutcomeInterrupted Outcome = "interrupted"
+	// OutcomeNoAnswerCaptured is a prompt with work but no answer on record.
 	OutcomeNoAnswerCaptured Outcome = "no_answer_captured"
-	OutcomeNoWork           Outcome = "no_work"
-	OutcomeInProgress       Outcome = "in_progress"
+	// OutcomeNoWork is a prompt nothing followed.
+	OutcomeNoWork Outcome = "no_work"
+	// OutcomeInProgress is the exchange still open when the fold ran.
+	OutcomeInProgress Outcome = "in_progress"
 	// HeadKey names the turn that holds a thread's rows from before its first
 	// prompt: a session whose head was not imported still has work to show.
 	HeadKey = "head"

@@ -37,15 +37,26 @@ import (
 // Tool identifies a supported agent harness.
 type Tool string
 
+// The harnesses discovery knows where to look for. Claude Code is captured
+// live and imported; Codex is imported and repaired from its rollouts; the
+// rest are located and reported so a fleet can see what it is not covering.
 const (
-	ClaudeCode    Tool = "claude_code"
+	// ClaudeCode is Anthropic's Claude Code CLI.
+	ClaudeCode Tool = "claude_code"
+	// ClaudeDesktop is the Claude desktop application.
 	ClaudeDesktop Tool = "claude_desktop"
-	Codex         Tool = "codex"
-	Cursor        Tool = "cursor"
-	Windsurf      Tool = "windsurf"
-	Aider         Tool = "aider"
-	Continue      Tool = "continue"
-	GeminiCLI     Tool = "gemini_cli"
+	// Codex is OpenAI's Codex CLI.
+	Codex Tool = "codex"
+	// Cursor is the Cursor editor.
+	Cursor Tool = "cursor"
+	// Windsurf is the Windsurf editor.
+	Windsurf Tool = "windsurf"
+	// Aider is the aider CLI.
+	Aider Tool = "aider"
+	// Continue is the Continue extension.
+	Continue Tool = "continue"
+	// GeminiCLI is Google's Gemini CLI.
+	GeminiCLI Tool = "gemini_cli"
 )
 
 // State is what we concluded about a tool on this machine.

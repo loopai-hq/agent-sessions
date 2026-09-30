@@ -129,9 +129,13 @@ type SlackPrefs struct {
 	Channel string `json:"channel,omitempty"`
 }
 
+// The values SlackPrefs.Mode takes.
 const (
-	SlackOff     = "off"
-	SlackDM      = "dm"
+	// SlackOff is the shipped default: nothing is mirrored.
+	SlackOff = "off"
+	// SlackDM mirrors to the person as direct messages.
+	SlackDM = "dm"
+	// SlackChannel mirrors into SlackPrefs.Channel.
 	SlackChannel = "channel"
 )
 
@@ -175,11 +179,22 @@ func (p Paths) Root() string {
 	return filepath.Join(home, ".loop", "sessions")
 }
 
-func (p Paths) ConfigFile() string    { return filepath.Join(p.Root(), "config.json") }
-func (p Paths) SpoolDir() string      { return filepath.Join(p.Root(), "spool") }
-func (p Paths) StateDir() string      { return filepath.Join(p.Root(), "state") }
-func (p Paths) SeqDir() string        { return filepath.Join(p.Root(), "seq") }
-func (p Paths) LogFile() string       { return filepath.Join(p.Root(), "logs", "agent.log") }
+// ConfigFile is the JSON file Load reads and Save writes.
+func (p Paths) ConfigFile() string { return filepath.Join(p.Root(), "config.json") }
+
+// SpoolDir is the outbox: captured events waiting to be delivered.
+func (p Paths) SpoolDir() string { return filepath.Join(p.Root(), "spool") }
+
+// StateDir holds the daemon's markers, stamps and ledgers.
+func (p Paths) StateDir() string { return filepath.Join(p.Root(), "state") }
+
+// SeqDir holds the per-session sequence counters the hook path advances.
+func (p Paths) SeqDir() string { return filepath.Join(p.Root(), "seq") }
+
+// LogFile is the agent log every subcommand appends to.
+func (p Paths) LogFile() string { return filepath.Join(p.Root(), "logs", "agent.log") }
+
+// DiscoveryFile is where `discover` records what it found on this machine.
 func (p Paths) DiscoveryFile() string { return filepath.Join(p.Root(), "discovery.json") }
 
 // Load reads the config.
@@ -408,14 +423,15 @@ func (c Config) IsSkipped(tool string) bool {
 	return false
 }
 
-// Pause and Resume record the user's choice with a timestamp, so the fleet view
-// can show how long a machine has been paused rather than just that it is.
+// Pause records the user's choice with a timestamp, so the fleet view can show
+// how long a machine has been paused rather than just that it is.
 func (c Config) Pause(now time.Time) Config {
 	c.Paused = true
 	c.PausedSince = now
 	return c
 }
 
+// Resume clears the pause and its timestamp.
 func (c Config) Resume() Config {
 	c.Paused = false
 	c.PausedSince = time.Time{}

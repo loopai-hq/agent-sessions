@@ -41,8 +41,12 @@ const (
 	AuthorEvidenceGitFirstCommit = "git_first_commit"
 )
 
+// The same sets as slices, in the CHECK's order, for the closed-enum guard
+// and for the UI's option lists.
 var (
-	AuthoredBys     = []string{AuthoredByHuman, AuthoredByAgent, AuthoredByVendor, AuthoredByUnknown}
+	// AuthoredBys is skill_catalog.authored_by's accepted values.
+	AuthoredBys = []string{AuthoredByHuman, AuthoredByAgent, AuthoredByVendor, AuthoredByUnknown}
+	// AuthorEvidences is skill_catalog.author_evidence's accepted values.
 	AuthorEvidences = []string{AuthorEvidenceNone, AuthorEvidenceFrontmatter, AuthorEvidenceGitFirstCommit}
 	// ReconcilerPlatforms is the reconciler_runs.agent_platform CHECK: the
 	// platforms whose activation log a reconciler replays. The two the

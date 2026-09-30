@@ -81,12 +81,20 @@ const (
 	SessionTypeAutomation = "automation"
 )
 
+// The closed sets above as slices, in the CHECK's order, for the closed-enum
+// guard and the UI's option lists.
 var (
-	Origins      = []string{OriginDerived, OriginHook, OriginBeacon, OriginReconciler}
-	Platforms    = []string{PlatformClaudeCode, PlatformDevin, PlatformCapy, PlatformCodex, PlatformVorflux}
-	Trusts       = []string{TrustDevice, TrustClaimed}
+	// Origins is how an invocation row came to exist.
+	Origins = []string{OriginDerived, OriginHook, OriginBeacon, OriginReconciler}
+	// Platforms is the agent platforms an invocation can name.
+	Platforms = []string{PlatformClaudeCode, PlatformDevin, PlatformCapy, PlatformCodex, PlatformVorflux}
+	// Trusts is whether an enrolled device attested the row or an emitter claimed it.
+	Trusts = []string{TrustDevice, TrustClaimed}
+	// SkillSources is where a skill was installed from.
 	SkillSources = []string{SkillSourcePlugin, SkillSourceProject, SkillSourceUser, SkillSourceMirror, SkillSourceBuiltin, SkillSourceUnknown}
-	Triggers     = []string{TriggerUser, TriggerAgent, TriggerNested, TriggerPreload, TriggerUnknown}
+	// Triggers is what invoked the skill.
+	Triggers = []string{TriggerUser, TriggerAgent, TriggerNested, TriggerPreload, TriggerUnknown}
+	// Outcomes is how an invocation ended.
 	Outcomes     = []string{OutcomeStarted, OutcomeSuccess, OutcomeError, OutcomeUnknown}
 	ErrorClasses = []string{ErrorClassNotFound, ErrorClassTimeout, ErrorClassRuntime, ErrorClassUnknown}
 	// SkillSessionTypes is the skill_invocations.session_type CHECK: the

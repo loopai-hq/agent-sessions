@@ -37,6 +37,7 @@ type SkillFilter struct {
 // The response documents, tagged here because the tags are the wire
 // contract (design 6.2).
 
+// SkillTotals is the summary's KPI row: counts over the window (wire form).
 type SkillTotals struct {
 	Invocations int64 `json:"invocations"`
 	Skills      int64 `json:"skills"`
@@ -50,6 +51,7 @@ type SkillTotals struct {
 	Claimed     int64 `json:"claimed"`
 }
 
+// SkillBucketRow is the invocations in one time bucket for one platform, trigger and trust (wire form).
 type SkillBucketRow struct {
 	Bucket      time.Time `json:"bucket"`
 	Platform    string    `json:"platform"`
@@ -58,6 +60,7 @@ type SkillBucketRow struct {
 	Invocations int64     `json:"invocations"`
 }
 
+// SkillSkillRow is one skill lineage and its use over the window (wire form).
 type SkillSkillRow struct {
 	Lineage     string     `json:"lineage"`
 	SourceRepo  string     `json:"source_repo"`
@@ -74,6 +77,7 @@ type SkillSkillRow struct {
 	LastUsedAt  *time.Time `json:"last_used_at"`
 }
 
+// SkillPlatformRow is the invocations on one platform for one origin and trust (wire form).
 type SkillPlatformRow struct {
 	Platform    string `json:"platform"`
 	Origin      string `json:"origin"`
@@ -83,6 +87,7 @@ type SkillPlatformRow struct {
 	People      int64  `json:"people"`
 }
 
+// SkillPersonRow is one person's skill use over the window (wire form).
 type SkillPersonRow struct {
 	Email       string   `json:"email"`
 	Invocations int64    `json:"invocations"`
@@ -91,12 +96,14 @@ type SkillPersonRow struct {
 	Platforms   []string `json:"platforms"`
 }
 
+// SkillRepoRow is the invocations of one lineage in one repository (wire form).
 type SkillRepoRow struct {
 	Repo        string `json:"repo"`
 	Lineage     string `json:"lineage"`
 	Invocations int64  `json:"invocations"`
 }
 
+// SkillSummary is the summary document: the window, the totals and every breakdown (wire form).
 type SkillSummary struct {
 	From       time.Time          `json:"from"`
 	To         time.Time          `json:"to"`
@@ -141,11 +148,13 @@ type SkillInvocation struct {
 	Lineage        string    `json:"lineage"`
 }
 
+// SkillInvocationPage is one page of the invocation listing and the cursor for the next (wire form).
 type SkillInvocationPage struct {
 	Invocations []SkillInvocation
 	NextCursor  string
 }
 
+// SkillUnusedRow is a catalog entry nobody ran in the window (wire form).
 type SkillUnusedRow struct {
 	SourceRepo    string     `json:"source_repo"`
 	Plugin        string     `json:"plugin"`
@@ -160,12 +169,14 @@ type SkillUnusedRow struct {
 	StaleMirror   bool       `json:"stale_mirror"`
 }
 
+// SkillSuggestion is the catalog entry an unknown name most likely meant (wire form).
 type SkillSuggestion struct {
 	SourceRepo string `json:"source_repo"`
 	Plugin     string `json:"plugin"`
 	Skill      string `json:"skill"`
 }
 
+// SkillUnknownRow is a skill name no catalog entry resolves, with how often it was seen (wire form).
 type SkillUnknownRow struct {
 	RawName   string           `json:"raw_name"`
 	Platform  string           `json:"platform"`
@@ -176,6 +187,7 @@ type SkillUnknownRow struct {
 	Suggested *SkillSuggestion `json:"suggested"`
 }
 
+// SkillPruningRow is the pruning report's row: a catalog entry and the action proposed for it (wire form).
 type SkillPruningRow struct {
 	SourceRepo     string     `json:"source_repo"`
 	Plugin         string     `json:"plugin"`
@@ -190,6 +202,7 @@ type SkillPruningRow struct {
 	StaleMirror    bool       `json:"stale_mirror"`
 }
 
+// SkillComplianceRow is the compliance report's row: beacon rows against reconciler rows for one day, platform and lineage (wire form).
 type SkillComplianceRow struct {
 	Day            time.Time  `json:"day"`
 	Platform       string     `json:"platform"`

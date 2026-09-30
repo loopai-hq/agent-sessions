@@ -11,6 +11,8 @@ import (
 	"github.com/yuin/goldmark/text"
 )
 
+// LongMessage reports whether a prompt is long enough (over 600 runes or 8
+// lines) to be shown collapsed. An assistant block never is.
 func (b Block) LongMessage() bool {
 	if b.Kind == KindAssistant {
 		return false
@@ -32,6 +34,8 @@ func continuousPath(path string) bool {
 	return ok && id != "" && !strings.Contains(id, "/")
 }
 
+// MessagePreview is the block's text on one line, cut at 320 runes, for the
+// collapsed rendering.
 func (b Block) MessagePreview() []Segment {
 	var text strings.Builder
 	for _, segment := range b.Text {
@@ -53,6 +57,9 @@ type ConversationRun struct {
 	Matched bool
 }
 
+// Runs folds the group's blocks into presentation runs: consecutive work
+// blocks (tool calls, answers without text) share a run; a prompt or an
+// answer with text stands alone.
 func (g Group) Runs() []ConversationRun {
 	var runs []ConversationRun
 	for _, b := range g.Blocks {
@@ -70,6 +77,7 @@ func (g Group) Runs() []ConversationRun {
 	return runs
 }
 
+// Matched reports whether any block in the group matched the search.
 func (g Group) Matched() bool {
 	for _, b := range g.Blocks {
 		if b.Matched() {
@@ -79,6 +87,8 @@ func (g Group) Matched() bool {
 	return false
 }
 
+// Matched reports whether the search matched the block's text or, for a tool
+// block, its input or output.
 func (b Block) Matched() bool {
 	fields := [][]Segment{b.Text}
 	if b.Tool != nil {
@@ -98,6 +108,8 @@ func (b Block) Matched() bool {
 // Raw HTML stays visible as text, and images never trigger external fetches.
 var conversationMarkdown = goldmark.New(goldmark.WithExtensions(extension.Table, extension.Strikethrough))
 
+// MarkdownNode is one node of a rendered Markdown tree: its kind, the text or
+// URL it carries, a heading's level, a list's numbering and its children.
 type MarkdownNode struct {
 	Kind     string
 	Text     string
