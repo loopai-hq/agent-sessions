@@ -1,34 +1,240 @@
-# The pull-request gate. Everything here mirrors `make lint` and `make test`,
-# plus the two builds a merge will need: the cross-compiled client and the
-# server image. A change that passes its unit tests and cannot link on
-# linux/arm64, or cannot build the Dockerfile, is a change that breaks the
-# release job on merge, and finding that out on the PR is the whole point.
+# The pull-request gate, and the weekly proof that main still holds.
+#
+# Each job answers one question a merge would otherwise answer the hard way:
+#   lint               gofmt, go vet, shellcheck and golangci-lint are clean
+#   test               the unit suite passes with the race detector on Linux
+#                      and on macOS (the darwin-only files run nowhere else)
+#   integration        the schema and the store work on the oldest supported
+#                      Postgres (15) and the newest (17)
+#   build              `make release` produces the same bytes twice, the
+#                      manifest verifies, the notices file is current, and
+#                      the server image builds with its labels
+#   govulncheck        no known vulnerability is reachable from the code
+#   gitleaks           no credential-shaped string in the tree or the history
+#   dependency-review  a pull request adds no vulnerable or badly licensed
+#                      dependency
+#
+# Every action is pinned to a commit SHA with its version beside it; Dependabot
+# moves both. The token is read-only for every job. A newer push cancels the
+# run in flight. The weekly schedule exists so a dependency advisory or a
+# runner-image change is noticed without waiting for the next pull request.
 name: ci
 
 on:
   pull_request:
   push:
     branches: [main]
+  schedule:
+    # Mondays 06:17 UTC.
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # The dependency and tool versions the jobs below install by hand. Pinned
+  # here so a bump is one line and shows up in review.
+  GOLANGCI_LINT_VERSION: v2.14.0
+  GOVULNCHECK_VERSION: v1.8.0
+  GITLEAKS_VERSION: v8.30.1
+  GO_LICENSES_VERSION: v2.0.1
+
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
           cache: true
-      - name: shellcheck
+      - name: install shellcheck
         run: sudo apt-get update -q && sudo apt-get install -y -q shellcheck
-      - name: lint
+      - name: make lint (gofmt, go vet, shellcheck)
         run: make lint
-      - name: test
+      # The action runs golangci-lint itself with the config in the repo; the
+      # step is skipped while no .golangci.yml exists, mirroring `make lint`.
+      - name: golangci-lint
+        if: hashFiles('.golangci.yml') != ''
+        uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: unit suite with the race detector
         run: make test
+
+  integration:
+    strategy:
+      fail-fast: false
+      matrix:
+        postgres: ["15", "17"]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:${{ matrix.postgres }}
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: loop_sessions_test
+        ports:
+          - 5432:5432
+        # The job must not start its tests before the server accepts
+        # connections; the health check gates the job on pg_isready.
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: integration suite on postgres ${{ matrix.postgres }}
+        env:
+          LOOP_SESSIONS_TEST_DSN: postgres://postgres:test@127.0.0.1:5432/loop_sessions_test
+        run: go test -race -tags integration ./server/...
+
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      # Full history and tags so `git describe` names the build the way a
+      # release would, and so the checkout is a real clone with a .git
+      # directory: the toolchain's VCS stamp and the Makefile's BUILD_DATE
+      # both read it.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
       - name: cross-compile the client (must link on every platform)
-        run: make release VERSION=ci ENDPOINT=https://example.invalid ALLOW_DIRTY=1 && make verify
+        run: make release ENDPOINT= && make verify
+
+      # Reproducibility, proven rather than claimed: the same commit built a
+      # second time must produce byte-identical binaries, and the manifest's
+      # build_date must be the commit time, not the clock. SHA256SUMS is
+      # copied out of dist/ between the runs because `make release` cleans it.
+      - name: build again and compare
+        run: |
+          cp dist/SHA256SUMS /tmp/first.SHA256SUMS
+          make release ENDPOINT= >/dev/null
+          diff /tmp/first.SHA256SUMS dist/SHA256SUMS
+          echo "reproducible: both builds wrote the same SHA256SUMS"
+          want="$(TZ=UTC git log -1 --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd)"
+          grep -F "\"build_date\": \"${want}\"" dist/latest.json
+          echo "build_date is the commit time: ${want}"
+
+      - name: the binary is stamped with this commit and no local changes
+        run: |
+          go version -m dist/loop-sessions_linux_amd64 | grep -q "vcs.revision=${GITHUB_SHA}"
+          if go version -m dist/loop-sessions_linux_amd64 | grep -q 'vcs.modified=true'; then
+            echo 'the build carries vcs.modified=true; refusing to continue' >&2
+            exit 1
+          fi
+
+      - name: THIRD_PARTY_NOTICES.md is current
+        run: |
+          go install "github.com/google/go-licenses/v2@${GO_LICENSES_VERSION}"
+          make notices
+          git diff --exit-code THIRD_PARTY_NOTICES.md
+
       - name: build the server image (must still build; never pushed from here)
-        run: docker build -f examples/deploy-gcp/Dockerfile --build-arg VERSION=ci .
+        run: |
+          docker build \
+            --build-arg VERSION=ci \
+            --build-arg REVISION="${GITHUB_SHA}" \
+            --build-arg BUILD_DATE="$(TZ=UTC git log -1 --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd)" \
+            -t loop-sessions-server:ci .
+          docker inspect loop-sessions-server:ci --format '{{ json .Config.Labels }}'
+          for label in source version revision created; do
+            test -n "$(docker inspect loop-sessions-server:ci --format "{{ index .Config.Labels \"org.opencontainers.image.${label}\" }}")"
+          done
+          # The image ships the notices file next to the binary.
+          docker create --name notices-check loop-sessions-server:ci
+          docker cp notices-check:/THIRD_PARTY_NOTICES.md /tmp/notices-from-image.md
+          docker rm notices-check
+          diff THIRD_PARTY_NOTICES.md /tmp/notices-from-image.md
+
+  govulncheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: govulncheck ./...
+        run: go run "golang.org/x/vuln/cmd/govulncheck@${GOVULNCHECK_VERSION}" ./...
+
+  gitleaks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Full history: `gitleaks git` scans every commit, not only the tip.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      # Installed from source at a pinned version rather than through
+      # gitleaks-action, which wants an organisation licence key.
+      - name: install gitleaks
+        run: go install "github.com/zricethezav/gitleaks/v8@${GITLEAKS_VERSION}"
+      - name: scan the working tree
+        run: gitleaks dir --config .gitleaks.toml --exit-code 1 --no-banner --redact .
+      - name: scan the history
+        run: gitleaks git --config .gitleaks.toml --exit-code 1 --no-banner --redact .
+
+  dependency-review:
+    # Diffs the dependency graph of a pull request against the Advisory
+    # Database and the licence allowlist. It needs the repository's
+    # dependency graph enabled (Settings > Security), which is on by default
+    # for public repositories.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: moderate
+          allow-licenses: MIT, BSD-2-Clause, BSD-3-Clause, ISC, Apache-2.0
