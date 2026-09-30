@@ -2284,13 +2284,13 @@ const (
 
 // clipRunes bounds a string to max runes, cutting on a rune boundary so a
 // multi-byte character is never split into an invalid tail.
-func clipRunes(s string, max int) string {
-	if utf8.RuneCountInString(s) <= max {
+func clipRunes(s string, limit int) string {
+	if utf8.RuneCountInString(s) <= limit {
 		return s
 	}
 	n := 0
 	for i := range s {
-		if n == max {
+		if n == limit {
 			return s[:i]
 		}
 		n++

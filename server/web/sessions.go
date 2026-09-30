@@ -1,7 +1,6 @@
 package web
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 	"net/url"
@@ -1086,7 +1085,7 @@ func (s *Server) handleEvent(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if len(e.Raw) > 0 {
-		view.Raw, t = textSegments(prettyJSON(json.RawMessage(e.Raw)), rawEventLimit, nil)
+		view.Raw, t = textSegments(prettyJSON(e.Raw), rawEventLimit, nil)
 		view.Truncated = view.Truncated || t
 	}
 	s.rnd.render(w, http.StatusOK, "event.html", view)

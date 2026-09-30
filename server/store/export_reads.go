@@ -98,7 +98,7 @@ func (s *Store) ExportAdvanceWatermarks(ctx context.Context, marks map[string]ti
 	if err != nil {
 		return fmt.Errorf("store: begin: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 	for name, at := range marks {
 		if at.IsZero() {
 			continue
@@ -160,7 +160,7 @@ func (s *Store) ExportPlan(ctx context.Context, req ExportPlanRequest) (ExportPl
 	if err != nil {
 		return out, fmt.Errorf("store: begin export plan: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 	// First, so no read of the plan runs outside the mode. Postgres would
 	// accept the statement after a query as well (only the isolation level
 	// and a switch back to READ WRITE must precede the first query); the
@@ -497,7 +497,7 @@ func (s *Store) exportCopy(ctx context.Context, settings [][2]string, sql string
 	if err != nil {
 		return 0, fmt.Errorf("store: begin export read: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 	if err := WithStatementTimeout(ctx, pgxTx{tx: tx}, ExportStatementTimeout); err != nil {
 		return 0, err
 	}

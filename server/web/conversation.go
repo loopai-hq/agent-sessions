@@ -150,9 +150,15 @@ func markdownNodes(parent ast.Node, source []byte) []MarkdownNode {
 				node.URL = string(n.URL(source))
 			}
 		case *ast.HTMLBlock:
-			node.Text = string(n.Text(source))
+			// The block's lines followed by its closure line when it has one,
+			// which is what the deprecated HTMLBlock.Text returned.
+			raw := n.Lines().Value(source)
+			if n.HasClosure() {
+				raw = append(raw, n.ClosureLine.Value(source)...)
+			}
+			node.Text = string(raw)
 		case *ast.RawHTML:
-			node.Text = string(n.Text(source))
+			node.Text = string(n.Segments.Value(source))
 		case *ast.FencedCodeBlock:
 			node.Text = string(n.Lines().Value(source))
 		case *ast.CodeBlock:

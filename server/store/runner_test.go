@@ -194,8 +194,8 @@ func TestDeriveLogLinesCarryTheFieldsTheMetricsRead(t *testing.T) {
 	if failed["version"] != "788dcb3-build" || failed["derive_version"] != float64(DerivedSchema) {
 		t.Errorf("derive step failed line: version = %v derive_version = %v", failed["version"], failed["derive_version"])
 	}
-	if recover, _ := failed["recover"].(string); !strings.Contains(recover, fmt.Sprintf("UPDATE derive_jobs SET attempts = 0 WHERE version = %d AND step = 'turns'", DerivedSchema)) {
-		t.Errorf("the failure line's reset statement is %q", recover)
+	if reset, _ := failed["recover"].(string); !strings.Contains(reset, fmt.Sprintf("UPDATE derive_jobs SET attempts = 0 WHERE version = %d AND step = 'turns'", DerivedSchema)) {
+		t.Errorf("the failure line's reset statement is %q", reset)
 	}
 	group, _ := pass["pass"].(map[string]any)
 	if group["derive_version"] != float64(DerivedSchema) || group["version"] != nil {

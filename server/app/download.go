@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -243,7 +244,7 @@ func (d *Downloads) accessToken() (string, error) {
 // server, which is how Cloud Run hands a workload its own identity without a
 // key file ever existing.
 func metadataToken() (string, time.Time, error) {
-	req, err := http.NewRequest(http.MethodGet, metadataTokenURL, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, metadataTokenURL, nil)
 	if err != nil {
 		return "", time.Time{}, err
 	}

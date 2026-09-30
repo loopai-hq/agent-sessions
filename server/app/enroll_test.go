@@ -94,13 +94,13 @@ func enrollDomains() []string { return testDomainsOf("dev@example.com", "dev@exa
 // newTestEnroll builds an Enroll over a fake verifier and store.
 func newTestEnroll(t *testing.T, v *enrollVerifier, devices *enrollDevices, log *slog.Logger) *Enroll {
 	t.Helper()
-	real, err := auth.NewVerifier(auth.VerifierOptions{ProjectID: enrollProjectID, Domains: enrollDomains()})
+	verifier, err := auth.NewVerifier(auth.VerifierOptions{ProjectID: enrollProjectID, Domains: enrollDomains()})
 	if err != nil {
 		t.Fatalf("verifier: %v", err)
 	}
 	e, err := NewEnroll(EnrollOptions{
 		Store:    &store.Store{},
-		Verifier: real,
+		Verifier: verifier,
 		Domains:  enrollDomains(),
 		Now:      func() time.Time { return enrollEpoch },
 		Logger:   log,
@@ -703,8 +703,10 @@ func TestEnrollLimiterSweepsOnlyRefilledEntries(t *testing.T) {
 	now := enrollEpoch
 
 	// Somebody who is out of budget right now.
-	if !l.allow("busy@example.com", now) || !l.allow("busy@example.com", now) {
-		t.Fatal("the first two attempts were refused")
+	for range 2 {
+		if !l.allow("busy@example.com", now) {
+			t.Fatal("the first two attempts were refused")
+		}
 	}
 	if l.allow("busy@example.com", now) {
 		t.Fatal("a third attempt was allowed")

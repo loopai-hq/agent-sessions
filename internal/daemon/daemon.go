@@ -533,7 +533,7 @@ func Reconcile(dir string, alive func(int) bool, now time.Time, staleAfter time.
 // closes, recover runs first with the session's state (the transcript path is
 // in it), so the events a dead daemon's hooks lost are re-derived before the
 // session is marked finished. A nil recover is Reconcile.
-func ReconcileWith(dir string, alive func(int) bool, now time.Time, staleAfter time.Duration, recover func(State) int) ([]Abandoned, error) {
+func ReconcileWith(dir string, alive func(int) bool, now time.Time, staleAfter time.Duration, recoverFn func(State) int) ([]Abandoned, error) {
 	if alive == nil {
 		alive = processAlive
 	}
@@ -571,8 +571,8 @@ func ReconcileWith(dir string, alive func(int) bool, now time.Time, staleAfter t
 			out = append(out, Abandoned{State: st, Reason: "daemon_died_owner_alive"})
 			continue
 		}
-		if recover != nil {
-			st.Recovered = recover(st)
+		if recoverFn != nil {
+			st.Recovered = recoverFn(st)
 		}
 		st.Finalized = true
 		st.EndedAt = now

@@ -475,7 +475,7 @@ func timeoutOr(ctx context.Context, res *Result, err error) error {
 // partitionAttempts.
 func exportPartition(ctx context.Context, src Source, objs ObjectStore, p LoadJob) (rows, bytes int64, err error) {
 	for attempt := 1; ; attempt++ {
-		rows, bytes, err = 0, 0, nil
+		rows = 0
 		bytes, err = objs.Put(ctx, p.Object, func(w io.Writer) error {
 			gz := gzip.NewWriter(w)
 			n, err := src.CopyPartition(ctx, p.Table, p.Day, gz)

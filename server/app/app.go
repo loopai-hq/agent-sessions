@@ -1057,7 +1057,7 @@ func readyHandler(ping func(context.Context) error, log *slog.Logger) http.Handl
 
 // Serve binds the configured port and serves until ctx is cancelled.
 func (a *App) Serve(ctx context.Context) error {
-	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", a.cfg.Port))
+	ln, err := (&net.ListenConfig{}).Listen(ctx, "tcp", fmt.Sprintf(":%d", a.cfg.Port))
 	if err != nil {
 		return fmt.Errorf("app: listen on port %d: %w", a.cfg.Port, err)
 	}

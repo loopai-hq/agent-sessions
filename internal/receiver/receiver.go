@@ -288,7 +288,7 @@ func validate(it spool.Item) (reason string, ok bool) {
 }
 
 // serveFailure emits an injected failure.
-func (r *Receiver) serveFailure(w http.ResponseWriter, req *http.Request, mode FailMode, retryAfter time.Duration) {
+func (r *Receiver) serveFailure(w http.ResponseWriter, _ *http.Request, mode FailMode, retryAfter time.Duration) {
 	switch mode {
 	case FailDrop:
 		// Hijack and close without writing anything. The client sees a broken

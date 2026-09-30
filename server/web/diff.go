@@ -261,14 +261,14 @@ func collapseContext(in []DiffLine, context int) []DiffLine {
 // early. A trailing newline does not produce a final empty line, because every
 // well-formed file has one and rendering it as a line the user must scroll past
 // is noise on every diff.
-func splitLines(s string, max int) ([]string, bool) {
+func splitLines(s string, limit int) ([]string, bool) {
 	if s == "" {
 		return nil, false
 	}
 	s = strings.TrimSuffix(s, "\n")
 	lines := strings.Split(s, "\n")
-	if len(lines) > max {
-		return lines[:max], true
+	if len(lines) > limit {
+		return lines[:limit], true
 	}
 	return lines, false
 }

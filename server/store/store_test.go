@@ -869,12 +869,12 @@ func TestSearchFiltersThenCapsThenRanksThenHighlights(t *testing.T) {
 	ranked := strings.Index(sql, "ranked AS")
 	rank := strings.Index(sql, "ts_rank(")
 	headline := strings.Index(sql, "ts_headline(")
-	cap := strings.Index(sql, "LIMIT $9")
+	capIdx := strings.Index(sql, "LIMIT $9")
 
-	if candidates >= cap || cap >= ranked {
+	if candidates >= capIdx || capIdx >= ranked {
 		t.Errorf("the candidate cap is not applied before ranking:\n%s", sql)
 	}
-	if cap >= rank {
+	if capIdx >= rank {
 		t.Errorf("ts_rank runs before the candidate set is capped, which is the "+
 			"thing that blows the latency budget:\n%s", sql)
 	}

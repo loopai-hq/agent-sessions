@@ -238,7 +238,7 @@ func threadLabel(raw []string, labels map[string]string) string {
 // mergeToolResult folds a result or failure onto the call it answers, and
 // reports whether it did. A result whose call is not in this window stays a
 // block of its own so the output is never silently dropped.
-func mergeToolResult(g *Group, e event.Event, b Block, opts TranscriptOptions) bool {
+func mergeToolResult(g *Group, e event.Event, b Block, _ TranscriptOptions) bool {
 	if e.Type != event.ToolResult && e.Type != event.ToolFailed {
 		return false
 	}
@@ -466,13 +466,13 @@ func prettyJSON(raw json.RawMessage) string {
 // boundary matters: slicing a UTF-8 sequence in half produces bytes that the
 // escaper still escapes but that render as a replacement character, which looks
 // like data corruption in an archive whose whole value is fidelity.
-func textSegments(s string, max int, terms []string) ([]Segment, bool) {
+func textSegments(s string, limit int, terms []string) ([]Segment, bool) {
 	if s == "" {
 		return nil, false
 	}
 	truncated := false
-	if max > 0 && len(s) > max {
-		cut := max
+	if limit > 0 && len(s) > limit {
+		cut := limit
 		for cut > 0 && !utf8Start(s[cut]) {
 			cut--
 		}
@@ -484,15 +484,15 @@ func textSegments(s string, max int, terms []string) ([]Segment, bool) {
 
 func utf8Start(b byte) bool { return b&0xC0 != 0x80 }
 
-func firstLine(s string, max int) string {
+func firstLine(s string, limit int) string {
 	if i := strings.IndexAny(s, "\r\n"); i >= 0 {
 		s = s[:i]
 	}
 	s = strings.TrimSpace(s)
-	if len(s) <= max {
+	if len(s) <= limit {
 		return s
 	}
-	cut := max
+	cut := limit
 	for cut > 0 && !utf8Start(s[cut]) {
 		cut--
 	}
