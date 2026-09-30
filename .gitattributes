@@ -1,0 +1,17 @@
+# Normalise line endings on commit so a checkout on any platform diffs
+# cleanly, and keep binary assets out of text handling.
+* text=auto
+
+# Shell scripts must stay LF on every checkout: a CRLF installer piped to
+# /bin/sh fails on its first line.
+*.sh text eol=lf
+Makefile text eol=lf
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+
+# Generated files: collapsed in GitHub diffs and excluded from language stats.
+THIRD_PARTY_NOTICES.md linguist-generated=true
+go.sum linguist-generated=true
