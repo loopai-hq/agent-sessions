@@ -98,6 +98,13 @@ func main() {
 	}
 }
 
+// whoCanRead is the sentence install and status both print about where captured
+// sessions go. It states what the server enforces, no more: store.canRead lets
+// a session be read by its owner, by an admin, or through a share link, and
+// store.recordAccess writes every read by anyone but the owner to the access
+// log an admin can list; retention is the server's own setting.
+const whoCanRead = "Your captured sessions can be read by you and by the server's admins, and by a colleague only through a link you share; every read by anyone but you is logged in the admin access log, and how long sessions are kept is set by the server operator."
+
 func usage(w io.Writer) {
 	fmt.Fprint(w, `loop-sessions - collate your local AI coding sessions
 
@@ -112,6 +119,8 @@ func usage(w io.Writer) {
   doctor              diagnose problems and say how to fix them
                       (--redrive: queue stuck items again;
                        --replay-quarantine: post one stuck item, print the verdict)
+  mirror              mirror your sessions to Slack: list, use <group>, off,
+                      attach <group> [--session <id>], status
   version             print the agent version
 
 Fleet operator actions:
@@ -763,6 +772,7 @@ func printStatus(v statusView) {
 	if v.Spool.Quarantine > 0 {
 		fmt.Printf("Stuck:    %d item(s) will not retry on their own\n", v.Spool.Quarantine)
 	}
+	fmt.Printf("\n%s\n", whoCanRead)
 	if len(v.Problems) > 0 {
 		fmt.Println("\nProblems:")
 		for _, s := range v.Problems {
