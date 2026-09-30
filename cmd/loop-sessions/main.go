@@ -630,8 +630,13 @@ func printDiscovery(s discovery.Summary) {
 		for _, t := range s.NeedsAsk {
 			fmt.Printf("  %s\n", t)
 		}
-		fmt.Printf("\nIf you use them, tell me where they are:\n")
-		fmt.Printf("  loop-sessions discover --set <tool>=<path>\n")
+		// The mechanism is the config's "roots" map, which discover, backfill
+		// and repair all read; there is no flag for it yet, so the hint names
+		// the file rather than a command that does not exist.
+		fmt.Printf("\nIf you use them, tell me where their sessions are: add the directory to\n")
+		fmt.Printf("\"roots\" in %s, for example\n", config.Paths{}.ConfigFile())
+		fmt.Printf("  \"roots\": {\"%s\": \"/path/to/its/sessions\"}\n", s.NeedsAsk[0])
+		fmt.Printf("then run: loop-sessions discover\n")
 	}
 }
 

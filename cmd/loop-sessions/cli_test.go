@@ -12,6 +12,7 @@ import (
 
 	"github.com/loopai-hq/agent-sessions/internal/capture"
 	"github.com/loopai-hq/agent-sessions/internal/config"
+	"github.com/loopai-hq/agent-sessions/internal/discovery"
 	"github.com/loopai-hq/agent-sessions/internal/event"
 	"github.com/loopai-hq/agent-sessions/internal/health"
 	"github.com/loopai-hq/agent-sessions/internal/hooks"
@@ -308,5 +309,21 @@ func TestPauseForRefusesANegativeDuration(t *testing.T) {
 	}
 	if cfg := mustConfig(t); cfg.Paused {
 		t.Fatal("a refused pause still paused the machine")
+	}
+}
+
+// The discover hint names the mechanism that exists (the config's roots map)
+// and not a flag that does not.
+func TestDiscoverHintNamesTheConfigRoots(t *testing.T) {
+	hermeticHome(t, "https://example.invalid")
+	out := captureStdout(t, func() error {
+		printDiscovery(discovery.Summary{NeedsAsk: []discovery.Tool{discovery.Codex}})
+		return nil
+	})
+	if strings.Contains(out, "--set") {
+		t.Fatalf("the hint still advertises --set:\n%s", out)
+	}
+	if !strings.Contains(out, `"roots"`) || !strings.Contains(out, `"codex"`) || !strings.Contains(out, config.Paths{}.ConfigFile()) {
+		t.Fatalf("the hint does not say where to put the path:\n%s", out)
 	}
 }
