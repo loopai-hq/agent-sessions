@@ -44,7 +44,8 @@ const (
 	// that started at least this many lifecycle-only sessions in a day, and
 	// at least this share of everything it started, has a script spawning
 	// claude with no prompt.
-	EmptyStartMin   = 20
+	EmptyStartMin = 20
+	// EmptyStartRatio is the share half of that rule; see EmptyStartMin.
 	EmptyStartRatio = 0.5
 	// EmptyStartRecipe is the one-liner that names the launcher on the
 	// affected machine; it rides in every empty-start line and CTA so the

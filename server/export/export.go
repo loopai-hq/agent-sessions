@@ -69,11 +69,17 @@ import (
 // first path segment of the object in the bucket.
 type Table string
 
+// The tables the export ships.
 const (
-	TableTurns        Table = "turns"
-	TableSessions     Table = "sessions"
-	TableMessages     Table = "messages"
-	TableEvents       Table = "events"
+	// TableTurns is the derived turns.
+	TableTurns Table = "turns"
+	// TableSessions is the sessions.
+	TableSessions Table = "sessions"
+	// TableMessages is the messages.
+	TableMessages Table = "messages"
+	// TableEvents is the raw events.
+	TableEvents Table = "events"
+	// TableHealthHourly is the hourly health rollup.
 	TableHealthHourly Table = "health_hourly"
 )
 

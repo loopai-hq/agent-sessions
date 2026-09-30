@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-// The install page: how somebody with a signed-in dashboard and no agent gets
-// from one to the other.
+// InstallPagePath is the install page: how somebody with a signed-in dashboard
+// and no agent gets from one to the other.
 //
 // It exists because the dashboard's empty state is otherwise indistinguishable
 // from a broken one. A person signs in, sees no sessions, and has no way to

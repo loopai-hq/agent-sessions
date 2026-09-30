@@ -10,6 +10,7 @@
 // roster row read after verification are now the whole control rather than a
 // second opinion behind `hd`. Anything that loosens either one loosens the
 // only fence there is.
+
 package auth
 
 import (

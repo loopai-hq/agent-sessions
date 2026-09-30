@@ -23,9 +23,12 @@ import (
 	"strings"
 )
 
-// Kind identifies the class of credential a redaction replaced.
+// Kind identifies the class of credential a redaction replaced. The value is
+// what the [REDACTED:<kind>] marker names, so a reader of a scrubbed
+// transcript can tell which rule fired without seeing what it removed.
 type Kind string
 
+// The kinds, one per rule in Rules.
 const (
 	KindAnthropicKey        Kind = "anthropic_key"
 	KindOpenAIKey           Kind = "openai_key"

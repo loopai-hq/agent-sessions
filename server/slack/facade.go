@@ -184,6 +184,8 @@ func (m *Mirror) Attach(ctx context.Context, email, sessionID, groupRef string) 
 	return attachSession(ctx, m.db, sessionID, g.ID, email, m.now())
 }
 
+// Detach removes one of the caller's own sessions from a group. A session the
+// caller does not own reads as no such group, so the call reveals nothing.
 func (m *Mirror) Detach(ctx context.Context, email, sessionID, groupRef string) error {
 	if ok, err := m.ownsSessionCtx(ctx, sessionID, email); err != nil || !ok {
 		if err != nil {

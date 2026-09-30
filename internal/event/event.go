@@ -34,27 +34,43 @@ import (
 // names.
 type Type string
 
+// The event types, in the order a session tends to produce them.
 const (
+	// SessionStarted opens a session.
 	SessionStarted Type = "session_started"
-	SessionEnded   Type = "session_ended"
-	UserPrompt     Type = "user_prompt"
-	AssistantTurn  Type = "assistant_turn"
-	ToolCall       Type = "tool_call"
-	ToolResult     Type = "tool_result"
-	ToolFailed     Type = "tool_failed"
-	FileChanged    Type = "file_changed"
-	SubagentStart  Type = "subagent_start"
-	SubagentEnd    Type = "subagent_end"
-	Compaction     Type = "compaction"
-	Artifact       Type = "artifact"
+	// SessionEnded closes it.
+	SessionEnded Type = "session_ended"
+	// UserPrompt is what the person typed.
+	UserPrompt Type = "user_prompt"
+	// AssistantTurn is the model's answer, with its usage.
+	AssistantTurn Type = "assistant_turn"
+	// ToolCall is the model invoking a tool.
+	ToolCall Type = "tool_call"
+	// ToolResult is what the tool returned.
+	ToolResult Type = "tool_result"
+	// ToolFailed is a tool call that errored.
+	ToolFailed Type = "tool_failed"
+	// FileChanged is a file a tool wrote.
+	FileChanged Type = "file_changed"
+	// SubagentStart is a subagent being spawned.
+	SubagentStart Type = "subagent_start"
+	// SubagentEnd is that subagent finishing.
+	SubagentEnd Type = "subagent_end"
+	// Compaction is the harness compacting its context.
+	Compaction Type = "compaction"
+	// Artifact is an artifact the session produced.
+	Artifact Type = "artifact"
 )
 
 // Source identifies the harness that produced the event.
 type Source string
 
+// The harnesses events come from.
 const (
+	// SourceClaudeCode is Claude Code.
 	SourceClaudeCode Source = "claude_code"
-	SourceCodex      Source = "codex"
+	// SourceCodex is the Codex CLI.
+	SourceCodex Source = "codex"
 )
 
 // Origin records how we came to have the event, which matters because a

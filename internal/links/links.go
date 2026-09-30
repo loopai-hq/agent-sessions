@@ -23,13 +23,20 @@ import (
 type Kind string
 
 const (
-	KindPR     Kind = "pr"
-	KindIssue  Kind = "issue"
+	// KindPR is a pull request.
+	KindPR Kind = "pr"
+	// KindIssue is an issue.
+	KindIssue Kind = "issue"
+	// KindCommit is a commit.
 	KindCommit Kind = "commit"
-	KindRepo   Kind = "repo"
-	KindDoc    Kind = "doc"
-	KindSlack  Kind = "slack"
-	KindOther  Kind = "other"
+	// KindRepo is a repository.
+	KindRepo Kind = "repo"
+	// KindDoc is a document.
+	KindDoc Kind = "doc"
+	// KindSlack is a Slack message or channel.
+	KindSlack Kind = "slack"
+	// KindOther is a URL none of the rules recognised.
+	KindOther Kind = "other"
 )
 
 // Link is one classified URL.

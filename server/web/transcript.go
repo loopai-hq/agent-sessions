@@ -22,7 +22,9 @@ type BlockKind string
 
 const (
 	// KindPrompt is something a person typed.
-	KindPrompt   BlockKind = "prompt"
+	KindPrompt BlockKind = "prompt"
+	// KindInternal is a user-role row the harness wrote rather than a person
+	// typed: a hook's output, a system reminder, an automation's prompt.
 	KindInternal BlockKind = "internal"
 	// KindAssistant is a model turn.
 	KindAssistant BlockKind = "assistant"
