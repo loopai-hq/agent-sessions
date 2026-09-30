@@ -1,5 +1,11 @@
 # gitleaks configuration for loop-sessions.
 #
+# Run locally with the same two commands CI runs (.github/workflows/ci.yml,
+# job `gitleaks`):
+#
+#   gitleaks dir --config .gitleaks.toml --exit-code 1 .
+#   gitleaks git --config .gitleaks.toml --exit-code 1 .
+#
 # Three test files carry credential-shaped strings on purpose. They are the
 # corpus the credential scrubber (internal/scrub) is tested against, and a
 # scrubber whose tests contain nothing that looks like a secret tests nothing.
@@ -12,11 +18,18 @@
 #
 # .github/secret_scanning.yml carries the same three paths for GitHub's own
 # scanner. Keep the two lists identical.
+#
+# Below the corpus, three known false positives are allowlisted one by one.
+# Each entry names the file AND the exact string (condition = "AND"), never
+# the file alone, so a real secret added to one of those files is still
+# reported, and never a fingerprint, which would silently stop matching the
+# moment the line moved. GitHub's scanner is not told about these three:
+# they are not credentials, so it does not report them either.
 
 title = "loop-sessions"
 
 [extend]
-# Every built-in rule stays on; this file only adds an allowlist.
+# Every built-in rule stays on; this file only adds allowlists.
 useDefault = true
 
 [[allowlists]]
@@ -26,3 +39,26 @@ paths = [
   '''internal/receiver/receiver_test\.go$''',
   '''server/ingest/scrub_test\.go$''',
 ]
+
+[[allowlists]]
+description = "The scrubber's own SSH private-key detector is a regexp literal spelling the PEM armour it looks for, not a key"
+condition = "AND"
+targetRules = ["private-key"]
+paths = ['''internal/scrub/scrub\.go$''']
+regexTarget = "line"
+regexes = ['''regexp\.MustCompile\(`\(\?s\)-----BEGIN OPENSSH PRIVATE KEY-----''']
+
+[[allowlists]]
+description = "A list of migration file names; generic-api-key matches `_keys.sql\", \"0018_turns.sql` because the word `keys` precedes a quoted token"
+condition = "AND"
+targetRules = ["generic-api-key"]
+paths = ['''server/store/derive_migrations_test\.go$''']
+regexTarget = "line"
+regexes = ['''"0017_event_keys\.sql", "0018_turns\.sql", "0019_derive_jobs\.sql"''']
+
+[[allowlists]]
+description = "bootSessionKey is base64 of the ASCII text `session-key-32-bytes-for-tests!!`, a shape-valid placeholder the config tests boot with"
+condition = "AND"
+targetRules = ["generic-api-key"]
+paths = ['''server/app/config_test\.go$''']
+regexes = ['''^c2Vzc2lvbi1rZXktMzItYnl0ZXMtZm9yLXRlc3RzISE=$''']
