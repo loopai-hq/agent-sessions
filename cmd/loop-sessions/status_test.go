@@ -298,7 +298,7 @@ func TestStatusStillReportsTheUsersPause(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := config.Save(p, cfg.Pause(time.Now())); err != nil {
+	if err := config.Save(p, cfg.Pause(time.Now(), 0)); err != nil {
 		t.Fatal(err)
 	}
 

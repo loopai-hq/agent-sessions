@@ -153,7 +153,7 @@ func TestSaveRefusesInvalidConfig(t *testing.T) {
 }
 
 func TestPausedBlocksCaptureWithAReason(t *testing.T) {
-	c := valid().Pause(time.Now())
+	c := valid().Pause(time.Now(), 0)
 	ok, why := c.ShouldCapture("/repo")
 	if ok {
 		t.Fatal("paused config must not capture")
@@ -166,6 +166,53 @@ func TestPausedBlocksCaptureWithAReason(t *testing.T) {
 	}
 	if r := c.Resume(); r.Paused || !r.PausedSince.IsZero() {
 		t.Fatal("resume must clear both fields")
+	}
+}
+
+// A timed pause ends on its own: IsPaused, which every path consults, reads
+// the deadline, and ShouldCapture lets a session through once it has passed.
+// Nothing rewrites the config for that; resume clears all three fields.
+func TestTimedPauseEndsOnItsOwn(t *testing.T) {
+	now := time.Date(2026, 9, 30, 12, 0, 0, 0, time.UTC)
+	c := valid().Pause(now, 2*time.Hour)
+	if !c.Paused || !c.PausedSince.Equal(now) || !c.PausedUntil.Equal(now.Add(2*time.Hour)) {
+		t.Fatalf("pause --for did not record the deadline: %+v", c)
+	}
+	if !c.IsPaused(now) || !c.IsPaused(now.Add(2*time.Hour-time.Second)) {
+		t.Fatal("not paused inside the window")
+	}
+	if c.IsPaused(now.Add(2 * time.Hour)) {
+		t.Fatal("still paused at the deadline")
+	}
+	if !valid().Pause(now, 0).IsPaused(now.Add(24 * 365 * time.Hour)) {
+		t.Fatal("an untimed pause must hold until resume")
+	}
+
+	// ShouldCapture reads the same deadline against the real clock.
+	if ok, why := valid().Pause(time.Now(), 2*time.Hour).ShouldCapture("/repo"); ok || why == "" {
+		t.Fatal("captured during a timed pause")
+	}
+	expired := valid().Pause(time.Now().Add(-3*time.Hour), 2*time.Hour)
+	if ok, _ := expired.ShouldCapture("/repo"); !ok {
+		t.Fatal("capture did not resume after the deadline")
+	}
+
+	r := c.Resume()
+	if r.Paused || !r.PausedSince.IsZero() || !r.PausedUntil.IsZero() {
+		t.Fatalf("resume must clear the pause, its timestamp and its deadline: %+v", r)
+	}
+
+	// The deadline survives the config file, or the daemon would never see it.
+	p := paths(t)
+	if err := Save(p, c); err != nil {
+		t.Fatal(err)
+	}
+	back, err := Load(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !back.PausedUntil.Equal(c.PausedUntil) {
+		t.Fatalf("paused_until did not round-trip: %v != %v", back.PausedUntil, c.PausedUntil)
 	}
 }
 

@@ -197,6 +197,18 @@ func (r *healthReporter) Report(ctx context.Context) error {
 // same reason: the honest source for both is a walk of every daemon's state
 // file, and a count of the one session this daemon shadows would be read in the
 // fleet view as a machine-wide total.
+// pausedSince is the pause timestamp only while the pause is in force. After
+// a timed pause runs out the config still holds PausedSince until `resume` or
+// the next `pause`; sending it beside Paused=false would read in the fleet
+// view as a machine that is paused but not saying so. status blanks it the
+// same way.
+func pausedSince(cfg config.Config, now time.Time) time.Time {
+	if !cfg.IsPaused(now) {
+		return time.Time{}
+	}
+	return cfg.PausedSince
+}
+
 func (r *healthReporter) build() health.Report {
 	now := r.now()
 	r.refresh()
@@ -225,8 +237,8 @@ func (r *healthReporter) build() health.Report {
 		LastSuccess:     sd.LastSuccess,
 		LastError:       r.lastError(sd, stateErr),
 		Discovery:       r.discover(now),
-		Paused:          r.cfg.Paused,
-		PausedSince:     r.cfg.PausedSince,
+		Paused:          r.cfg.IsPaused(now),
+		PausedSince:     pausedSince(r.cfg, now),
 		SkippedTools:    r.cfg.SkippedTools,
 		PrevPending:     r.prevPending,
 		PrevDropped:     r.prevDropped,

@@ -304,7 +304,7 @@ func TestTheImportHonoursWhatThePersonExcluded(t *testing.T) {
 		},
 		{
 			name:    "a paused agent imports nothing and says why",
-			adjust:  func(c *config.Config) { *c = c.Pause(time.Now()) },
+			adjust:  func(c *config.Config) { *c = c.Pause(time.Now(), 0) },
 			wantErr: "paused",
 		},
 	}

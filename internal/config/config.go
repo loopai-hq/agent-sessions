@@ -73,6 +73,11 @@ type Config struct {
 	// choice rather than as a broken agent.
 	Paused      bool      `json:"paused,omitempty"`
 	PausedSince time.Time `json:"paused_since,omitempty"`
+	// PausedUntil, when set, ends the pause on its own: IsPaused reports false
+	// from that moment, without a write to the config, so `pause --for 2h` on
+	// a laptop closed for the day does not stay paused until somebody remembers
+	// it. Zero means paused until `resume`.
+	PausedUntil time.Time `json:"paused_until,omitempty"`
 
 	// Slack holds per-user mirroring preferences. Off by default: a tool that
 	// starts posting someone's work into a channel without being asked is one
@@ -313,7 +318,7 @@ func (c Config) Validate() error {
 // get a real answer. Silent exclusion is indistinguishable from a bug, and a
 // capture tool that cannot explain its own gaps does not get trusted.
 func (c Config) ShouldCapture(cwd string) (bool, string) {
-	if c.Paused {
+	if c.IsPaused(time.Now()) {
 		return false, "capture is paused"
 	}
 	clean := filepath.Clean(cwd)
@@ -423,17 +428,35 @@ func (c Config) IsSkipped(tool string) bool {
 	return false
 }
 
+// IsPaused reports whether capture and delivery are suspended at now. It is
+// the one reading every path consults (the hook, the daemon, backfill, repair,
+// status, doctor and the health report), so a timed pause ends everywhere at
+// once: a config that says Paused whose PausedUntil has passed is not paused.
+func (c Config) IsPaused(now time.Time) bool {
+	if !c.Paused {
+		return false
+	}
+	return c.PausedUntil.IsZero() || now.Before(c.PausedUntil)
+}
+
 // Pause records the user's choice with a timestamp, so the fleet view can show
-// how long a machine has been paused rather than just that it is.
-func (c Config) Pause(now time.Time) Config {
+// how long a machine has been paused rather than just that it is. A positive
+// d ends the pause at now+d without a further command; zero pauses until
+// Resume.
+func (c Config) Pause(now time.Time, d time.Duration) Config {
 	c.Paused = true
 	c.PausedSince = now
+	c.PausedUntil = time.Time{}
+	if d > 0 {
+		c.PausedUntil = now.Add(d)
+	}
 	return c
 }
 
-// Resume clears the pause and its timestamp.
+// Resume clears the pause, its timestamp and its deadline.
 func (c Config) Resume() Config {
 	c.Paused = false
 	c.PausedSince = time.Time{}
+	c.PausedUntil = time.Time{}
 	return c
 }
