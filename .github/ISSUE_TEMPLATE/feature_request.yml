@@ -1,0 +1,63 @@
+name: Feature request
+description: Propose a change in behaviour or a new capability
+title: "[feature] "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check ROADMAP.md first: if it is already there, comment on why it should move up rather than opening a duplicate.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - client agent (cmd/loop-sessions, internal/)
+        - installer (install/)
+        - server (server/)
+        - dashboard (server/web)
+        - example deployment (examples/deploy-gcp)
+        - docker compose example (examples/docker-compose)
+        - documentation
+        - not sure
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What you are trying to do and what stops you today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: The proposal
+      description: What you would change, and where in the tree it would live if you know.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: What else you considered, including doing nothing.
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Does this change a contract?
+      description: See docs/UPGRADES.md and CONTRIBUTING.md. Changes to these need a design discussion before code.
+      options:
+        - "No"
+        - "What an event carries (event.CaptureSchema)"
+        - "What the server derives (store.DerivedSchema)"
+        - "The release layout (Makefile, install.sh, internal/upgrade, download.go)"
+        - "Not sure"
+    validations:
+      required: true
+  - type: checkboxes
+    id: redaction
+    attributes:
+      label: Redaction
+      options:
+        - label: Nothing above names my organisation's infrastructure, people, or transcript content.
+          required: true

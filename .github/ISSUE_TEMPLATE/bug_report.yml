@@ -1,0 +1,75 @@
+name: Bug report
+description: Something does not work the way the code or the documentation says it should
+title: "[bug] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks. Do not file security problems here: use private vulnerability reporting or `security@loopai.com`, as SECURITY.md describes.
+        Questions belong in SUPPORT.md's channels. Redact anything you would not paste in public (see the last checkbox).
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - client agent (cmd/loop-sessions, internal/)
+        - installer (install/)
+        - server (server/)
+        - dashboard (server/web)
+        - example deployment (examples/deploy-gcp)
+        - docker compose example (examples/docker-compose)
+        - documentation
+        - not sure
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you saw, and the exact message if there was one.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: Commands, in order, from a clean state where possible.
+      placeholder: |
+        1. loop-sessions install --endpoint https://sessions.example.com
+        2. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: "`loop-sessions version` output for the client, or the server image tag or commit."
+      placeholder: "v0.1.0 (a1b2c3d)"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS and architecture; the harness and its version (Claude Code, Codex); the Postgres version for server bugs.
+      placeholder: "macOS 15.6 arm64, Claude Code 2.1.285; Postgres 16"
+  - type: textarea
+    id: doctor
+    attributes:
+      label: "`loop-sessions doctor` output (client problems) or the relevant server log lines"
+      description: Paste it as is; it is rendered as a code block. Server log lines carry ids, counts and reasons, never content, but check the `email` and `device_id` fields.
+      render: shell
+  - type: checkboxes
+    id: redaction
+    attributes:
+      label: Redaction
+      options:
+        - label: I have redacted secrets, device tokens, transcript content, and my organisation's hostnames, project ids and addresses from everything above.
+          required: true
