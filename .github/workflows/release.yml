@@ -1,0 +1,272 @@
+# The release driver for GitHub Releases and GHCR.
+#
+# One checkout of one tag produces both halves, the cross-compiled client and
+# the server image, and publishes them where anyone can fetch and verify them:
+#
+#   https://github.com/loopai-hq/agent-sessions/releases/download/vX.Y.Z/<asset>
+#   ghcr.io/loopai-hq/loop-sessions-server:vX.Y.Z
+#
+# Two jobs. `build` runs on every trigger and proves the release is sound
+# without any write permission: `make release` twice with identical bytes,
+# `make verify`, govulncheck on the shipped binary, the image builds. It is
+# the dry run, and it is what a pull request touching the release path runs.
+# `publish` runs only for a `v*` tag (pushed, or dispatched with dry_run
+# unticked): it builds again from the same tag, attests and signs, pushes
+# the image, and creates the GitHub Release as a draft, uploads every asset,
+# then undrafts it. A draft with all its assets flipped once is the
+# GitHub-native form of the org channel's "binaries first, manifests last"
+# rule, and it is what makes immutable releases safe to turn on.
+#
+# What the public binaries are: built with ENDPOINT empty, so they carry no
+# organisation's server address and ask for --endpoint at install time. The
+# org channel (examples/deploy-gcp/release.yml.example) still stamps its own.
+#
+# There is deliberately no cancel-in-progress here: a cancelled upload is the
+# half-published release this file exists to prevent. The version, image and
+# repository names are taken from the tag and from github.repository_owner,
+# so a repository rename changes nothing below.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  pull_request:
+    paths:
+      - .github/workflows/release.yml
+      - .github/scripts/changelog-section.sh
+      - Makefile
+      - Dockerfile
+      - .dockerignore
+      - THIRD_PARTY_NOTICES.md
+      - install/**
+      - internal/upgrade/**
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Build, verify and diff only; publish nothing (untick on a tag to publish)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+env:
+  GOVULNCHECK_VERSION: v1.8.0
+  IMAGE_NAME: loop-sessions-server
+
+jobs:
+  build:
+    if: github.repository_owner == 'loopai-hq'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: build the client from a clean checkout
+        run: make release ENDPOINT= && make verify
+
+      - name: build again and compare (reproducible bytes)
+        run: |
+          cp dist/SHA256SUMS /tmp/first.SHA256SUMS
+          make release ENDPOINT= >/dev/null
+          diff /tmp/first.SHA256SUMS dist/SHA256SUMS
+          want="$(TZ=UTC git log -1 --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd)"
+          grep -F "\"build_date\": \"${want}\"" dist/latest.json
+
+      - name: the stamp must name this commit and no local changes
+        run: |
+          go version -m dist/loop-sessions_linux_amd64 | grep -q "vcs.revision=${GITHUB_SHA}"
+          if go version -m dist/loop-sessions_linux_amd64 | grep -q 'vcs.modified=true'; then
+            echo 'the build carries vcs.modified=true; refusing to continue' >&2
+            exit 1
+          fi
+          grep -q "\"commit\": \"${GITHUB_SHA}\"" dist/latest.json
+
+      - name: govulncheck on the shipped linux/amd64 binary
+        run: go run "golang.org/x/vuln/cmd/govulncheck@${GOVULNCHECK_VERSION}" -mode binary dist/loop-sessions_linux_amd64
+
+      - name: build the server image (not pushed)
+        run: |
+          docker build \
+            --build-arg VERSION="${GITHUB_REF_NAME}" \
+            --build-arg REVISION="${GITHUB_SHA}" \
+            --build-arg BUILD_DATE="$(TZ=UTC git log -1 --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd)" \
+            -t "${IMAGE_NAME}:dry-run" .
+          docker inspect "${IMAGE_NAME}:dry-run" --format '{{ json .Config.Labels }}'
+
+      - name: what a publish would do
+        if: ${{ !(github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) && !(github.event_name == 'workflow_dispatch' && !inputs.dry_run && startsWith(github.ref, 'refs/tags/v')) }}
+        run: |
+          echo "dry run: attest, cosign, GitHub Release and GHCR push are skipped on ${GITHUB_EVENT_NAME} for ${GITHUB_REF}"
+          ls -l dist/
+
+  publish:
+    needs: build
+    if: >-
+      github.repository_owner == 'loopai-hq' &&
+      startsWith(github.ref, 'refs/tags/v') &&
+      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run))
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    # Elevated only here, and only for what each step needs: contents for
+    # the release, packages for GHCR, id-token to mint the Sigstore signing
+    # certificate, attestations and artifact-metadata to store provenance.
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      # The tag goes through the environment rather than an expression: a
+      # `${{ }}` inside `run:` is spliced into the script before the shell
+      # sees it. A tag with a hyphen (v0.2.0-rc.1) is a prerelease and does
+      # not move the image's `latest` tag or the release's "Latest" mark.
+      # An existing release for the tag stops the job here, before any
+      # image tag is pushed or anything is signed, so a re-run cannot
+      # overwrite what was published.
+      - name: name the release after the tag
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          printf '%s' "$tag" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'
+          if gh release view "${tag}" >/dev/null 2>&1; then
+            echo "a release for ${tag} already exists; refusing to overwrite it" >&2
+            exit 1
+          fi
+          echo "TAG=${tag}" >> "$GITHUB_ENV"
+          case "$tag" in
+            *-*) echo "PRERELEASE=true" >> "$GITHUB_ENV" ;;
+            *)   echo "PRERELEASE=false" >> "$GITHUB_ENV" ;;
+          esac
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          echo "IMAGE=ghcr.io/${owner}/${IMAGE_NAME}" >> "$GITHUB_ENV"
+          echo "BUILD_DATE=$(TZ=UTC git log -1 --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd)" >> "$GITHUB_ENV"
+
+      - name: build the client from the tag
+        run: make release ENDPOINT= && make verify
+
+      - name: the stamp must name this commit and no local changes
+        run: |
+          go version -m dist/loop-sessions_linux_amd64 | grep -q "vcs.revision=${GITHUB_SHA}"
+          if go version -m dist/loop-sessions_linux_amd64 | grep -q 'vcs.modified=true'; then
+            echo 'the build carries vcs.modified=true; refusing to continue' >&2
+            exit 1
+          fi
+          grep -q "\"commit\": \"${GITHUB_SHA}\"" dist/latest.json
+          grep -q "\"version\": \"${TAG}\"" dist/latest.json
+
+      # Checksums of the two scripts are published beside them so a person
+      # who fetches install.sh by hand can check it the same way the script
+      # checks the binary.
+      - name: checksum the installer scripts
+        run: |
+          (cd install && sha256sum install.sh > install.sh.sha256 && sha256sum uninstall.sh > uninstall.sh.sha256)
+          cat install/install.sh.sha256 install/uninstall.sh.sha256
+
+      # Build provenance (SLSA provenance, signed with Sigstore's public-good
+      # instance) for every binary named in SHA256SUMS, and for the two
+      # scripts. Verified with `gh attestation verify <file> --repo <owner>/<repo>`.
+      - name: attest the binaries
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-checksums: dist/SHA256SUMS
+      - name: attest the installer scripts
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: |
+            install/install.sh
+            install/uninstall.sh
+
+      # A keyless signature over SHA256SUMS, so a person with cosign and no
+      # GitHub account can check the manifest, then the binaries against it.
+      - name: sign SHA256SUMS with cosign
+        run: cosign sign-blob --yes --bundle dist/SHA256SUMS.sigstore.json dist/SHA256SUMS
+
+      - name: verify what was just attested and signed
+        run: |
+          gh attestation verify dist/loop-sessions_linux_amd64 --repo "${GITHUB_REPOSITORY}"
+          gh attestation verify install/install.sh --repo "${GITHUB_REPOSITORY}"
+          cosign verify-blob \
+            --bundle dist/SHA256SUMS.sigstore.json \
+            --certificate-identity "https://github.com/${GITHUB_REPOSITORY}/.github/workflows/release.yml@${GITHUB_REF}" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            dist/SHA256SUMS
+
+      - name: push the server image to GHCR
+        run: |
+          echo "${GH_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+          tags=(-t "${IMAGE}:${TAG}" -t "${IMAGE}:sha-${GITHUB_SHA}")
+          if [ "${PRERELEASE}" = "false" ]; then tags+=(-t "${IMAGE}:latest"); fi
+          docker buildx build --push --platform linux/amd64 \
+            --build-arg VERSION="${TAG}" \
+            --build-arg REVISION="${GITHUB_SHA}" \
+            --build-arg BUILD_DATE="${BUILD_DATE}" \
+            --metadata-file /tmp/image-metadata.json \
+            "${tags[@]}" .
+          digest="$(jq -r '."containerimage.digest"' /tmp/image-metadata.json)"
+          printf '%s' "$digest" | grep -Eq '^sha256:[0-9a-f]{64}$'
+          echo "IMAGE_DIGEST=${digest}" >> "$GITHUB_ENV"
+          echo "pushed ${IMAGE}@${digest}"
+
+      - name: attest the image
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ env.IMAGE_DIGEST }}
+          push-to-registry: true
+
+      # The CHANGELOG section for this version is the release body when one
+      # exists; otherwise GitHub generates notes from the merged pull requests
+      # using the categories in .github/release.yml.
+      - name: release notes
+        run: |
+          bash .github/scripts/changelog-section.sh "${TAG}" > /tmp/notes.md
+          if [ -s /tmp/notes.md ]; then
+            echo "NOTES_FLAG=--notes-file=/tmp/notes.md" >> "$GITHUB_ENV"
+            cat /tmp/notes.md
+          else
+            echo "NOTES_FLAG=--generate-notes" >> "$GITHUB_ENV"
+            echo "no CHANGELOG.md section for ${TAG}; notes will be generated"
+          fi
+
+      - name: create the release as a draft, upload every asset, then publish
+        run: |
+          gh release create "${TAG}" \
+            --draft --verify-tag \
+            --title "${TAG}" \
+            --prerelease="${PRERELEASE}" \
+            "${NOTES_FLAG}"
+          gh release upload "${TAG}" \
+            dist/loop-sessions_darwin_amd64 \
+            dist/loop-sessions_darwin_arm64 \
+            dist/loop-sessions_linux_amd64 \
+            dist/loop-sessions_linux_arm64 \
+            dist/SHA256SUMS \
+            dist/SHA256SUMS.sigstore.json \
+            dist/latest.json \
+            install/install.sh \
+            install/install.sh.sha256 \
+            install/uninstall.sh \
+            install/uninstall.sh.sha256 \
+            THIRD_PARTY_NOTICES.md
+          gh release edit "${TAG}" --draft=false --latest="$([ "${PRERELEASE}" = "false" ] && echo true || echo false)"
+          gh release view "${TAG}"
