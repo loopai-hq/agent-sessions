@@ -382,7 +382,7 @@ func (s *Server) handleRoot(w http.ResponseWriter, r *http.Request) {
 // notFound is the single response for "no such thing" and for "not yours".
 // Both callers pass through here so the two cannot drift apart into a
 // distinguishable pair.
-func (s *Server) notFound(w http.ResponseWriter, r *http.Request, v Viewer) {
+func (s *Server) notFound(w http.ResponseWriter, _ *http.Request, v Viewer) {
 	p := s.page(v, "Not found", "")
 	p.Error = "No session at this address, or it is not one you can open."
 	s.rnd.render(w, http.StatusNotFound, "error.html", struct {

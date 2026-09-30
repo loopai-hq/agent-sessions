@@ -485,7 +485,7 @@ func Summarize(findings []Finding, now time.Time) Summary {
 // the install UI and to fleet coverage reporting, so a half-written file would
 // be worse than none.
 func WriteSummary(path string, s Summary) error {
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		return err
 	}
 	b, err := json.MarshalIndent(s, "", "  ")
@@ -493,7 +493,7 @@ func WriteSummary(path string, s Summary) error {
 		return err
 	}
 	tmp := path + ".tmp"
-	if err := os.WriteFile(tmp, append(b, '\n'), 0o644); err != nil {
+	if err := os.WriteFile(tmp, append(b, '\n'), 0o600); err != nil {
 		return err
 	}
 	return os.Rename(tmp, path)

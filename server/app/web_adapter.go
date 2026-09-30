@@ -237,7 +237,7 @@ func (d webData) Events(ctx context.Context, v web.Viewer, id string, q web.Even
 // for a single record. Reporting the event as absent instead would be worse than
 // the failure, because the transcript page linked to it a moment ago and the
 // reader would be told something they can see does not exist.
-func (d webData) Event(ctx context.Context, v web.Viewer, sessionID, eventID string) (event.Event, error) {
+func (d webData) Event(_ context.Context, v web.Viewer, sessionID, eventID string) (event.Event, error) {
 	return event.Event{}, fmt.Errorf(
 		"%w: one event by id needs a store read keyed on (session_id, id), authorised and audited like store.GetSession",
 		errWebUnsupported)

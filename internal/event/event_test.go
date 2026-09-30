@@ -335,8 +335,8 @@ func TestValidateReportsAllProblemsAtOnce(t *testing.T) {
 // Session.Apply — the rollup behind every count the dashboard shows
 // ---------------------------------------------------------------------------
 
-func at(min int) time.Time {
-	return time.Date(2026, 8, 1, 9, min, 0, 0, time.UTC)
+func at(minute int) time.Time {
+	return time.Date(2026, 8, 1, 9, minute, 0, 0, time.UTC)
 }
 
 func ev(typ Type, minute int) Event {

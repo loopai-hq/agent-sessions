@@ -94,13 +94,13 @@ func ReadHead(path string) (Head, bool) {
 
 	s := bufio.NewScanner(f)
 	s.Buffer(make([]byte, 64<<10), maxLineBytes)
-	var any bool
+	var found bool
 	for lines := 0; lines < headLines && s.Scan(); lines++ {
 		var r record
 		if json.Unmarshal(s.Bytes(), &r) != nil {
 			continue
 		}
-		any = true
+		found = true
 		if h.SessionID == "" && r.SessionID != "" {
 			h.SessionID = r.SessionID
 		}
@@ -123,7 +123,7 @@ func ReadHead(path string) (Head, bool) {
 			}
 		}
 	}
-	return h, any
+	return h, found
 }
 
 // isContentType names the record types that carry a uuid worth anchoring on.

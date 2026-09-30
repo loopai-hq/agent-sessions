@@ -146,7 +146,7 @@ func layoutChart(sp chartSpec) ChartView {
 		sp.Fmt = func(v float64) string { return fmt.Sprintf("%.0f", v) }
 	}
 
-	var max float64
+	var peak float64
 	if sp.Stacked {
 		for i := range sp.Days {
 			var sum float64
@@ -155,35 +155,35 @@ func layoutChart(sp chartSpec) ChartView {
 					sum += s.Points[i]
 				}
 			}
-			if sum > max {
-				max = sum
+			if sum > peak {
+				peak = sum
 			}
 		}
 	} else {
 		for _, s := range sp.Ser {
 			for _, p := range s.Points {
-				if p > max {
-					max = p
+				if p > peak {
+					peak = p
 				}
 			}
 		}
 	}
-	if max == 0 {
-		max = 1 // a flat zero chart still needs a scale to draw its axis
+	if peak == 0 {
+		peak = 1 // a flat zero chart still needs a scale to draw its axis
 	}
-	max = niceCeil(max)
+	peak = niceCeil(peak)
 
 	n := len(sp.Days)
 	plotW := float64(chartW - chartYAxis - 2*chartXPad)
 	segW := plotW / float64(n)
 	plotH := float64(chartH - 2*chartPad - 18) // 18 leaves room for x captions
 	x := func(i int) float64 { return float64(chartYAxis+chartXPad) + segW*(float64(i)+0.5) }
-	y := func(v float64) float64 { return chartPad + plotH - (v/max)*plotH }
+	y := func(v float64) float64 { return chartPad + plotH - (v/peak)*plotH }
 
 	cv := ChartView{
 		W: chartW, H: chartH,
 		GridX0: chartYAxis,
-		YTop:   sp.Fmt(max),
+		YTop:   sp.Fmt(peak),
 		YTopY:  chartPad + 9,
 		YZeroY: chartPad + plotH,
 		LabelX: chartYAxis - 6,
@@ -282,7 +282,7 @@ func layoutChart(sp chartSpec) ChartView {
 	const rowH, panelPad = 14.0, 8.0
 	panelW := 130.0
 	for _, s := range sp.Ser {
-		if w := float64(len(s.Label))*5.6 + float64(len(sp.Fmt(max)))*6 + 46; w > panelW {
+		if w := float64(len(s.Label))*5.6 + float64(len(sp.Fmt(peak)))*6 + 46; w > panelW {
 			panelW = w
 		}
 	}

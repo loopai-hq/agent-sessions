@@ -13,18 +13,6 @@ import (
 	"time"
 )
 
-func signedInteractive(t *testing.T, secret, payload string, at time.Time) *httptest.ResponseRecorder {
-	t.Helper()
-	body := "payload=" + url.QueryEscape(payload)
-	ts := strconv.FormatInt(at.Unix(), 10)
-	mac := hmac.New(sha256.New, []byte(secret))
-	fmt.Fprintf(mac, "v0:%s:%s", ts, body)
-	req := httptest.NewRequest("POST", InteractivePath, strings.NewReader(body))
-	req.Header.Set("X-Slack-Request-Timestamp", ts)
-	req.Header.Set("X-Slack-Signature", "v0="+hex.EncodeToString(mac.Sum(nil)))
-	return httptest.NewRecorder()
-}
-
 // A payload signed with the wrong secret, or an aged one, is refused with one
 // indistinguishable answer; a good one for somebody else's session detaches
 // nothing.

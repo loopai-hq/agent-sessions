@@ -222,9 +222,6 @@ func logEventType(t string) string {
 // tool_use_id by the same rule, so one shape decides on both routes.
 var IDShape = regexp.MustCompile(`^[0-9A-Za-z._:-]{1,64}$`)
 
-// idShape is IDShape under the name this file grew up with.
-var idShape = IDShape
-
 // LogID bounds an id field on a log line the way logEventType bounds the
 // type: Validate only requires the ids to be non-empty, so they are the last
 // payload strings that could carry content into a line, and the line's

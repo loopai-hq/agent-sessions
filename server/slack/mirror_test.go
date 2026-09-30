@@ -400,7 +400,7 @@ func TestSummaryCarriesNoFieldThatCouldHoldTranscript(t *testing.T) {
 	}
 	var got []string
 	ty := reflect.TypeOf(Summary{})
-	for i := 0; i < ty.NumField(); i++ {
+	for i := range ty.NumField() {
 		got = append(got, ty.Field(i).Name)
 	}
 	sort.Strings(got)

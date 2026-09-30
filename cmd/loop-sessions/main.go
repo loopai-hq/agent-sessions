@@ -267,7 +267,7 @@ func runDaemon(args []string) error {
 	runCtx, cancelRun := context.WithCancel(ctx)
 	defer cancelRun()
 	go startUpgradeCheck(runCtx, p, cfg)
-	go startCaptureRewalk(runCtx, p, cfg)
+	go startCaptureRewalk(p, cfg)
 	go runRepairIfDue(runCtx, p, cfg, false)
 	// The binary this daemon runs is watched for an upgrade (restart.go):
 	// a different build at the same path that runs ends the run through a
@@ -499,7 +499,7 @@ func redriveParkedIfDue(p config.Paths, sp *spool.Spool, now time.Time) {
 // change delivery, the daemon, or the server contract and extract nothing new; a
 // re-walk for those is nine minutes of CPU and a few hundred megabytes on the
 // wire to produce rows the server already has and will discard.
-func startCaptureRewalk(ctx context.Context, p config.Paths, cfg config.Config) {
+func startCaptureRewalk(p config.Paths, cfg config.Config) {
 	if cfg.CaptureSchemaVersion >= event.CaptureSchema {
 		return
 	}

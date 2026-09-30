@@ -206,16 +206,6 @@ func (t *ingPGTx) event(id string) (ingEventRow, bool) {
 	return e, ok
 }
 
-func (t *ingPGTx) haveEvent(id string) bool {
-	if _, ok := t.events[id]; ok {
-		return true
-	}
-	t.db.mu.Lock()
-	defer t.db.mu.Unlock()
-	_, ok := t.db.events[id]
-	return ok
-}
-
 func (t *ingPGTx) haveLedger(key string) bool {
 	if t.ledger[key] {
 		return true

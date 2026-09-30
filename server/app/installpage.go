@@ -42,7 +42,7 @@ type installPageData struct {
 // session: somebody setting up a second machine has a dashboard open on the
 // first, and making them sign in twice to read an instruction helps nobody.
 // Nothing on the page is private; the same text is in the repository.
-func (d *Downloads) handleInstall(w http.ResponseWriter, r *http.Request) {
+func (d *Downloads) handleInstall(w http.ResponseWriter, _ *http.Request) {
 	base := strings.TrimSuffix(d.publicURL, "/")
 	data := installPageData{
 		BaseURL:   base,

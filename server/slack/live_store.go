@@ -255,17 +255,3 @@ func liveMilestones(ctx context.Context, db DB, sessionID, prefix string, after 
 	}
 	return out, rows.Err()
 }
-
-// threadMessageCount is what the per-thread cap is measured against: replies
-// actually delivered into one session's thread.
-func threadMessageCount(ctx context.Context, db DB, prefix string) (int, error) {
-	var n int
-	if err := db.QueryRow(ctx, `
-		SELECT count(*) FROM slack_posts
-		 WHERE key LIKE $1 || ':%' AND posted_at IS NOT NULL`,
-		prefix,
-	).Scan(&n); err != nil {
-		return 0, fmt.Errorf("slack: count thread messages under %s: %w", prefix, err)
-	}
-	return n, nil
-}

@@ -53,7 +53,7 @@ type request struct {
 var loggableFields = func() map[string]bool {
 	fields := map[string]bool{"args": true, "body": true}
 	rt := reflect.TypeOf(request{})
-	for i := 0; i < rt.NumField(); i++ {
+	for i := range rt.NumField() {
 		if tag, _, _ := strings.Cut(rt.Field(i).Tag.Get("json"), ","); tag != "" {
 			fields[tag] = true
 		}

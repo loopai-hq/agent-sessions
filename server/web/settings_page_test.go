@@ -348,7 +348,7 @@ func TestGroupDeleteAndLiveToggle(t *testing.T) {
 		t.Fatalf("pause: code %d, killed %v", rec.Code, fs.killed)
 	}
 	rec = fltPost(t, s2, "/settings/notifications/controls", url.Values{"csrf": {csrf}, "live": {"resume"}})
-	if len(fs.killed) != 2 || fs.killed[1] {
-		t.Fatalf("resume did not clear the kill: %v", fs.killed)
+	if rec.Code != http.StatusSeeOther || len(fs.killed) != 2 || fs.killed[1] {
+		t.Fatalf("resume: code %d, killed %v", rec.Code, fs.killed)
 	}
 }

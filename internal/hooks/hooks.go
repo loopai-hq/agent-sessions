@@ -402,13 +402,13 @@ func save(path string, s settings) error {
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil { //nolint:gosec // G301: this is Claude Code's own directory, created the way the harness creates it
 		return err
 	}
 	// Atomic: a half-written settings file can stop the harness from starting,
 	// which would make installing telemetry an outage on someone's laptop.
 	tmp := path + ".loop-tmp"
-	if err := os.WriteFile(tmp, append(b, '\n'), 0o644); err != nil {
+	if err := os.WriteFile(tmp, append(b, '\n'), 0o644); err != nil { //nolint:gosec // G306: settings.json is Claude Code's file; it keeps the mode the harness and an editor give it
 		return err
 	}
 	return os.Rename(tmp, path)

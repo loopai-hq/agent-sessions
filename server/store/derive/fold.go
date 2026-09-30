@@ -772,7 +772,7 @@ func finish(t *turn, superseded map[string]string) {
 		case h.HasText:
 			tw = nearest(assistants, h, func(c *Row) bool { return c.HasText && c.TextHash == h.TextHash }, pairWindow)
 		case !h.HasUsage:
-			tw = nearest(assistants, h, func(c *Row) bool { return true }, 0)
+			tw = nearest(assistants, h, func(*Row) bool { return true }, 0)
 		}
 		if tw != nil {
 			roles[h] = RoleSuperseded

@@ -701,15 +701,15 @@ func retitleSession(ctx context.Context, q Queryer, sessionID string) (bool, err
 			source = "command"
 		}
 	case f.Type == "automation" || f.Type == "internal":
-		var any *string
+		var first *string
 		if err := q.QueryRow(ctx, `
 			SELECT text FROM messages
 			WHERE session_id = $1 AND role = 'user' AND agent_id IS NULL
-			ORDER BY seq, occurred_at LIMIT 1`, sessionID).Scan(&any); err != nil && !noRows(err) {
+			ORDER BY seq, occurred_at LIMIT 1`, sessionID).Scan(&first); err != nil && !noRows(err) {
 			return false, fmt.Errorf("store: read first prompt of %s: %w", sessionID, err)
 		}
-		if any != nil {
-			t := normalize.Title(normalize.ClassifyUser(*any, nil, false, false))
+		if first != nil {
+			t := normalize.Title(normalize.ClassifyUser(*first, nil, false, false))
 			title = &t
 			source = "automation_template"
 		}
