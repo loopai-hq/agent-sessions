@@ -463,7 +463,7 @@ func (d *Daemon) drainBacklog() {
 	ctx, cancel := context.WithTimeout(context.Background(), d.opts.ShutdownGrace)
 	defer cancel()
 
-	for i := 0; i < maxShutdownFlushCycle; i++ {
+	for range maxShutdownFlushCycle {
 		if ctx.Err() != nil {
 			return
 		}

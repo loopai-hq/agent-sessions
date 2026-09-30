@@ -124,11 +124,11 @@ func BuildFileDiff(path, before, after string, created bool) FileDiff {
 	}
 
 	head := make([]DiffLine, 0, prefix)
-	for i := 0; i < prefix; i++ {
+	for i := range prefix {
 		head = append(head, DiffLine{Kind: DiffContext, Text: a[i], OldLine: i + 1, NewLine: i + 1})
 	}
 	tail := make([]DiffLine, 0, suffix)
-	for i := 0; i < suffix; i++ {
+	for i := range suffix {
 		oldIdx := len(a) - suffix + i
 		newIdx := len(b) - suffix + i
 		tail = append(tail, DiffLine{Kind: DiffContext, Text: a[oldIdx], OldLine: oldIdx + 1, NewLine: newIdx + 1})

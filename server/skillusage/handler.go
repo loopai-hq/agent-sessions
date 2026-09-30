@@ -199,7 +199,7 @@ func (h *Handler) serveDevice(ctx context.Context, bearer string, req request, n
 		if err != nil {
 			return err
 		}
-		out.dup = !(res.Inserted || res.Changed)
+		out.dup = !res.Inserted && !res.Changed
 		out.clamped = row.TimeClamped
 		return nil
 	})
@@ -263,7 +263,7 @@ func (h *Handler) serveSource(ctx context.Context, bearer string, req request, n
 		if err != nil {
 			return err
 		}
-		out.dup = !(res.Inserted || res.Changed)
+		out.dup = !res.Inserted && !res.Changed
 		return nil
 	})
 	return out, err

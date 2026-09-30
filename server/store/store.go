@@ -4064,7 +4064,7 @@ func isUUID(s string) bool {
 	if len(s) != 36 {
 		return false
 	}
-	for i := 0; i < len(s); i++ {
+	for i := range len(s) {
 		c := s[i]
 		if i == 8 || i == 13 || i == 18 || i == 23 {
 			if c != '-' {

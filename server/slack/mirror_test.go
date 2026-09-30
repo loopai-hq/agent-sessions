@@ -89,7 +89,7 @@ func TestASessionIsPostedOnceHoweverManyPassesRun(t *testing.T) {
 	db.due = []candidate{sampleCandidate("s-once", "ana@example.org", ModeChannel)}
 
 	m := testMirror(t, db, fs.client(t), nil)
-	for i := 0; i < 4; i++ {
+	for i := range 4 {
 		if _, err := m.pass(context.Background()); err != nil {
 			t.Fatalf("pass %d: %v", i, err)
 		}

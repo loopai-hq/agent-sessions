@@ -193,11 +193,7 @@ func (h *Handler) handleMintSourceToken(w http.ResponseWriter, r *http.Request) 
 	h.log.Info("source token minted",
 		"actor", id.Email, "source_token_id", issued.ID, "platform", issued.Platform,
 		"environment", issued.Environment, "scope", issued.Scope, "expires_at", issued.ExpiresAt)
-	writeJSON(w, http.StatusOK, mintResponse{
-		ID: issued.ID, Token: issued.Token, Platform: issued.Platform, Environment: issued.Environment,
-		Scope: issued.Scope, Label: issued.Label, ExpiresAt: issued.ExpiresAt,
-		RateLimitPerMin: issued.RateLimitPerMin, AllowedOrigins: issued.AllowedOrigins,
-	})
+	writeJSON(w, http.StatusOK, mintResponse(issued))
 }
 
 // handleSetSourceTokenLimit is POST /v1/admin/source-tokens/{id}/limit. A

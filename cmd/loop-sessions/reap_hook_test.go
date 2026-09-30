@@ -3,13 +3,13 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/loopai-hq/agent-sessions/internal/capture"
 	"github.com/loopai-hq/agent-sessions/internal/config"
 	"github.com/loopai-hq/agent-sessions/internal/health"
 	"github.com/loopai-hq/agent-sessions/internal/spool"
-	"strings"
 )
 
 // A SessionEnd hook leaves the marker that ends the session's daemon; a

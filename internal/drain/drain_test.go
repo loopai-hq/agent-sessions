@@ -120,7 +120,7 @@ func seed(t *testing.T, sp *spool.Spool, n int) []string {
 func seedSized(t *testing.T, sp *spool.Spool, n, payloadBytes int) []string {
 	t.Helper()
 	ids := make([]string, 0, n)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		id := fmt.Sprintf("item-%03d", i)
 		body, err := json.Marshal(strings.Repeat("x", payloadBytes))
 		if err != nil {
@@ -267,7 +267,7 @@ func TestUndecidedDoesNotAdvanceAttempts(t *testing.T) {
 	tr := &fakeTransport{replies: []reply{{resp: Response{}}}}
 	d := newDrain(t, sp, tr, nil)
 
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		if _, err := d.RunOnce(context.Background()); err != nil {
 			t.Fatalf("RunOnce %d: %v", i, err)
 		}
@@ -298,7 +298,7 @@ func TestUndecidedParksAfterNAndNeverQuarantines(t *testing.T) {
 	tr := &fakeTransport{replies: []reply{{resp: Response{}}}}
 	d := newDrain(t, sp, tr, nil)
 
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		if _, err := d.RunOnce(context.Background()); err != nil {
 			t.Fatalf("RunOnce %d: %v", i, err)
 		}
@@ -330,7 +330,7 @@ func TestParkedItemsDeliverAfterRedrive(t *testing.T) {
 	tr := &fakeTransport{replies: []reply{{resp: Response{}}, {resp: Response{}}, {acceptAll: true}}}
 	d := newDrain(t, sp, tr, nil)
 	ctx := context.Background()
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		_, _ = d.RunOnce(ctx)
 	}
 	if st, _ := sp.Stats(); st.Parked != 1 {
@@ -448,7 +448,7 @@ func TestTransportErrorLeavesEverythingPendingAndRetries(t *testing.T) {
 	d := newDrain(t, sp, tr, nil)
 
 	// Far more cycles than the spool's attempt cutoff.
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		_, err := d.RunOnce(context.Background())
 		if !errors.Is(err, boom) {
 			t.Fatalf("cycle %d: err = %v, want %v", i, err, boom)
@@ -479,7 +479,7 @@ func TestRecoversAfterOutage(t *testing.T) {
 	d := newDrain(t, sp, tr, nil)
 
 	ctx := context.Background()
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		_, _ = d.RunOnce(ctx)
 	}
 
@@ -512,7 +512,7 @@ func TestBackoffGrowsAndResetsOnSuccess(t *testing.T) {
 
 	ctx := context.Background()
 	var seen []time.Duration
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		st, _ := d.RunOnce(ctx)
 		seen = append(seen, st.Backoff)
 	}
@@ -540,7 +540,7 @@ func TestBackoffCappedAtMax(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	for i := 0; i < 30; i++ {
+	for i := range 30 {
 		st, _ := d.RunOnce(ctx)
 		if st.Backoff > 5*time.Second {
 			t.Fatalf("cycle %d: backoff %s exceeded Max", i, st.Backoff)
@@ -566,7 +566,7 @@ func TestFullJitterSpreadsWithinCeiling(t *testing.T) {
 	seen := map[time.Duration]bool{}
 	var belowHalf int
 	const n = 200
-	for i := 0; i < n; i++ {
+	for range n {
 		st, _ := d.RunOnce(ctx)
 		if st.Backoff <= 0 || st.Backoff > time.Second {
 			t.Fatalf("backoff %s outside (0, 1s]", st.Backoff)
@@ -731,7 +731,7 @@ func TestOversizedItemRejectedThenQueueDrains(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		if _, err := d.RunOnce(ctx); err != nil {
 			t.Fatalf("cycle %d: %v", i, err)
 		}
@@ -803,7 +803,7 @@ func TestStatsAccumulateAcrossCycles(t *testing.T) {
 	d := newDrain(t, sp, tr, nil)
 
 	ctx := context.Background()
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		if _, err := d.RunOnce(ctx); err != nil {
 			t.Fatalf("cycle %d: %v", i, err)
 		}
@@ -1023,11 +1023,11 @@ func TestRunAndStatsDoNotRace(t *testing.T) {
 	}()
 
 	// Hammer Stats from several readers while Run mutates it.
-	for i := 0; i < 4; i++ {
+	for range 4 {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			for j := 0; j < 500; j++ {
+			for range 500 {
 				st := d.Stats()
 				_ = st.Cycles + st.Sent + st.Accepted + st.Rejected + st.Undecided + st.Parked
 				_ = st.Backoff
@@ -1054,11 +1054,11 @@ func TestConcurrentRunOnceIsSafe(t *testing.T) {
 	d := newDrain(t, sp, tr, func(o *Options) { o.BatchSize = 5 })
 
 	var wg sync.WaitGroup
-	for i := 0; i < 8; i++ {
+	for range 8 {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			for j := 0; j < 10; j++ {
+			for range 10 {
 				_, _ = d.RunOnce(context.Background())
 			}
 		}()

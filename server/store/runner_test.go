@@ -84,7 +84,7 @@ func TestNextEventBatchHalvesToTheFloorAndThenStops(t *testing.T) {
 func TestParkingEvictsTheSoonestEntryWhenFull(t *testing.T) {
 	s := NewWithDB(&fakeDB{}, nil)
 	now := time.Date(2026, 9, 11, 3, 0, 0, 0, time.UTC)
-	for i := 0; i < dirtyParkedMax; i++ {
+	for i := range dirtyParkedMax {
 		s.parkSession(fmt.Sprintf("s-%05d", i), now.Add(time.Duration(i)*time.Millisecond))
 	}
 	if n := len(s.dirtyParked.rows); n != dirtyParkedMax {

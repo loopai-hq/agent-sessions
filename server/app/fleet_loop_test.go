@@ -137,7 +137,7 @@ func TestTheAssembledServerRunsTheFleetEvaluatorOnItsCadence(t *testing.T) {
 	stopped := make(chan error, 1)
 	go func() { stopped <- a.serve(ctx, ln) }()
 
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		select {
 		case <-db.ticked:
 		case <-time.After(5 * time.Second):

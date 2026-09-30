@@ -211,7 +211,7 @@ func TestLeaseReturnsOldestFirst(t *testing.T) {
 
 func TestLeaseRespectsLimit(t *testing.T) {
 	s := newSpool(t)
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		_ = s.Add(item("x"))
 		time.Sleep(time.Millisecond)
 	}
@@ -344,7 +344,7 @@ func TestConcurrentAddsAreAllDurable(t *testing.T) {
 	const n = 50
 	var wg sync.WaitGroup
 	wg.Add(n)
-	for i := 0; i < n; i++ {
+	for range n {
 		go func() {
 			defer wg.Done()
 			_ = s.Add(item("concurrent"))
@@ -385,7 +385,7 @@ func TestReopenSeesExistingItems(t *testing.T) {
 
 func TestNewIDIsUnique(t *testing.T) {
 	seen := map[string]bool{}
-	for i := 0; i < 1000; i++ {
+	for range 1000 {
 		id := NewID()
 		if seen[id] {
 			t.Fatalf("duplicate id %q", id)

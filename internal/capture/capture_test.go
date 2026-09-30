@@ -300,7 +300,7 @@ func TestEveryEventIsValidAndCarriesAnID(t *testing.T) {
 func TestSequenceNumbersAreMonotonicWithinSession(t *testing.T) {
 	r := &recorder{}
 	c := newCap(t, r)
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		_, _ = c.Handle(HookEvent{HookEventName: "UserPromptSubmit", SessionID: "s1", Prompt: "x"})
 	}
 	for i := 1; i < len(r.events); i++ {
@@ -330,7 +330,7 @@ func TestFileSeqSurvivesProcessRestart(t *testing.T) {
 	dir := t.TempDir()
 	f := FileSeq{Dir: dir}
 	var last int64
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		n := f.Next("session-a")
 		if n <= last {
 			t.Fatalf("sequence went backwards: %d then %d", last, n)
@@ -356,7 +356,7 @@ func TestFileSeqIsConcurrencySafe(t *testing.T) {
 	got := make([]int64, n)
 	var wg sync.WaitGroup
 	wg.Add(n)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		go func(i int) { defer wg.Done(); got[i] = f.Next("s") }(i)
 	}
 	wg.Wait()

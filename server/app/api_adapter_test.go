@@ -167,7 +167,7 @@ func (f *apiFakeDB) readSessionOwner(args []any) store.Row {
 	viewer, _ := args[1].(string)
 	admin, _ := args[2].(bool)
 	owner, ok := f.sessions[id]
-	if !ok || !(admin || owner == viewer) {
+	if !ok || (!admin && owner != viewer) {
 		return apiFakeErrRow{err: pgx.ErrNoRows}
 	}
 	return apiFakeRow{values: []any{owner}}
@@ -417,7 +417,7 @@ func TestAPIStoreReportsDenialAndAbsenceAsOneError(t *testing.T) {
 			if !errors.Is(absenceErr, api.ErrNotFound) {
 				t.Fatalf("absence: got %v, want api.ErrNotFound", absenceErr)
 			}
-			if denialErr != absenceErr {
+			if denialErr != absenceErr { //nolint:errorlint // identity is the assertion: denial and absence must be one value, not merely related
 				t.Errorf("denial and absence are distinguishable error values: %#v vs %#v",
 					denialErr, absenceErr)
 			}
@@ -526,7 +526,7 @@ func TestAPIStoreTranslatesAnInvalidCursorRatherThanRestarting(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			s := apiAdapter(&apiFakeDB{})
 			_, err := s.ListSessions(ctx, v, api.SessionFilter{Cursor: tc.cursor})
-			if err != api.ErrInvalidCursor {
+			if !errors.Is(err, api.ErrInvalidCursor) {
 				t.Fatalf("got %v, want api.ErrInvalidCursor", err)
 			}
 			if errors.Is(err, api.ErrNotFound) {

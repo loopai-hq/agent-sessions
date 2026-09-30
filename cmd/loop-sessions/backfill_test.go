@@ -210,7 +210,7 @@ func TestTheImportKeepsTheOutboxSmallerThanItsHighWaterMark(t *testing.T) {
 	// engage several times rather than once at the end.
 	const records = 1200
 	lines := make([]string, 0, records)
-	for i := 0; i < records; i++ {
+	for i := range records {
 		lines = append(lines, userRecord(sessionOne, ago(time.Duration(records-i)*time.Minute),
 			fmt.Sprintf("u%d", i), "/repo", fmt.Sprintf("turn %d", i)))
 	}

@@ -137,7 +137,7 @@ func TestLastAssistantUsageReadsPastATruncatedFirstLine(t *testing.T) {
 	// Padding well past the tail window, so the read certainly starts inside a
 	// record rather than at a line boundary.
 	var lines []string
-	for i := 0; i < 400; i++ {
+	for i := range 400 {
 		lines = append(lines, userLine("s1", "2026-08-17T09:00:00.000Z", fmt.Sprintf("u%d", i),
 			strings.Repeat("x", 300)))
 	}

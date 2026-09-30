@@ -256,7 +256,7 @@ func TestIntegrationTheVersionedPassIsResumableIdempotentAndSingleWinner(t *test
 		}
 	}
 	// Whichever stood down, the work finishes: run until done.
-	for i := 0; i < 20; i++ {
+	for range 20 {
 		pass, err = s.RunDerive(context.Background(), DeriveConfig{Window: always, RowsPerSec: 1_000_000, Sleep: noSleep})
 		if err != nil {
 			t.Fatal(err)

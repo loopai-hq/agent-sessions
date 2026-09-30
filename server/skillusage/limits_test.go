@@ -42,7 +42,7 @@ func TestBucketLimiterRefillsAndSweeps(t *testing.T) {
 	if !l.allow("d", now.Add(time.Second)) {
 		t.Error("one second refills one")
 	}
-	for i := 0; i < bucketSweepAt; i++ {
+	for i := range bucketSweepAt {
 		l.allow(string(rune('A'+i%26))+string(rune(i)), now)
 	}
 	before := len(l.seen)

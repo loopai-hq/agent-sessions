@@ -182,7 +182,7 @@ func TestIdentityFailuresAreIndistinguishable(t *testing.T) {
 			if gotAPI != (api.Identity{}) {
 				t.Errorf("api identity = %+v, want zero", gotAPI)
 			}
-			if errAPI != api.ErrNoIdentity {
+			if errAPI != api.ErrNoIdentity { //nolint:errorlint // identity is the assertion: exactly the sentinel, nothing wrapped around it
 				t.Errorf("api error = %v (%T), want exactly api.ErrNoIdentity", errAPI, errAPI)
 			}
 
@@ -190,7 +190,7 @@ func TestIdentityFailuresAreIndistinguishable(t *testing.T) {
 			if gotAdmin != (admin.Identity{}) {
 				t.Errorf("admin identity = %+v, want zero", gotAdmin)
 			}
-			if errAdmin != admin.ErrNoIdentity {
+			if errAdmin != admin.ErrNoIdentity { //nolint:errorlint // identity is the assertion: exactly the sentinel, nothing wrapped around it
 				t.Errorf("admin error = %v (%T), want exactly admin.ErrNoIdentity", errAdmin, errAdmin)
 			}
 
@@ -218,10 +218,10 @@ func TestDisabledPrincipalAuthenticatesAsNobody(t *testing.T) {
 	// A cookie minted while they were still an enabled admin.
 	r := w7Request(c.Name(), w7IssueCookie(t, c, "gone@example.com", auth.RoleAdmin, w7Epoch))
 
-	if _, err := (apiAuth{cookies: c, roster: roster}).Authenticate(r); err != api.ErrNoIdentity {
+	if _, err := (apiAuth{cookies: c, roster: roster}).Authenticate(r); err != api.ErrNoIdentity { //nolint:errorlint // identity is the assertion: exactly the sentinel
 		t.Errorf("api error = %v, want api.ErrNoIdentity", err)
 	}
-	if _, err := (adminAuth{cookies: c, roster: roster}).Authenticate(r); err != admin.ErrNoIdentity {
+	if _, err := (adminAuth{cookies: c, roster: roster}).Authenticate(r); err != admin.ErrNoIdentity { //nolint:errorlint // identity is the assertion: exactly the sentinel
 		t.Errorf("admin error = %v, want admin.ErrNoIdentity", err)
 	}
 	if v, ok := (webViewer{cookies: c, roster: roster}).viewer(r); ok {
@@ -365,7 +365,7 @@ func TestEmailDomainIsCheckedAsSetMembership(t *testing.T) {
 // one is a failing test rather than a compile error in somebody else's file.
 func TestIdentityConstructorsSatisfyTheConsumerPorts(t *testing.T) {
 	c := w7Cookies(t, func() time.Time { return w7Epoch })
-	var _ api.Authenticator = NewAPIAuth(c, nil)
-	var _ admin.Authenticator = NewAdminAuth(c, nil)
-	var _ func(*http.Request) (web.Viewer, bool) = NewWebViewer(c, nil)
+	var _ = NewAPIAuth(c, nil)
+	var _ = NewAdminAuth(c, nil)
+	var _ = NewWebViewer(c, nil)
 }

@@ -188,7 +188,7 @@ func TestStaleTmpFilesAreSwept(t *testing.T) {
 // the estimate corrected, which is how a stale number cannot evict wrongly.
 func TestEnforceCapUsesTheCachedTotalFarFromTheCap(t *testing.T) {
 	s := newSpool(t, func(o *Options) { o.MaxBytes = 1 << 20 })
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		if err := s.Add(item("x")); err != nil {
 			t.Fatal(err)
 		}

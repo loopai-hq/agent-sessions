@@ -490,7 +490,7 @@ func TestWebDataReportsDenialAndAbsenceAsOneError(t *testing.T) {
 			}
 			// Identity, not merely errors.Is: a wrapped sentinel carries text, and
 			// text is where the two cases would start to differ.
-			if deniedErr != missingErr {
+			if deniedErr != missingErr { //nolint:errorlint // identity is the assertion; see the comment above
 				t.Fatalf("denial and absence are distinguishable: %#v vs %#v", deniedErr, missingErr)
 			}
 			if deniedErr.Error() != missingErr.Error() {
@@ -670,7 +670,7 @@ func TestWebDataCarriesEverySessionFieldOntoThePage(t *testing.T) {
 			if !reflect.DeepEqual(det.Session, tc.want) {
 				t.Fatalf("session translated to\n %#v\nwant\n %#v", det.Session, tc.want)
 			}
-			if got := det.Session.Duration(); got != tc.dur {
+			if got := det.Duration(); got != tc.dur {
 				t.Fatalf("duration %s, want %s", got, tc.dur)
 			}
 		})
@@ -1375,7 +1375,7 @@ func TestWebDataFleetOrdersMachinesStably(t *testing.T) {
 	d := wdAdapterAt(db, wdNow)
 
 	var first []string
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		f, err := d.Fleet(context.Background(), wdViewer(wdAdmin, true))
 		if err != nil {
 			t.Fatalf("fleet: %v", err)
@@ -1653,7 +1653,7 @@ func TestWebDataAccessLogCarriesEveryFilterAndKeepsTheWindowHalfOpen(t *testing.
 // clock here would panic on the first fleet page; a zero one would report every
 // machine in the fleet as silent since 1970.
 func TestNewWebDataWiresAClockAndSatisfiesThePort(t *testing.T) {
-	var _ web.Data = NewWebData(nil)
+	var _ = NewWebData(nil)
 
 	d, ok := NewWebData(store.NewWithDB(&wdFakeDB{}, nil)).(webData)
 	if !ok {

@@ -55,7 +55,7 @@ func newLaptop(t *testing.T, installedAgo time.Duration) *laptop {
 // evidence that separates "waiting" from "not moving".
 func (l *laptop) capture(t *testing.T, n int, queuedAgo time.Duration) {
 	t.Helper()
-	for i := 0; i < n; i++ {
+	for range n {
 		if err := l.sp.Add(spool.Item{Kind: "event", SessionID: "s1", Payload: json.RawMessage(`{"a":1}`)}); err != nil {
 			t.Fatal(err)
 		}

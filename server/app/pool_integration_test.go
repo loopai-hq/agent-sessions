@@ -59,7 +59,7 @@ func TestIntegrationEveryPooledConnectionCarriesTheStatementTimeout(t *testing.T
 	defer pool.Close()
 
 	want := poolStatementTimeout.String()
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		var got string
 		if err := pool.QueryRow(ctx, `SHOW statement_timeout`).Scan(&got); err != nil {
 			t.Fatalf("SHOW statement_timeout: %v", err)

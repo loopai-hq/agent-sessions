@@ -85,7 +85,7 @@ func claimRace(t *testing.T, dir string, sessions []string, claimers int) (int, 
 	var locks []*Lock
 
 	for _, s := range sessions {
-		for i := 0; i < claimers; i++ {
+		for range claimers {
 			done.Add(1)
 			go func(sessionID string) {
 				defer done.Done()

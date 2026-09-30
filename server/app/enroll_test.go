@@ -364,7 +364,7 @@ func TestEnrollMintsADistinctTokenEachTime(t *testing.T) {
 	e.limit = newEnrollLimiter(64, time.Minute)
 
 	seen := map[string]bool{}
-	for i := 0; i < 16; i++ {
+	for range 16 {
 		var out enroll.Result
 		res := postEnroll(e, enrollBody())
 		if err := json.NewDecoder(res.Body).Decode(&out); err != nil {
@@ -584,7 +584,7 @@ func TestEnrollRateLimitsByEmail(t *testing.T) {
 	e.now = func() time.Time { return now }
 	e.limit = newEnrollLimiter(3, time.Hour)
 
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		if res := postEnroll(e, enrollBody()); res.StatusCode != http.StatusOK {
 			t.Fatalf("enrollment %d: status = %d, want 200", i, res.StatusCode)
 		}
@@ -710,7 +710,7 @@ func TestEnrollLimiterSweepsOnlyRefilledEntries(t *testing.T) {
 		t.Fatal("a third attempt was allowed")
 	}
 	// Enough distinct addresses to trip the sweep.
-	for i := 0; i < enrollLimiterSweepAt+1; i++ {
+	for i := range enrollLimiterSweepAt + 1 {
 		l.allow(string(rune('a'+i%26))+"-"+time.Duration(i).String()+"@example.com", now)
 	}
 	if l.allow("busy@example.com", now) {

@@ -441,11 +441,12 @@ func codexResponseEvent(base event.Event, r codexResponse) (event.Event, string,
 	e := base
 	switch r.Type {
 	case "message":
-		if r.Role == "user" {
+		switch r.Role {
+		case "user":
 			e.Type = event.UserPrompt
-		} else if r.Role == "assistant" {
+		case "assistant":
 			e.Type = event.AssistantTurn
-		} else {
+		default:
 			return e, "", false
 		}
 		e.Text = codexContentText(r.Content)

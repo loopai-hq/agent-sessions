@@ -503,7 +503,7 @@ func fillBuckets(rows []DayUsage, from time.Time, n int, step time.Duration) []D
 			r.Day.Hour(), 0, 0, 0, from.Location())
 		// Linear over at most 24 boundaries; correctness over cleverness.
 		i := -1
-		for j := 0; j < n; j++ {
+		for j := range n {
 			if !local.Before(bounds[j]) && local.Before(bounds[j+1]) {
 				i = j
 				break

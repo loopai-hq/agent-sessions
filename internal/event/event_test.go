@@ -65,7 +65,7 @@ func TestSameEventIdentityAlwaysYieldsSameID(t *testing.T) {
 			}
 			// Repeat calls model the crash-and-re-read path, which must land on
 			// the same key rather than a fresh one.
-			for i := 0; i < 3; i++ {
+			for i := range 3 {
 				if again := DeterministicID(tc.session, tc.seq, tc.typ, tc.disc); again != got {
 					t.Fatalf("call %d returned %q, want %q", i+2, again, got)
 				}
@@ -198,7 +198,7 @@ func TestIDDependsOnArgumentsNotProcessState(t *testing.T) {
 	want := DeterministicID("sess", 5, UserPrompt, "d")
 
 	// Interleaving unrelated calls must not perturb the result.
-	for i := 0; i < 20; i++ {
+	for i := range 20 {
 		DeterministicID("other", int64(i), ToolCall, "noise")
 		if got := DeterministicID("sess", 5, UserPrompt, "d"); got != want {
 			t.Fatalf("after %d interleaved calls id = %q, want %q", i+1, got, want)
@@ -563,7 +563,7 @@ func TestEndedRequiresAnExplicitEndMarker(t *testing.T) {
 // magnitude. Every field has to be carried.
 func TestUsageTotalsIncludeAllCacheTiers(t *testing.T) {
 	var s Session
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		e := ev(AssistantTurn, i+1)
 		e.Usage = &Usage{
 			InputTokens:         1,

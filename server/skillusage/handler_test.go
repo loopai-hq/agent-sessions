@@ -739,7 +739,7 @@ func TestADeviceHasAnInProcessBucketOfSixtyPerMinute(t *testing.T) {
 	st := newFakeStore()
 	now := testNow
 	h := newHandler(t, st, goodDevices(), func(o *Options) { o.Now = func() time.Time { return now } })
-	for i := 0; i < 60; i++ {
+	for range 60 {
 		wantDuplicate(t, post(t, h, deviceToken, body(hook())), false)
 	}
 	wantRejected(t, post(t, h, deviceToken, body(hook())), http.StatusTooManyRequests, "rate_limited", "")
@@ -752,7 +752,7 @@ func TestADeviceHasAnInProcessBucketOfSixtyPerMinute(t *testing.T) {
 func TestTheShedIsBoundedAndKeyedOnTheAddressBeforeTheVerify(t *testing.T) {
 	st := newFakeStore()
 	h := newHandler(t, st, goodDevices())
-	for i := 0; i < 100_000; i++ {
+	for i := range 100_000 {
 		r := httptest.NewRequest(http.MethodPost, InvocationsPath, bytes.NewReader(body(beacon())))
 		r.Header.Set("Authorization", "Bearer lss_junk-"+fmt.Sprint(i))
 		// The front end appends the connection's address last; the fixed
@@ -773,7 +773,7 @@ func TestTheShedIsBoundedAndKeyedOnTheAddressBeforeTheVerify(t *testing.T) {
 	// minute rather than at its end.
 	st = newFakeStore()
 	h = newHandler(t, st, goodDevices(), func(o *Options) { o.ShedPerMinute = 3 })
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		wantRejected(t, post(t, h, "lss_junk", body(beacon())), http.StatusUnauthorized, "unauthenticated", "")
 	}
 	w := post(t, h, "lss_junk", body(beacon()))
@@ -813,14 +813,14 @@ func TestAFifthRequestWhileFourHoldConnectionsIs429(t *testing.T) {
 
 	var wg sync.WaitGroup
 	results := make(chan int, 4)
-	for i := 0; i < 4; i++ {
+	for i := range 4 {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			results <- post(t, h, sourceToken, body(beacon()), "X-Forwarded-For", fmt.Sprintf("10.0.0.%d", i)).Code
 		}()
 	}
-	for i := 0; i < 4; i++ {
+	for range 4 {
 		select {
 		case <-st.entered:
 		case <-time.After(5 * time.Second):

@@ -510,7 +510,7 @@ func exportBundles(ctx context.Context, src Source, objs ObjectStore, sessions [
 		}
 		mu.Unlock()
 	}
-	for i := 0; i < opt.BundleWorkers; i++ {
+	for range opt.BundleWorkers {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
