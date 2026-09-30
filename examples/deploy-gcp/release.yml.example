@@ -82,13 +82,14 @@ jobs:
       # The tag goes through the environment rather than an expression: a
       # `${{ }}` inside `run:` is spliced into the script before the shell sees
       # it, and the habit is what makes the promote job's user input safe too.
-      # BUILD_DATE is read once here so the client binaries, latest.json and
-      # the server image all carry the same instant; the Makefile honours an
-      # exported value instead of reading the clock itself.
+      # BUILD_DATE is the commit time in UTC, which is what the Makefile
+      # defaults to as well; it is read once here and exported so the client
+      # binaries, latest.json and the server image all carry the same instant
+      # and a rebuild of this commit produces the same bytes.
       - name: name the build after this commit
         run: |
           echo "TAG=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
-          echo "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+          echo "BUILD_DATE=$(TZ=UTC git log -1 --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd)" >> "$GITHUB_ENV"
 
       - name: build the client from a clean checkout
         run: make release VERSION="$TAG" ENDPOINT="$PUBLIC_URL" && make verify
@@ -131,8 +132,9 @@ jobs:
         run: |
           IMAGE="$REGION-docker.pkg.dev/$PROJECT/loop-sessions/server:$TAG"
           gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
-          docker build -f examples/deploy-gcp/Dockerfile \
+          docker build \
             --build-arg VERSION="$TAG" --build-arg BUILD_DATE="$BUILD_DATE" \
+            --build-arg REVISION="$GITHUB_SHA" \
             -t "$IMAGE" .
           docker push "$IMAGE"
 

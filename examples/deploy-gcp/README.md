@@ -311,9 +311,9 @@ there is no client credential anywhere in the flow.
 
 ```bash
 docker build \
-  -f examples/deploy-gcp/Dockerfile \
   --build-arg VERSION="$TAG" \
-  --build-arg BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  --build-arg BUILD_DATE="$(TZ=UTC git log -1 --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd)" \
+  --build-arg REVISION="$(git rev-parse HEAD)" \
   -t "${REGION}-docker.pkg.dev/${PROJECT}/loop-sessions/server:${TAG}" \
   .
 
