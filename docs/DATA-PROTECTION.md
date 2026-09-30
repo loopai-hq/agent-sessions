@@ -107,9 +107,10 @@ may do; a disabled row is refused even though its domain is allowed.
 
 `loop-sessions pause [--for 2h]` stops capture and delivery (and resumes on
 its own after the period); `status` shows what is being captured and where
-it goes; `uninstall` removes the hooks and the binary and, with `--purge`,
-everything captured that is still waiting to upload. What has already been
-delivered is the operator's to delete.
+it goes; `loop-sessions uninstall` removes the hooks, after which the binary
+can be removed (`install/uninstall.sh` does that); `--purge` also deletes
+`~/.loop/sessions`, including anything captured that had not yet uploaded.
+What has already been delivered is the operator's to delete.
 
 ## Controller and processor
 

@@ -25,8 +25,9 @@ the example deployments, with releases people can download and verify.
 - The installer works from GitHub Releases without a channel host
   (`LOOP_SESSIONS_BASE_URL=.../releases/latest LOOP_SESSIONS_VERSION=download`).
 - `pause --for <duration>`: capture and delivery pause for the period and
-  resume on their own; `resume` ends it early; `status` and the health
-  report show the deadline. New config field `paused_until`.
+  resume on their own; `resume` ends it early; `status` and `doctor` show
+  the deadline, and the health report stops reporting paused once it has
+  passed (no new wire field). New config field `paused_until`.
 - `install` and `status` print who can read captured sessions (the owner,
   the server's admins, a colleague through a shared link), that every read
   by anyone but the owner is logged, and that retention is set by the

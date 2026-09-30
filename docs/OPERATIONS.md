@@ -102,9 +102,10 @@ matter on any platform:
 | `fleet silent`, `fleet drops`, `fleet empty_start` | WARNING | one machine that stopped reporting for a day, dropped events, or is over the empty-start rule |
 | `fleet condition`, `fleet version_lag` | INFO | per-machine conditions from the latest health reports |
 | `release manifest missing` | WARNING | `latest/latest.json` is absent from the release bucket |
-| `sign-in refused` | INFO | a verified token whose address is outside `ALLOWED_DOMAINS` or whose roster row is disabled |
+| `sign-in refused` | WARNING | a sign-in refused before the roster check; `stage` names the check that fired (origin, body, csrf, token, verify or domain) |
+| `sign-in refused: no enabled roster row` | INFO | a verified token on an allowed domain whose roster row is missing or disabled |
 | `slack mirror pass failed`, `slack live pass failed` | ERROR | the Slack mirror, when configured |
-| `export run` | INFO | one per `export` run, `status` `ok`, `failed` or `timeout` |
+| `export run` | INFO on success, ERROR on failure | one per `export` run, `status` `ok`, `failed` or `timeout` |
 
 The full field list for every line, and the GCP alert policy built on each,
 is in the example deployment's "The log contract" section.
@@ -137,14 +138,21 @@ platform with request logs, the 5xx rate on `/v1/events`.
 Back up the whole database, `pg_dump -Fc` or your platform's point-in-time
 recovery. Everything derived (`sessions`, `turns`, `messages`, `links`,
 `artifacts`, `artifact_versions`) is a pure function of the `events` table
-and can be rebuilt, so in an emergency `events` plus the tables that are not
-derived from it is a complete backup, including: `principals` (the roster), `devices` and `device_tokens`
-(the fleet's credentials), `access_log` (who read what), `shares`,
-`usage_ledger`, `model_prices`, `health_reports`, `source_tokens`, the
+and can be rebuilt while the bodies are still there, so in an emergency
+`events` plus the tables that are not derived from it is a complete backup,
+including: `principals` (the roster) and `principal_changes`, `devices` and
+`device_tokens` (the fleet's credentials), `access_log` (who read what) and
+`admin_actions`, `shares`, `usage_ledger`, `model_prices`, `health_reports`,
+`fleet_mutes`, `source_tokens`, `session_mirrors`, `reconciler_runs`, the
 `skill_*` and `slack_*` tables, and the ledgers `schema_migrations`,
-`derive_jobs` and `derived_schema`. `events.body` is roughly 65% of the
-database, so a dump is dominated by it; a nightly dump plus WAL archiving is
-enough for a service whose writers retry until acknowledged.
+`derive_jobs`, `derived_schema`, `fleet_ticks` and `export_watermarks`. That
+shortcut stops holding once `RETENTION_BODY_DAYS` is set: body retention
+deletes `events.body` but keeps `messages`, `turns` and the search index,
+and the runner cannot re-derive from an expired body, so from then on the
+derived tables hold the only copy of expired transcripts and must be backed
+up too. `events.body` is roughly 65% of the database, so a dump is dominated
+by it; a nightly dump plus WAL archiving is enough for a service whose
+writers retry until acknowledged.
 
 ## Restore
 

@@ -118,6 +118,8 @@ disk; the only credential kept is a device token minted for this machine.
 |---|---|
 | `~/.local/bin/loop-sessions` | the agent binary, the only thing installed |
 | `~/.loop/sessions/config.json` | your settings, written at sign-in, including what you chose to exclude |
+| `~/.loop/sessions/device.token` | the device token, the one credential the agent keeps; mode `0600` |
+| `~/.loop/sessions/discovery.json` | what `discover` found: where each harness keeps its sessions; mode `0600` |
 | `~/.loop/sessions/spool/` | captured events waiting to upload |
 | `~/.loop/sessions/state/`, `seq/` | bookkeeping |
 | `~/.loop/sessions/logs/agent.log` | the agent's own log |
