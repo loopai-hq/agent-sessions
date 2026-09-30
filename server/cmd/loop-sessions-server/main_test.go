@@ -37,7 +37,7 @@ func TestRunRefusesToStartOnAnEnvironmentItCannotUse(t *testing.T) {
 }
 
 // TestVersionIsAPackageVariableTheBuildCanStamp is a tripwire on the linker
-// contract in examples/deploy-gcp/Dockerfile, which passes
+// contract in the Dockerfile at the repository root, which passes
 // -ldflags "-X main.version=...". A -X against a symbol that does not exist is
 // ignored silently, so a rename here would leave every deployed revision
 // logging "dev" with nothing to say why.

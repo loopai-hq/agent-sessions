@@ -18,12 +18,6 @@ import (
 	"github.com/loopai-hq/agent-sessions/internal/hooks"
 )
 
-// LaunchAgentLabel names the per-user agent. It contains both "agent-sessions"
-// and "loop-sessions" so the uninstaller's search finds it whichever term it
-// looks for, and so a person scanning their LaunchAgents folder can tell at a
-// glance what it belongs to.
-const LaunchAgentLabel = "io.github.loopkitchen.agent-sessions.loop-sessions"
-
 // defaultEndpoint may be stamped at build time (make build ENDPOINT=...). It
 // is not a secret: it is a URL people paste into a browser anyway.
 //

@@ -20,7 +20,7 @@ import (
 	"github.com/loopai-hq/agent-sessions/server/export"
 )
 
-// version is stamped at build time by examples/deploy-gcp/Dockerfile
+// version is stamped at build time by the Dockerfile at the repository root
 // (-ldflags "-X main.version=..."). It is logged once at startup, which is what
 // makes a log line attributable to a revision when two are running side by side
 // during a rollout.
