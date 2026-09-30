@@ -1,5 +1,7 @@
 # Server assembly contract
 
+> **Historical design note.** Written while the server was being assembled and kept as it was; moved from `server/` to `docs/design/` on 2026-09-30. It is not maintained and may no longer match the code. The current description of the system is [docs/ARCHITECTURE.md](../ARCHITECTURE.md); the source is the truth where the two differ.
+
 The six server packages were each built against their own consumer-defined port
 interfaces and each tested against their own fakes. Nothing binds them to the
 store, and there is no process entrypoint. This document pins the boundary so

@@ -1,5 +1,7 @@
 # Design note: Firebase authentication
 
+> **Historical design note.** Written while the server was being assembled and kept as it was; moved from `server/` to `docs/design/` on 2026-09-30. It is not maintained and may no longer match the code. The current description of the system is [docs/ARCHITECTURE.md](../ARCHITECTURE.md); the source is the truth where the two differ.
+
 Supersedes the Google OAuth design in `CONTRACT-assembly.md` §W7 and every
 OAuth-client environment variable in §W6.
 
