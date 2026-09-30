@@ -128,6 +128,14 @@ func (f *fakeData) ListSessions(_ context.Context, v Viewer, q SessionQuery) (Se
 		}
 		out = append(out, d.Session)
 	}
+	// Newest first with the id as the tiebreak, which is the store's own
+	// order, so a page of fixtures renders in one order rather than the map's.
+	sort.SliceStable(out, func(i, j int) bool {
+		if !out[i].StartedAt.Equal(out[j].StartedAt) {
+			return out[i].StartedAt.After(out[j].StartedAt)
+		}
+		return out[i].ID > out[j].ID
+	})
 	return SessionPage{Sessions: out, NextCursor: "next"}, nil
 }
 
