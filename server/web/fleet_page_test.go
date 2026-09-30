@@ -102,7 +102,7 @@ func TestFleetPageRanksTheActionListWorstFirst(t *testing.T) {
 	if quarantine < 0 || silent < 0 || empty < 0 || lag < 0 {
 		t.Fatalf("a CTA row is missing: quarantine=%d silent=%d empty=%d lag=%d", quarantine, silent, empty, lag)
 	}
-	if !(quarantine < silent && silent < empty && empty < lag) {
+	if quarantine >= silent || silent >= empty || empty >= lag {
 		t.Errorf("rows are not worst first: quarantine=%d silent=%d empty=%d lag=%d", quarantine, silent, empty, lag)
 	}
 	// The list sits above the coverage table, so the operator reads it first.

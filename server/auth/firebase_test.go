@@ -29,7 +29,7 @@ import (
 // generated once and shared. Nothing here mutates it.
 var testKeys = sync.OnceValue(func() []*rsa.PrivateKey {
 	var out []*rsa.PrivateKey
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		k, err := rsa.GenerateKey(rand.Reader, 2048)
 		if err != nil {
 			panic(err)
@@ -491,7 +491,7 @@ func TestHTTPKeySourceReadsX509CertificatesRatherThanAJWKS(t *testing.T) {
 	if len(set.Keys) != 2 {
 		t.Fatalf("parsed %d keys, want 2", len(set.Keys))
 	}
-	if set.Keys[testKid].N.Cmp(keys[0].PublicKey.N) != 0 || set.Keys[testKid].E != keys[0].PublicKey.E {
+	if set.Keys[testKid].N.Cmp(keys[0].N) != 0 || set.Keys[testKid].E != keys[0].E {
 		t.Error("the certificate did not round trip to the key that signs tokens")
 	}
 }
@@ -618,7 +618,7 @@ func TestKeysAreCachedByKeyID(t *testing.T) {
 	cs, keys := oneCertServer(t)
 	v, _ := newTestVerifier(t, cs, nil)
 
-	for i := 0; i < 20; i++ {
+	for i := range 20 {
 		if _, err := v.Verify(context.Background(), signToken(t, keys[0], testKid, validClaims())); err != nil {
 			t.Fatalf("Verify %d: %v", i, err)
 		}
@@ -661,7 +661,7 @@ func TestNonsenseKeyIDsCannotFloodGoogle(t *testing.T) {
 	})
 
 	// One thousand tokens, each naming a key id that has never existed.
-	for i := 0; i < 1000; i++ {
+	for i := range 1000 {
 		tok := signToken(t, keys[0], fmt.Sprintf("garbage-%d", i), validClaims())
 		if _, err := v.Verify(context.Background(), tok); !errors.Is(err, ErrUnknownKeyID) {
 			t.Fatalf("token %d: err = %v, want ErrUnknownKeyID", i, err)
@@ -811,7 +811,7 @@ func TestConcurrentVerifyFetchesOnce(t *testing.T) {
 	tok := signToken(t, keys[0], testKid, validClaims())
 	var wg sync.WaitGroup
 	errs := make(chan error, 50)
-	for i := 0; i < 50; i++ {
+	for range 50 {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()

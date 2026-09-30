@@ -205,7 +205,7 @@ func TestExactlyOneCallerEverWinsAKey(t *testing.T) {
 	start := make(chan struct{})
 	now := time.Now()
 
-	for i := 0; i < racers; i++ {
+	for range racers {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -292,7 +292,7 @@ func TestAKeyThatSpentItsAttemptBudgetIsAbandoned(t *testing.T) {
 	ctx := context.Background()
 	key := sessionKey("s-doomed")
 
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		past := time.Now().Add(-time.Duration(10-i) * time.Minute)
 		ok, err := claimKey(ctx, pool, key, "ana@example.org", "s-doomed", past, time.Now(), 3)
 		if err != nil {
@@ -706,7 +706,7 @@ func TestABatchIsBoundedAndOldestFirst(t *testing.T) {
 	freshDB(t)
 	ctx := context.Background()
 	base := time.Now().Add(-10 * time.Hour)
-	for i := 0; i < 8; i++ {
+	for i := range 8 {
 		addSession(t, sessionRow{
 			id: fmt.Sprintf("s-%02d", i), email: "ana@example.org", ended: true,
 			updatedAt: base.Add(time.Duration(i) * time.Minute),

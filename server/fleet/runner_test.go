@@ -106,7 +106,7 @@ func TestTheViewCachesTheManifestForAnInterval(t *testing.T) {
 	src := &countingManifest{m: Manifest{Commit: "788dcb3", BuildDate: now.Add(-48 * time.Hour)}}
 	clock := now
 	r := &Runner{Store: &fakeStore{held: true}, Manifest: src, Now: func() time.Time { return clock }}
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		if _, err := r.View(context.Background()); err != nil {
 			t.Fatal(err)
 		}

@@ -440,7 +440,7 @@ func ParseCLICallback(q url.Values) (CLICallback, error) {
 // this client mints, so refusing them costs nothing and removes the class of
 // bug where a template change makes the relay injectable.
 func isBase64URL(s string) bool {
-	for i := 0; i < len(s); i++ {
+	for i := range len(s) {
 		c := s[i]
 		switch {
 		case c >= 'A' && c <= 'Z', c >= 'a' && c <= 'z', c >= '0' && c <= '9':

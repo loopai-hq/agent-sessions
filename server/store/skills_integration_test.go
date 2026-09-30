@@ -144,7 +144,7 @@ func runSkillStep(t *testing.T, s *Store) {
 		t.Fatal(err)
 	}
 	cfg := DeriveConfig{Window: derive.Window{Always: true}, RowsPerSec: 1_000_000, Sleep: noSleep}
-	for i := 0; i < 20; i++ {
+	for range 20 {
 		pass, err := s.RunDerive(ctx, cfg)
 		if err != nil {
 			t.Fatalf("RunDerive: %v", err)

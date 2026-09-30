@@ -270,7 +270,7 @@ func TestFoldTurnsMergesSameSecondSameTextWalkDuplicates(t *testing.T) {
 		r.TextHash = hash8(aborted)
 	}
 	copies := func(f *fixture, at time.Time, n int, mut func(*Row)) {
-		for i := 0; i < n; i++ {
+		for i := range n {
 			f.add(event.OriginTranscript, event.UserPrompt, at.Add(time.Duration(i)*100*time.Millisecond), mut)
 		}
 	}

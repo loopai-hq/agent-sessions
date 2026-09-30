@@ -846,7 +846,7 @@ func (s *Server) renderSession(w http.ResponseWriter, r *http.Request, v Viewer,
 	if view.Spend.Unpriced() {
 		view.Unpriced = modelsUsed(turnEvents(tp))
 	}
-	if s.slack != nil && det.Session.Email == v.Email {
+	if s.slack != nil && det.Email == v.Email {
 		view.ShowMirror = true
 		if ms, err := s.slack.SessionMirrors(ctx, id); err == nil {
 			view.Mirrors = ms

@@ -274,7 +274,7 @@ var skillUpsertSQL = func() string {
 		return fmt.Sprintf("%s = CASE WHEN %s THEN EXCLUDED.%s ELSE s.%s END", c, u, c, c)
 	}
 	mArms := map[string]string{
-		"outcome":      fmt.Sprintf("CASE WHEN EXCLUDED.outcome IN ('success', 'error') THEN EXCLUDED.outcome ELSE s.outcome END"),
+		"outcome":      "CASE WHEN EXCLUDED.outcome IN ('success', 'error') THEN EXCLUDED.outcome ELSE s.outcome END",
 		"plugin":       fmt.Sprintf("CASE WHEN %s THEN EXCLUDED.plugin ELSE s.plugin END", n),
 		"skill_source": "CASE WHEN s.skill_source = 'unknown' THEN EXCLUDED.skill_source ELSE s.skill_source END",
 		"event_id":     "COALESCE(s.event_id, EXCLUDED.event_id)",
@@ -298,9 +298,9 @@ ON CONFLICT (dedupe_key) DO UPDATE SET
 		"time_clamped", "repo", "prompt_id", "tool_use_id", "args_present", "args_bytes", "harness_version"} {
 		b.WriteString("  " + uArm(c) + ",\n")
 	}
-	b.WriteString(fmt.Sprintf("  raw_name     = CASE WHEN %s OR (%s AND %s) THEN EXCLUDED.raw_name ELSE s.raw_name END,\n", u, m, n))
-	b.WriteString(fmt.Sprintf("  plugin       = CASE WHEN %s OR (%s AND %s) THEN EXCLUDED.plugin ELSE s.plugin END,\n", u, m, n))
-	b.WriteString(fmt.Sprintf("  skill_source = CASE WHEN %s OR (%s AND s.skill_source = 'unknown') THEN EXCLUDED.skill_source ELSE s.skill_source END,\n", u, m))
+	fmt.Fprintf(&b, "  raw_name     = CASE WHEN %s OR (%s AND %s) THEN EXCLUDED.raw_name ELSE s.raw_name END,\n", u, m, n)
+	fmt.Fprintf(&b, "  plugin       = CASE WHEN %s OR (%s AND %s) THEN EXCLUDED.plugin ELSE s.plugin END,\n", u, m, n)
+	fmt.Fprintf(&b, "  skill_source = CASE WHEN %s OR (%s AND s.skill_source = 'unknown') THEN EXCLUDED.skill_source ELSE s.skill_source END,\n", u, m)
 	// The outcome arms (design 3.3, ADV-LS1 F1): a derived copy always
 	// arrives started, its result being the separate UPDATE of query 2,
 	// so under U it takes the outcome only when it carries one. A hook's
@@ -308,13 +308,13 @@ ON CONFLICT (dedupe_key) DO UPDATE SET
 	// the rest of the row flips to the derived copy; the plain U would
 	// have read success as started until the result's batch, or for good
 	// when that result never pairs.
-	b.WriteString(fmt.Sprintf("  outcome      = CASE WHEN (%s AND EXCLUDED.outcome <> 'started') OR (%s AND EXCLUDED.outcome IN ('success', 'error')) THEN EXCLUDED.outcome ELSE s.outcome END,\n", u, m))
-	b.WriteString(fmt.Sprintf("  error_class  = CASE WHEN (%s AND EXCLUDED.outcome <> 'started') OR (%s AND EXCLUDED.outcome IN ('success', 'error')) THEN EXCLUDED.error_class ELSE s.error_class END,\n", u, m))
-	b.WriteString(fmt.Sprintf("  event_id     = CASE WHEN %s THEN EXCLUDED.event_id WHEN %s THEN COALESCE(s.event_id, EXCLUDED.event_id) ELSE s.event_id END,\n", u, m))
-	b.WriteString(fmt.Sprintf("  link_ref     = CASE WHEN %s THEN EXCLUDED.link_ref WHEN %s THEN COALESCE(s.link_ref, EXCLUDED.link_ref) ELSE s.link_ref END,\n", u, m))
-	b.WriteString(fmt.Sprintf("  session_type = CASE WHEN %s OR (%s AND s.session_type = '') THEN EXCLUDED.session_type ELSE s.session_type END\n", u, m))
-	b.WriteString(fmt.Sprintf("WHERE %s OR (%s AND (s.outcome, s.plugin, s.skill_source, s.event_id, s.link_ref, s.session_type)\n  IS DISTINCT FROM (%s, %s, %s, %s, %s, %s))\n",
-		u, m, mArms["outcome"], mArms["plugin"], mArms["skill_source"], mArms["event_id"], mArms["link_ref"], mArms["session_type"]))
+	fmt.Fprintf(&b, "  outcome      = CASE WHEN (%s AND EXCLUDED.outcome <> 'started') OR (%s AND EXCLUDED.outcome IN ('success', 'error')) THEN EXCLUDED.outcome ELSE s.outcome END,\n", u, m)
+	fmt.Fprintf(&b, "  error_class  = CASE WHEN (%s AND EXCLUDED.outcome <> 'started') OR (%s AND EXCLUDED.outcome IN ('success', 'error')) THEN EXCLUDED.error_class ELSE s.error_class END,\n", u, m)
+	fmt.Fprintf(&b, "  event_id     = CASE WHEN %s THEN EXCLUDED.event_id WHEN %s THEN COALESCE(s.event_id, EXCLUDED.event_id) ELSE s.event_id END,\n", u, m)
+	fmt.Fprintf(&b, "  link_ref     = CASE WHEN %s THEN EXCLUDED.link_ref WHEN %s THEN COALESCE(s.link_ref, EXCLUDED.link_ref) ELSE s.link_ref END,\n", u, m)
+	fmt.Fprintf(&b, "  session_type = CASE WHEN %s OR (%s AND s.session_type = '') THEN EXCLUDED.session_type ELSE s.session_type END\n", u, m)
+	fmt.Fprintf(&b, "WHERE %s OR (%s AND (s.outcome, s.plugin, s.skill_source, s.event_id, s.link_ref, s.session_type)\n  IS DISTINCT FROM (%s, %s, %s, %s, %s, %s))\n",
+		u, m, mArms["outcome"], mArms["plugin"], mArms["skill_source"], mArms["event_id"], mArms["link_ref"], mArms["session_type"])
 	b.WriteString(`RETURNING (xmax = 0) AS inserted, (s.preempted_by IS NOT NULL OR s.preempted_device IS NOT NULL) AS preempted, s.preempted_by::text, s.preempted_device::text`)
 	return b.String()
 }()
@@ -1019,7 +1019,7 @@ func (s *Store) pairSlashCopies(ctx context.Context, q Queryer, slashes []skillC
 		c := competitors[oi-len(still)]
 		return c.sid, c.name, c.at
 	}
-	for oi := 0; oi < len(still)+len(competitors); oi++ {
+	for oi := range len(still) + len(competitors) {
 		sid, name, at := orphanAt(oi)
 		for hi, h := range hooks {
 			if h.sid != sid || bareCommand(h.name) != bareCommand(name) {

@@ -497,7 +497,7 @@ func IsSHA(v string) bool {
 	if len(v) < 7 || len(v) > 40 {
 		return false
 	}
-	for i := 0; i < len(v); i++ {
+	for i := range len(v) {
 		c := v[i]
 		if (c < '0' || c > '9') && (c < 'a' || c > 'f') && (c < 'A' || c > 'F') {
 			return false
@@ -753,7 +753,7 @@ func Evaluate(in Inputs) Evaluation {
 		}
 		if !muted(d.Email, "drops_recorded") {
 			ev.Summary.Drops += d.Delta
-			ev.Drops = append(ev.Drops, DropLine{Email: d.Email, DeviceID: d.DeviceID, Reason: d.Reason, Delta: d.Delta})
+			ev.Drops = append(ev.Drops, DropLine(d))
 		}
 		addCTA(d.Email, d.DeviceID, "drops_recorded", "error", fmt.Sprintf("%d events dropped (%s) since the last evaluation", d.Delta, d.Reason), now)
 	}

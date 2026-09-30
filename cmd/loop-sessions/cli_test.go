@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"github.com/loopai-hq/agent-sessions/internal/hooks"
 	"io"
 	"os"
 	"path/filepath"
@@ -15,6 +14,7 @@ import (
 	"github.com/loopai-hq/agent-sessions/internal/config"
 	"github.com/loopai-hq/agent-sessions/internal/event"
 	"github.com/loopai-hq/agent-sessions/internal/health"
+	"github.com/loopai-hq/agent-sessions/internal/hooks"
 	"github.com/loopai-hq/agent-sessions/internal/spool"
 )
 

@@ -124,10 +124,7 @@ func TestAStaleAgentUpgradesItselfWhenAHookRuns(t *testing.T) {
 	// The upgrade happens in the background, so this waits for the outcome
 	// rather than assuming a duration.
 	deadline := time.Now().Add(90 * time.Second)
-	for {
-		if sha256File(t, installed) == publishedHex {
-			break
-		}
+	for sha256File(t, installed) != publishedHex {
 		if time.Now().After(deadline) {
 			t.Fatalf("the installed agent was never replaced; it is still %q\nlog:\n%s",
 				reportedVersion(t, installed), readAgentLogAt(t, home))

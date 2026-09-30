@@ -119,7 +119,7 @@ func TestListSessionsCursorSurvivesConcurrentIngest(t *testing.T) {
 
 	var seen []string
 	cursor := ""
-	for page := 0; page < 5; page++ {
+	for page := range 5 {
 		target := "/v1/sessions?limit=2"
 		if cursor != "" {
 			target += "&cursor=" + url.QueryEscape(cursor)

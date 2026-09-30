@@ -56,7 +56,7 @@ func TestDiffOfANewFileIsAllAdditions(t *testing.T) {
 
 func TestDiffCollapsesLongUnchangedRuns(t *testing.T) {
 	var before, after []string
-	for i := 0; i < 200; i++ {
+	for range 200 {
 		before = append(before, "line")
 		after = append(after, "line")
 	}
@@ -83,7 +83,7 @@ func TestDiffCollapsesLongUnchangedRuns(t *testing.T) {
 
 func TestDiffFallsBackToBlockReplaceWhenTooLargeToAlign(t *testing.T) {
 	var before, after []string
-	for i := 0; i < diffAlignLimit+50; i++ {
+	for range diffAlignLimit + 50 {
 		before = append(before, "a")
 		after = append(after, "b")
 	}
@@ -99,7 +99,7 @@ func TestDiffFallsBackToBlockReplaceWhenTooLargeToAlign(t *testing.T) {
 
 func TestDiffCapsItsOutput(t *testing.T) {
 	var before, after []string
-	for i := 0; i < diffMaxLines+2000; i++ {
+	for range diffMaxLines + 2000 {
 		before = append(before, "x")
 		after = append(after, "y")
 	}

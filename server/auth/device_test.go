@@ -165,7 +165,7 @@ func TestIssuedTokensAreUnique(t *testing.T) {
 	d, _ := newTestDevices(t, store, nil)
 
 	seen := map[string]bool{}
-	for i := 0; i < 100; i++ {
+	for i := range 100 {
 		got, err := d.Issue(context.Background(), "dev@example.com", fmt.Sprintf("device-%d", i))
 		if err != nil {
 			t.Fatal(err)
@@ -353,7 +353,7 @@ func TestLastUsedIsWrittenOnAThrottle(t *testing.T) {
 
 	// An agent uploading every few seconds must not turn authentication into a
 	// write on every request.
-	for i := 0; i < 50; i++ {
+	for range 50 {
 		*clock = clock.Add(2 * time.Second)
 		if _, err := d.Verify(context.Background(), issued.Token); err != nil {
 			t.Fatal(err)
@@ -473,7 +473,7 @@ func TestConcurrentVerify(t *testing.T) {
 	}
 
 	var wg sync.WaitGroup
-	for i := 0; i < 50; i++ {
+	for range 50 {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -508,7 +508,7 @@ func TestBearerToken(t *testing.T) {
 
 func TestNewUUID(t *testing.T) {
 	seen := map[string]bool{}
-	for i := 0; i < 200; i++ {
+	for range 200 {
 		u, err := NewUUID()
 		if err != nil {
 			t.Fatal(err)

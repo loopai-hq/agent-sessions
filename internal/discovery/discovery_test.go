@@ -283,7 +283,7 @@ func TestUnreadableSubtreeDoesNotAbortScan(t *testing.T) {
 
 func TestWalkCapPreventsRunaway(t *testing.T) {
 	home := fakeHome(t)
-	for i := 0; i < 50; i++ {
+	for i := range 50 {
 		write(t, filepath.Join(home, ".claude/projects/p", "s"+string(rune('a'+i%26))+string(rune('a'+i/26))+".jsonl"), 10)
 	}
 	f := findingFor(Run(Options{Home: home, Getenv: noEnv, LookPath: noPath, MaxWalk: 5}), ClaudeCode)

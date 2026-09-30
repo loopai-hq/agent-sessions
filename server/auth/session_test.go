@@ -273,7 +273,7 @@ func TestRenewalCannotOutrunTheAbsoluteLifetime(t *testing.T) {
 
 	// Renewing repeatedly must not walk a session past the cap: the point of
 	// the cap is that being signed in stops being self-sustaining.
-	for i := 0; i < 40; i++ {
+	for range 40 {
 		*clock = clock.Add(time.Hour)
 		s, _ = c.Renew(httptest.NewRecorder(), s)
 	}

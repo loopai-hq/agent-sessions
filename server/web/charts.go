@@ -188,7 +188,7 @@ func layoutChart(sp chartSpec) ChartView {
 		YZeroY: chartPad + plotH,
 		LabelX: chartYAxis - 6,
 	}
-	for q := 0; q <= 4; q++ {
+	for q := range 5 {
 		cv.Grid = append(cv.Grid, chartPad+plotH*float64(q)/4)
 	}
 
@@ -221,7 +221,7 @@ func layoutChart(sp chartSpec) ChartView {
 		// accumulate in value space and each boundary is projected through y()
 		// once, so rounding cannot open gaps between segments.
 		bw := segW * 0.6
-		for i := 0; i < n; i++ {
+		for i := range n {
 			var acc float64
 			drawn := false
 			for _, s := range sp.Ser {

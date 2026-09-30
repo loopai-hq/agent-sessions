@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -155,10 +156,10 @@ func TestFleetMutesAreAnAdminsDecision(t *testing.T) {
 	member := Viewer{Email: "m@example.com", Role: RoleMember}
 	admin := Viewer{Email: "a@example.com", Role: RoleAdmin}
 	mute := FleetMute{Email: "casey@example.com", Kind: "empty_start", Until: at.Add(7 * 24 * time.Hour), Note: "asked on Slack"}
-	if err := s.PutFleetMute(context.Background(), member, mute); err != ErrNotAdmin {
+	if err := s.PutFleetMute(context.Background(), member, mute); !errors.Is(err, ErrNotAdmin) {
 		t.Errorf("a member set a mute: %v", err)
 	}
-	if err := s.DeleteFleetMute(context.Background(), member, mute.Email, mute.Kind); err != ErrNotAdmin {
+	if err := s.DeleteFleetMute(context.Background(), member, mute.Email, mute.Kind); !errors.Is(err, ErrNotAdmin) {
 		t.Errorf("a member lifted a mute: %v", err)
 	}
 	if err := s.PutFleetMute(context.Background(), admin, FleetMute{Email: "x", Kind: "y"}); err == nil {

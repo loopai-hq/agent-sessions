@@ -167,7 +167,7 @@ func TestTheMissingIdentityIndexIsWarnedAboutOncePerBoot(t *testing.T) {
 	var out bytes.Buffer
 	s := NewWithDB(db, nil)
 	s.SetLogger(slog.New(slog.NewJSONHandler(&out, nil)))
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		if _, err := s.UpsertEvents(t.Context(), []Ingest{user}); err != nil {
 			t.Fatalf("batch %d: %v", i, err)
 		}

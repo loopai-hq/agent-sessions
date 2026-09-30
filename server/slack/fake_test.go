@@ -146,7 +146,7 @@ func writeSlackJSON(w http.ResponseWriter, v any) {
 // for something nothing depends on.
 func shortHash(s string) string {
 	var n uint32 = 2166136261
-	for i := 0; i < len(s); i++ {
+	for i := range len(s) {
 		n = (n ^ uint32(s[i])) * 16777619
 	}
 	return fmt.Sprintf("%08x", n)
