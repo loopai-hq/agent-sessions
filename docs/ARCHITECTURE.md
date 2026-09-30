@@ -76,7 +76,7 @@ installer invoke, `hook` and `daemon`.
 | `internal/capture` | the live path: one lifecycle hook payload in, canonical events out, scrubbed, handed to the spool; no network |
 | `internal/scrub` | credential redaction; every hit becomes `[REDACTED:<kind>]` so a leaked Stripe key and a leaked JWT stay distinguishable downstream; `Kinds` is the list |
 | `internal/spool` | the durable outbox: immutable payload files published by atomic rename under `pending/`, `quarantine/` for what the server explicitly refused, `parked/` for what it neither accepted nor refused eight times running |
-| `internal/drain` | the only component that talks to the network: acknowledges exactly what the server said it stored, retries transport failures forever with full-jitter backoff, treats only an explicit rejection as final |
+| `internal/drain` | delivery, the only path session content leaves by (`POST /v1/events`, through the transport in `cmd/loop-sessions/deliver.go`): acknowledges exactly what the server said it stored, retries transport failures forever with full-jitter backoff, treats only an explicit rejection as final |
 | `internal/daemon` | a session's lifetime: spawned at session start, watches the harness pid, flushes on a cadence, finalises when the process goes away, reconciles sessions an earlier daemon left open |
 | `internal/backfill` | historical transcripts to events, timestamps intact: Claude Code (including subagent and workflow files) and Codex rollouts; forks and lineage |
 | `internal/discovery` | where each harness keeps its sessions (the probe table covers macOS, Linux and Windows layouts; a path that does not apply simply does not exist), honouring `CLAUDE_CONFIG_DIR` and `CODEX_HOME`; three states per tool: found, installed with no sessions where it looked, absent |
@@ -127,8 +127,11 @@ Each of these is an absence, and each is enforced somewhere you can point at.
 
 - **Nothing on the hook path touches the network.** A hook runs inline with a
   person's turn on a budget of tens of milliseconds; `internal/capture`
-  writes a file and returns, and `internal/drain` is the only package that
-  opens a connection. The hook verb returns zero unconditionally and never
+  writes a file and returns. Session content leaves only through the drain's
+  transport (`POST /v1/events`); the agent's other requests (the health
+  report, enrolment, the self-upgrade check against `/dl`, `mirror`, the
+  repair walk's `GET /v1/repair`) go to the same enrolled server and carry
+  no transcript content. The hook verb returns zero unconditionally and never
   writes to stdout, because a gap in telemetry is better than a degraded
   editor.
 - **Scrub runs before any byte reaches the spool.** Redaction happens in
@@ -198,7 +201,8 @@ Each of these is an absence, and each is enforced somewhere you can point at.
   its own transaction, additive only, so two instances of a rolling deploy
   cannot apply one twice and the previous revision keeps working against the
   new schema.
-- **Testing.** Every package has unit tests against fakes; `*_integration_test.go`
+- **Testing.** Every package with behaviour has unit tests against fakes
+  (`internal/skilllog` is constants only); `*_integration_test.go`
   files need a database and the `integration` build tag and run in CI against
   Postgres 15 and 17; `server/web` can serve the whole dashboard against
   fixtures (`TestServeDemo`) without a database or a Firebase project, which

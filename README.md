@@ -89,10 +89,14 @@ is not supported and the installer refuses to run there.
 | Projects listed in `exclude_paths`, anything captured while paused, files the harness never showed the agent | never | |
 | Credentials the scrubber recognises | never: each becomes `[REDACTED:<kind>]` before the event touches the spool | the redaction count travels with the event |
 
-Nothing on the hook path touches the network, and only the `drain` component
-ever does. The one third-party contact is the browser, not the agent: the
-sign-in page loads the Firebase SDK from `www.gstatic.com` and
-`apis.google.com`, and its Content-Security-Policy names exactly those origins.
+Nothing on the hook path touches the network. Session content leaves the
+laptop only through delivery (`POST /v1/events`). The agent's other requests
+(the health report, enrolment, the self-upgrade check against `/dl`,
+`mirror` and the repair walk's `GET /v1/repair`) go to the same enrolled
+server and carry no transcript content. The one third-party contact is the
+browser, not the agent: the sign-in page loads the Firebase SDK from
+`www.gstatic.com` and `apis.google.com`, and its Content-Security-Policy
+names exactly those origins.
 
 Who can read a captured session is what `install` and `status` print: **you
 and the server's admins, and a colleague only through a link you share; every
@@ -106,9 +110,11 @@ audit row and the retention controls are in
 Claude Code's analytics dashboard gives Team and Enterprise admins usage
 metrics, pull-request attribution, a leaderboard and a CSV export; it shows no
 transcripts. Its OpenTelemetry export emits metrics and events for your own
-collector, with prompt text, tool details and tool content off by default and
-redacted in spans. Both answer "how much"; neither keeps the record of what an
-agent did. loop-sessions keeps that record: the transcript itself, scrubbed,
+collector. Prompt text, tool details and tool content are off by default;
+with the opt-in flags (`OTEL_LOG_ASSISTANT_RESPONSES`,
+`OTEL_LOG_RAW_API_BODIES`) it can send responses and whole API bodies to
+that collector, unscrubbed, and only from the moment it was switched on.
+loop-sessions keeps the record by default: the transcript itself, scrubbed,
 from every laptop in the fleet, plus the history that was on disk before the
 agent was installed. It is not a metrics product: there is no Prometheus
 endpoint today (see [ROADMAP.md](ROADMAP.md)), and cost is derived from the
@@ -271,9 +277,9 @@ policy in [CONTRIBUTING.md](CONTRIBUTING.md#ai-assisted-contributions).
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the build, the code style and what
 a change needs before it can merge, [SUPPORT.md](SUPPORT.md) for where to ask,
-and [GOVERNANCE.md](GOVERNANCE.md) for how decisions are made. The suite runs
-with the race detector, unit and integration suites in CI, on Ubuntu and macOS
-against Postgres 15 and 17. This project follows the
+and [GOVERNANCE.md](GOVERNANCE.md) for how decisions are made. CI runs the
+suite with the race detector: the unit suite on Ubuntu and macOS, the
+integration suite on Ubuntu against Postgres 15 and 17. This project follows the
 [Contributor Covenant](CODE_OF_CONDUCT.md).
 
 ## License

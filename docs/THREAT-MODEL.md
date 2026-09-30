@@ -12,14 +12,14 @@ contradicts it as described in [SECURITY.md](../SECURITY.md).
  ┌──────────────────────────────┐        ┌──────────────────────┐    ┌───────────────┐
  │ Claude Code ── hook ─▶ spool │─drain─▶│ ingest ─▶ Postgres   │    │ Google certs  │
  │ (user's account)   daemon    │  lsd_  │ auth  ◀── cookie ────│◀───│ Firebase      │
- │ config.json (device token)   │        │ web / api / admin    │    │ (browser only)│
+ │ device.token (mode 0600)     │        │ web / api / admin    │    │ (browser only)│
  └──────────────────────────────┘        │ /dl  ◀── bucket      │    │ release host  │
                                          └──────────────────────┘    └───────────────┘
 ```
 
 | Boundary | Credential | Who is trusted |
 |---|---|---|
-| Laptop to server | the device token (`lsd_…`), minted at enrolment, stored in `~/.loop/sessions/config.json` | the person whose account the agent runs under; the server trusts the token to speak for that person's device and nothing more |
+| Laptop to server | the device token (`lsd_…`), minted at enrolment, stored in `~/.loop/sessions/device.token` (mode 0600, a separate file from the config) | the person whose account the agent runs under; the server trusts the token to speak for that person's device and nothing more |
 | Browser to server | a Firebase ID token, spent once for an HMAC session cookie (`__Host-loop_session`, HttpOnly, SameSite=Lax, Secure unless `PUBLIC_URL` is `http://`) | the person; Google, to have authenticated them |
 | Server to database | the `DATABASE_*` credentials | the operator's platform |
 | Server to Google | none outbound beyond fetching the public certificates | Google's key publication |
@@ -40,10 +40,13 @@ user account.
 payload on stdin, scrubs, writes a spool file and returns zero
 unconditionally without writing to stdout, because a hook that errors or
 chatters degrades the editor. Nothing on that path opens a connection
-(`internal/capture`); only `internal/drain` does. A hook cannot be made to
-exfiltrate to a third party by anything in a transcript: it has no network
-and the destination is the enrolled endpoint in the config, which the
-transcript cannot change.
+(`internal/capture`). Session content leaves only through delivery
+(`POST /v1/events`); the agent's other requests (the health report,
+enrolment, the self-upgrade check against `/dl`, `mirror`, the repair walk's
+`GET /v1/repair`) go to the same enrolled server and carry no transcript
+content. A hook cannot be made to exfiltrate to a third party by anything in
+a transcript: it has no network and the destination is the enrolled endpoint
+in the config, which the transcript cannot change.
 
 **Transcript content is untrusted.** A page the agent fetched or a file it
 read can contain anything, including text that looks like a credential or a

@@ -43,8 +43,11 @@ very things you should not post in public:
 - your organisation's hostnames, project ids, email addresses and people's
   names (use `sessions.example.com`, `__PROJECT__`, `you@example.com`).
 
-`loop-sessions doctor` and `status` output is designed to be safe to paste;
-the server's log lines carry ids, counts and reasons, never content, but do
+`loop-sessions doctor` and `status` output carries no transcript content,
+but both print the enrolled email address, `doctor` prints the config path
+(which includes your home directory) and `status` can print the uploader's
+last error, which may name the server; replace those before pasting. The
+server's log lines carry ids, counts and reasons, never content, but do
 check the `email` and `device_id` fields before posting.
 
 ## If you operate a server for your organisation

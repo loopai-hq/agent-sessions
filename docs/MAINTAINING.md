@@ -11,7 +11,7 @@ before and after a tag. Code-level rules are in
 | Workflow | Trigger | Jobs |
 |---|---|---|
 | `ci` (`.github/workflows/ci.yml`) | every pull request, every push to `main`, Mondays 06:17 UTC, manual | `lint` (make lint plus golangci-lint v2.14.0 with `.golangci.yml`), `test` (Ubuntu and macOS, so the darwin-only files execute), `integration` (Postgres 15 and 17, `go test -race -tags integration ./server/...`), `build` (`make release ENDPOINT=`, `make verify`, a second build diffed against the first to prove reproducibility, `make notices` diffed against the committed file, a `docker build` of the root Dockerfile), `govulncheck`, `gitleaks` (`dir` and `git` with `.gitleaks.toml`), `dependency-review` (pull requests only) |
-| `identifier-gate` | every pull request and push | `.github/scripts/identifier-gate.sh` over the tree; in this repository's own CI it also uses the `IDENTIFIER_GATE_PATTERNS` secret; forks run the generic pattern only, so a maintainer re-runs the full gate before merging a fork's pull request |
+| `identifier-gate` | every pull request, every push to `main`, manual | `.github/scripts/identifier-gate.sh` over the tree; in this repository's own CI it also uses the `IDENTIFIER_GATE_PATTERNS` secret; forks run the generic pattern only, so a maintainer re-runs the full gate before merging a fork's pull request |
 | `scorecard` | pushes to `main`, Tuesdays 06:31 UTC | OpenSSF Scorecard with SARIF upload to code scanning; `publish_results` needs a public repository |
 | `release` | tags `v*`; pull requests that touch the release path (dry run); manual with `dry_run` | `build` (the dry run: build, verify, twice-build diff, govulncheck on the binary, image build) and `publish` (GitHub Release, GHCR image, attestations, cosign) |
 
@@ -57,8 +57,9 @@ lists the order; this is the what.
   `.github/ISSUE_TEMPLATE/config.yml` and [SUPPORT.md](../SUPPORT.md) from
   SUPPORT.md to Discussions.
 - **Immutable releases**: on, so a published release's assets and tag cannot
-  be changed afterwards; the release workflow refuses to run when a release
-  for the tag already exists, before it builds anything.
+  be changed afterwards; the release workflow's `publish` job refuses to
+  continue when a release for the tag already exists, before anything is
+  pushed, signed or published (the `build` job has already run by then).
 - **GHCR package `loop-sessions-server`**: after the first push, make it
   public (packages inherit the repository's permissions but not its
   visibility) and verify with an anonymous `docker pull`.
