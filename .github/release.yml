@@ -1,0 +1,37 @@
+# Categories for GitHub's auto-generated release notes, used when a tag has no
+# matching section in CHANGELOG.md (the release workflow prefers the hand
+# written section and falls back to `gh release create --generate-notes`).
+# Pull requests land in the first category whose label they carry; the
+# catch-all keeps an unlabelled change visible rather than dropped.
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+    authors:
+      - dependabot
+      - dependabot[bot]
+      - github-actions
+      - github-actions[bot]
+  categories:
+    - title: Features
+      labels:
+        - enhancement
+        - feature
+    - title: Fixes
+      labels:
+        - bug
+        - fix
+    - title: Documentation
+      labels:
+        - documentation
+        - docs
+    - title: Dependencies
+      labels:
+        - dependencies
+    - title: CI and tooling
+      labels:
+        - ci
+        - build
+    - title: Other changes
+      labels:
+        - "*"
