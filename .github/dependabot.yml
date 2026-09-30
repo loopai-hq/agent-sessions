@@ -1,7 +1,18 @@
-# Weekly dependency updates. The client is stdlib-only, so gomod updates only
-# touch the server's two direct dependencies (pgx, goldmark) and their
-# transitive set; github-actions covers the pinned action versions in
-# .github/workflows.
+# Weekly dependency updates.
+#
+# gomod: the client is stdlib-only, so updates only touch the server's two
+# direct dependencies (pgx, goldmark) and their transitive set. Minor and
+# patch bumps arrive as one grouped pull request; a major arrives alone so it
+# gets its own review.
+#
+# github-actions: every `uses:` in .github/workflows is pinned to a commit
+# SHA with a version comment, and Dependabot rewrites both. One grouped pull
+# request per week, because the pins are always merged together.
+#
+# docker: the root Dockerfile's builder image (golang:<patch>-bookworm). Its
+# patch digit must move with go.mod's toolchain line, so only patch bumps are
+# proposed here; a new Go minor or major is adopted through go.mod first and
+# the Dockerfile follows by hand in the same change.
 version: 2
 updates:
   - package-ecosystem: gomod
@@ -10,9 +21,30 @@ updates:
       interval: weekly
     commit-message:
       prefix: "chore(deps)"
+    groups:
+      go-minor-and-patch:
+        update-types: [minor, patch]
+
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
     commit-message:
       prefix: "chore(ci)"
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore(deps)"
+    ignore:
+      # 1.26 -> 1.27 is a minor in Dependabot's reading of the tag and a new
+      # Go release to us; both follow go.mod, never the other way round.
+      - dependency-name: golang
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
