@@ -19,8 +19,10 @@
 // it to answer, captures the four pages below with Playwright's Chromium at a
 // 1280x800 viewport in the light colour scheme, writes them to docs/images/,
 // checks each file is under 500 KB and that the text on every page names only
-// fixture identities, then stops the server. Exit status 0 means every file
-// was written and checked.
+// fixture identities, then stops the server and waits for it to be gone. Exit
+// status 0 means every file was written and checked; the FAIL line go test
+// prints for the interrupted TestServeDemo on the way out is how it reports
+// being stopped, not a failure.
 //
 // Playwright resolves from node_modules, NODE_PATH, or the global module root
 // (`npm root -g`); the browser is Playwright's own cached Chromium unless
@@ -138,13 +140,33 @@ function startDemo(port) {
   return child;
 }
 
+// Stops the demo and waits for it to be gone. The group gets SIGINT rather
+// than SIGTERM: go test handles an interrupt by waiting for its test binary
+// and then exiting, whereas SIGTERM ends go outright and orphans web.test as
+// a zombie for init to reap. The go process is then waited for here, so node
+// does not exit with an unreaped child of its own. A group still there after
+// ten seconds is killed outright.
 function stopDemo(child) {
-  if (child.exitCode !== null) return;
-  try {
-    process.kill(-child.pid, "SIGTERM");
-  } catch {
-    child.kill("SIGTERM");
-  }
+  if (child.exitCode !== null || child.signalCode !== null) return Promise.resolve();
+  return new Promise(done => {
+    child.ref();
+    const hammer = setTimeout(() => {
+      try {
+        process.kill(-child.pid, "SIGKILL");
+      } catch {
+        // already gone
+      }
+    }, 10_000);
+    child.once("exit", () => {
+      clearTimeout(hammer);
+      done();
+    });
+    try {
+      process.kill(-child.pid, "SIGINT");
+    } catch {
+      child.kill("SIGINT");
+    }
+  });
 }
 
 function checkIdentities(file, text) {
@@ -185,7 +207,7 @@ async function main() {
     if (errors.length) throw new Error(`page errors: ${errors.join("; ")}`);
   } finally {
     if (browser) await browser.close();
-    stopDemo(demo);
+    await stopDemo(demo);
   }
 }
 
