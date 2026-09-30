@@ -107,8 +107,8 @@ func usage(w io.Writer) {
   discover            re-scan this machine for agent session files
   backfill            import the sessions already on this machine
                       (--since all|30d|2026-07-01, --session <id>, --dry-run)
-  pause [--for 2h]    stop capturing until resumed
-  resume              start capturing again
+  pause [--for 2h]    stop capturing until resumed, or until the period ends
+  resume              start capturing again (ends a timed pause early)
   doctor              diagnose problems and say how to fix them
                       (--redrive: queue stuck items again;
                        --replay-quarantine: post one stuck item, print the verdict)
@@ -182,7 +182,7 @@ func runDaemon(args []string) error {
 		logf("daemon: not delivering: %v", err)
 		return err
 	}
-	if cfg.Paused {
+	if cfg.IsPaused(time.Now()) {
 		// Paused means paused for delivery too, and a paused machine reads as a
 		// choice in the fleet view rather than as a broken one.
 		logf("daemon: capture is paused; not delivering")
@@ -405,7 +405,7 @@ func runUpgradeNow(p config.Paths) error {
 		fmt.Println("Auto-upgrade is switched off in the config (disable_auto_upgrade); this machine stays on", Version)
 		return nil
 	}
-	if cfg.Paused {
+	if cfg.IsPaused(time.Now()) {
 		fmt.Println("Capture is paused, and a paused machine is left alone, binary included; run `loop-sessions resume` first. Staying on", Version)
 		return nil
 	}
@@ -678,6 +678,7 @@ type statusView struct {
 	Email       string     `json:"email,omitempty"`
 	Paused      bool       `json:"paused"`
 	PausedSince *time.Time `json:"paused_since,omitempty"`
+	PausedUntil *time.Time `json:"paused_until,omitempty"`
 	Version     string     `json:"agent_version"`
 
 	// State and Summary are the verdict: one machine-readable enum and one
@@ -732,6 +733,10 @@ func printStatus(v statusView) {
 	// a claim about whether the machine works — and that line was printed by a
 	// laptop which had at that moment uploaded nothing, ever.
 	switch {
+	case v.Paused && v.PausedSince != nil && v.PausedUntil != nil:
+		fmt.Printf("Capture:  PAUSED since %s until %s\n", v.PausedSince.Format(time.RFC1123), v.PausedUntil.Format(time.RFC1123))
+	case v.Paused && v.PausedUntil != nil:
+		fmt.Printf("Capture:  PAUSED until %s\n", v.PausedUntil.Format(time.RFC1123))
 	case v.Paused && v.PausedSince != nil:
 		fmt.Printf("Capture:  PAUSED since %s\n", v.PausedSince.Format(time.RFC1123))
 	case v.Paused:
@@ -780,8 +785,11 @@ func collectStatus(p config.Paths, now time.Time) statusView {
 		}
 		return v
 	}
-	v.Email, v.Paused = cfg.Email, cfg.Paused
-	v.PausedSince = whenever(cfg.PausedSince)
+	v.Email, v.Paused = cfg.Email, cfg.IsPaused(now)
+	if v.Paused {
+		v.PausedSince = whenever(cfg.PausedSince)
+		v.PausedUntil = whenever(cfg.PausedUntil)
+	}
 
 	var (
 		st       spool.Stats
@@ -833,8 +841,8 @@ func collectStatus(p config.Paths, now time.Time) statusView {
 		SpoolErr:    spoolErr,
 		LastSuccess: sd.LastSuccess,
 		LastError:   currentFailure(sd),
-		Paused:      cfg.Paused,
-		PausedSince: cfg.PausedSince,
+		Paused:      cfg.IsPaused(now),
+		PausedSince: pausedSince(cfg, now),
 		SpoolDir:    p.SpoolDir(),
 		DiskFree:    spool.DiskFree,
 		Now:         func() time.Time { return now },
@@ -1044,13 +1052,16 @@ func runPause(args []string, pause bool) error {
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
+	if *forDur < 0 {
+		return fmt.Errorf("pause: --for wants a positive duration such as 2h, not %s", *forDur)
+	}
 	p := config.Paths{}
 	cfg, err := config.Load(p)
 	if err != nil {
 		return err
 	}
 	if pause {
-		cfg = cfg.Pause(time.Now())
+		cfg = cfg.Pause(time.Now(), *forDur)
 	} else {
 		cfg = cfg.Resume()
 	}
@@ -1059,7 +1070,10 @@ func runPause(args []string, pause bool) error {
 	}
 	if pause {
 		if *forDur > 0 {
-			fmt.Printf("Paused. Capture will not resume automatically yet; run `loop-sessions resume` when ready.\n")
+			// The deadline is honoured by every path that reads the config, so
+			// nothing has to be running for the pause to end.
+			fmt.Printf("Paused until %s. Capture resumes on its own then; run `loop-sessions resume` to end the pause sooner.\n",
+				cfg.PausedUntil.Format(time.RFC1123))
 		} else {
 			fmt.Println("Paused. Nothing will be captured or uploaded until you run `loop-sessions resume`.")
 		}
@@ -1098,10 +1112,14 @@ func runDoctor(args []string) error {
 		fmt.Printf("  [ok] identity    %s\n", cfg.Email)
 	}
 
-	if cfg.Paused {
+	switch {
+	case cfg.IsPaused(time.Now()) && !cfg.PausedUntil.IsZero():
+		fmt.Printf("  [--] capture     paused since %s until %s (this is a choice, not a fault)\n",
+			cfg.PausedSince.Format(time.RFC1123), cfg.PausedUntil.Format(time.RFC1123))
+	case cfg.IsPaused(time.Now()):
 		fmt.Printf("  [--] capture     paused since %s (this is a choice, not a fault)\n",
 			cfg.PausedSince.Format(time.RFC1123))
-	} else {
+	default:
 		fmt.Printf("  [ok] capture     on\n")
 	}
 

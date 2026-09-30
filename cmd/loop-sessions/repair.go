@@ -70,7 +70,7 @@ func runRepairIfDue(ctx context.Context, p config.Paths, cfg config.Config, forc
 	if !force && !stampDue(p, stampRepairLast, repairEvery, now) {
 		return
 	}
-	if cfg.Paused {
+	if cfg.IsPaused(now) {
 		return
 	}
 	list, answered, err := fetchRepairList(ctx, p, cfg)

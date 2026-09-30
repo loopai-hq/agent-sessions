@@ -254,7 +254,7 @@ func importHistory(ctx context.Context, p config.Paths, cfg config.Config, req r
 	}
 	// A paused agent is paused for history too. Importing into a machine
 	// somebody has switched off would be the same betrayal as capturing on it.
-	if cfg.Paused {
+	if cfg.IsPaused(time.Now()) {
 		return errors.New("backfill: capture is paused, so nothing is being imported; run `loop-sessions resume` first")
 	}
 

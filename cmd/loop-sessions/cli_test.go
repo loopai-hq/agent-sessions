@@ -262,3 +262,51 @@ func TestDaemonRefreshesTheRegisteredHooksOncePerVersion(t *testing.T) {
 		t.Fatalf("a new version did not refresh the hooks: %+v", plan)
 	}
 }
+
+// pause --for records a deadline, says so, and status shows it; when the
+// deadline has passed the machine reads as capturing again without anyone
+// running resume, and resume itself clears every pause field.
+func TestPauseForEndsOnItsOwnAndSaysSo(t *testing.T) {
+	hermeticHome(t, "https://example.invalid")
+	before := time.Now()
+	out := captureStdout(t, func() error { return runPause([]string{"--for", "2h"}, true) })
+	if !strings.Contains(out, "Paused until") || !strings.Contains(out, "resumes on its own") {
+		t.Fatalf("pause --for must say when it ends:\n%s", out)
+	}
+	cfg := mustConfig(t)
+	if !cfg.Paused || cfg.PausedUntil.Before(before.Add(2*time.Hour)) || cfg.PausedUntil.After(time.Now().Add(2*time.Hour)) {
+		t.Fatalf("config after pause --for 2h: %+v", cfg)
+	}
+
+	now := time.Now()
+	v := collectStatus(config.Paths{}, now)
+	if !v.Paused || v.PausedUntil == nil {
+		t.Fatalf("status inside the window: %+v", v)
+	}
+	status := captureStdout(t, func() error { printStatus(v); return nil })
+	if !strings.Contains(status, "PAUSED") || !strings.Contains(status, "until "+v.PausedUntil.Format(time.RFC1123)) {
+		t.Fatalf("status must show the deadline:\n%s", status)
+	}
+	if later := collectStatus(config.Paths{}, now.Add(3*time.Hour)); later.Paused || later.PausedUntil != nil {
+		t.Fatalf("status after the deadline still reads paused: %+v", later)
+	}
+
+	out = captureStdout(t, func() error { return runPause(nil, false) })
+	if !strings.Contains(out, "Resumed.") {
+		t.Fatalf("resume output:\n%s", out)
+	}
+	if cfg := mustConfig(t); cfg.Paused || !cfg.PausedSince.IsZero() || !cfg.PausedUntil.IsZero() {
+		t.Fatalf("resume left pause fields behind: %+v", cfg)
+	}
+}
+
+// A negative --for is refused rather than treated as "until resume".
+func TestPauseForRefusesANegativeDuration(t *testing.T) {
+	hermeticHome(t, "https://example.invalid")
+	if err := runPause([]string{"--for", "-1h"}, true); err == nil {
+		t.Fatal("pause --for -1h was accepted")
+	}
+	if cfg := mustConfig(t); cfg.Paused {
+		t.Fatal("a refused pause still paused the machine")
+	}
+}
