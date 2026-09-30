@@ -114,6 +114,9 @@ func runInstall(args []string) error {
 	fmt.Println()
 	printDiscovery(sum)
 	fmt.Println()
+	// Said before sign-in, because it is part of what the person is agreeing to.
+	fmt.Println(whoCanRead)
+	fmt.Println()
 
 	// Step 2: identity. Everything server-side joins on this, because a
 	// transcript carries no identity of its own.

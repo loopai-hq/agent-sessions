@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"io"
@@ -325,5 +326,34 @@ func TestDiscoverHintNamesTheConfigRoots(t *testing.T) {
 	}
 	if !strings.Contains(out, `"roots"`) || !strings.Contains(out, `"codex"`) || !strings.Contains(out, config.Paths{}.ConfigFile()) {
 		t.Fatalf("the hint does not say where to put the path:\n%s", out)
+	}
+}
+
+// help lists every command a person can run, including mirror, and describes
+// pause --for as what it now is.
+func TestUsageListsMirrorAndTheTimedPause(t *testing.T) {
+	var b bytes.Buffer
+	usage(&b)
+	for _, want := range []string{"  mirror ", "pause [--for 2h]", "until the period ends", "  doctor ", "  backfill "} {
+		if !strings.Contains(b.String(), want) {
+			t.Errorf("help does not mention %q:\n%s", want, b.String())
+		}
+	}
+}
+
+// install says, before sign-in, who can read what it captures and where reads
+// are logged; status repeats it.
+func TestInstallAndStatusSayWhoCanRead(t *testing.T) {
+	hermeticHome(t, "https://example.invalid")
+	out := captureStdout(t, func() error { return runInstall([]string{"--skip-hooks", "--skip-backfill"}) })
+	if !strings.Contains(out, whoCanRead) {
+		t.Fatalf("install did not say who can read captured sessions:\n%s", out)
+	}
+	if i, j := strings.Index(out, whoCanRead), strings.Index(out, "Already signed in"); i < 0 || j < 0 || i > j {
+		t.Fatalf("the sentence must come before sign-in:\n%s", out)
+	}
+	status := captureStdout(t, func() error { return runStatus(nil) })
+	if !strings.Contains(status, whoCanRead) {
+		t.Fatalf("status did not repeat it:\n%s", status)
 	}
 }
