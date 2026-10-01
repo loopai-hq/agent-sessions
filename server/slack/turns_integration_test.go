@@ -14,9 +14,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/normalize"
-	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/normalize"
+	"github.com/loopai-hq/loop-sessions/server/store"
 )
 
 // ingestTurn writes one hook-captured exchange and, when transcript is set,

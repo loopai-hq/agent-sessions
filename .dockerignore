@@ -1,0 +1,28 @@
+# Keeping the build context small matters: the repository root is the
+# context, and shipping the .git directory, the docs and the test fixtures to
+# the daemon on every build is the difference between a two second and a
+# thirty second upload. Everything the server build needs is go.mod, go.sum
+# and the Go sources (plus what they go:embed, which lives beside them).
+.git
+.github
+.playwright-mcp
+docs
+*.md
+**/*_test.go
+**/testdata
+*.png
+dist
+Dockerfile
+.dockerignore
+examples/deploy-gcp/analytics
+examples/deploy-gcp/ci-setup.sh
+examples/deploy-gcp/cloudbuild.yaml
+examples/deploy-gcp/cloudrun.yaml
+examples/deploy-gcp/monitoring
+examples/deploy-gcp/release.yml.example
+examples/docker-compose
+
+# The one Markdown file the image ships: the licence notices for the modules
+# linked into the server binary. It is copied into the final stage, so it
+# must reach the context despite the *.md rule above.
+!THIRD_PARTY_NOTICES.md

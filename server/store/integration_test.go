@@ -26,7 +26,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/event"
 )
 
 var pool *pgxpool.Pool
@@ -632,7 +632,7 @@ func TestIntegrationBackfilledEventsStartingAtSequenceZeroAreAllReturned(t *test
 
 	// The backfill walker numbers each session's events from zero.
 	var batch []Ingest
-	for i := int64(0); i < 4; i++ {
+	for i := range int64(4) {
 		in := ingestOf(fmt.Sprintf("bf-%d", i), "sess-bf", "me@example.com", event.ToolCall, i)
 		in.Event.Origin = event.OriginTranscript
 		batch = append(batch, in)
@@ -881,7 +881,7 @@ func TestIntegrationPutPrincipalLeavesAnUnchangedRowAndItsTrailAlone(t *testing.
 	if saved.Change != nil {
 		t.Errorf("reported a change of %+v for a resubmission that moved nothing", *saved.Change)
 	}
-	if saved.Principal.Role != RoleMember {
+	if saved.Role != RoleMember {
 		t.Errorf("returned %+v, want the row as it already stood", saved.Principal)
 	}
 
@@ -953,7 +953,7 @@ func TestIntegrationHealthReportsAndFleetCoverage(t *testing.T) {
 
 	report := healthSample()
 	report.EmittedAt = time.Now().Add(-time.Minute)
-	for i := 0; i < 2; i++ { // delivered twice, as at-least-once delivery does
+	for range 2 { // delivered twice, as at-least-once delivery does
 		if err := s.PutHealthReport(ctx, "reporting@example.com", live.ID, report); err != nil {
 			t.Fatalf("PutHealthReport: %v", err)
 		}

@@ -38,7 +38,7 @@
     "links": [
       {
         "displayName": "Runbook: upgrade",
-        "url": "https://github.com/loopai-hq/agent-sessions/blob/main/examples/deploy-gcp/README.md#runbook-upgrade"
+        "url": "https://github.com/loopai-hq/loop-sessions/blob/main/examples/deploy-gcp/README.md#runbook-upgrade"
       },
       {
         "displayName": "/admin/fleet",

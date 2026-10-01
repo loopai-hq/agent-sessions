@@ -10,6 +10,7 @@
 // roster row read after verification are now the whole control rather than a
 // second opinion behind `hd`. Anything that loosens either one loosens the
 // only fence there is.
+
 package auth
 
 import (
@@ -460,7 +461,7 @@ func (v *Verifier) checkClaims(c claims) (Identity, error) {
 
 	domain, err := emailDomain(email)
 	if err != nil {
-		return Identity{}, fmt.Errorf("%w: %v", ErrDomainNotAllowed, err)
+		return Identity{}, fmt.Errorf("%w: %w", ErrDomainNotAllowed, err)
 	}
 	if !containsFold(v.domains, domain) {
 		return Identity{}, fmt.Errorf("%w: domain=%q", ErrDomainNotAllowed, domain)
@@ -533,7 +534,7 @@ func (v *Verifier) key(ctx context.Context, kid string) (*rsa.PublicKey, error) 
 		if present {
 			return stale, nil
 		}
-		return nil, fmt.Errorf("%w: %v", ErrKeysUnavailable, err)
+		return nil, fmt.Errorf("%w: %w", ErrKeysUnavailable, err)
 	}
 	if len(set.Keys) == 0 {
 		// A source that reports success with nothing in it would otherwise

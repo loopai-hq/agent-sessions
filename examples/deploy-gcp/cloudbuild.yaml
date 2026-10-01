@@ -1,10 +1,11 @@
 # Cloud Build recipe for the server image.
 #
-# An explicit config rather than `builds submit --tag`, because that shorthand
-# insists on a Dockerfile at the root of the build context and this one lives
-# at examples/deploy-gcp/Dockerfile. The context still has to be the repository root:
-# the server imports internal/event and internal/health, which the client also
-# uses, so building from the deploy directory would silently exclude them.
+# An explicit config rather than `builds submit --tag` so the build args
+# (version, build date, revision) are named here and not on a command line
+# someone has to remember. The Dockerfile lives at the repository root and the
+# context is the repository root: the server imports internal/event and
+# internal/health, which the client also uses, so building from the deploy
+# directory would silently exclude them.
 #
 # The release workflow (examples/deploy-gcp/release.yml.example) and a release engineer's
 # laptop both build the image from this file, so the two cannot drift: the
@@ -17,8 +18,20 @@
 #   _TAG    the 7-character git sha stamped into the binary as its version
 #   _IMAGE  the full Artifact Registry path the image is pushed to
 #
-# The build date is taken at build time rather than passed in, so a caller
-# cannot stamp a binary with a date it was not built on.
+# REVISION is the full sha the OCI label records: Cloud Build's COMMIT_SHA
+# when a trigger set it, else what git reports, else empty. The build date
+# is the commit time in UTC, the same rule the Makefile uses for the client
+# binaries, so an image and the client built from one commit carry one
+# instant; without a .git it is the wall clock, as in the Makefile.
+#
+# The fallbacks exist because `gcloud builds submit` uploads the tree
+# without .git (the generated .gcloudignore leaves it out) and sets no
+# COMMIT_SHA, so in that case neither git command can answer. A failed
+# `$(...)` inside an argument is not an error under `-e`, so without the
+# fallbacks both build args were silently empty: no `created` label, no
+# "Latest build" time on the fleet page. The server tolerates an empty
+# BUILD_DATE; the fallback keeps it from being one. `$$` is Cloud Build's
+# escape for a shell `$`.
 #
 # Usage from the repository root (the build context; the Dockerfile says why):
 #   gcloud builds submit --project=__PROJECT__ --region=__REGION__ \
@@ -32,10 +45,15 @@ steps:
     args:
       - -ceu
       - |
+        revision="${COMMIT_SHA}"
+        if [ -z "$$revision" ]; then
+          revision="$(git rev-parse HEAD 2>/dev/null || true)"
+        fi
+        build_date="$(TZ=UTC git log -1 --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
         docker build \
-          -f examples/deploy-gcp/Dockerfile \
           --build-arg VERSION="${_TAG}" \
-          --build-arg BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+          --build-arg BUILD_DATE="$$build_date" \
+          --build-arg REVISION="$$revision" \
           -t "${_IMAGE}" \
           .
 images:

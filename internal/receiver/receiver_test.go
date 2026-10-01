@@ -20,12 +20,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/backfill"
-	"github.com/loopai-hq/agent-sessions/internal/capture"
-	"github.com/loopai-hq/agent-sessions/internal/drain"
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/scrub"
-	"github.com/loopai-hq/agent-sessions/internal/spool"
+	"github.com/loopai-hq/loop-sessions/internal/backfill"
+	"github.com/loopai-hq/loop-sessions/internal/capture"
+	"github.com/loopai-hq/loop-sessions/internal/drain"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/scrub"
+	"github.com/loopai-hq/loop-sessions/internal/spool"
 )
 
 // ---------------------------------------------------------------------------
@@ -215,7 +215,7 @@ func (r *rig) quarantined() int {
 func (r *rig) drainAll(maxCycles int) {
 	r.t.Helper()
 	ctx := context.Background()
-	for i := 0; i < maxCycles; i++ {
+	for range maxCycles {
 		if r.pending() == 0 {
 			return
 		}
@@ -358,7 +358,7 @@ func TestReceiverIsIdempotent(t *testing.T) {
 	_, first := post(t, srv, batch)
 	countAfterFirst := rec.Count()
 
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		_, again := post(t, srv, batch)
 		if len(again.Accepted) != len(first.Accepted) {
 			t.Errorf("redelivery %d accepted %v, want the same ids as the first", i, again.Accepted)
@@ -485,7 +485,7 @@ func TestReceiverFailureInjection(t *testing.T) {
 		defer srv.Close()
 
 		rec.FailNext(2, Fail503, 0)
-		for i := 0; i < 2; i++ {
+		for i := range 2 {
 			resp, _ := post(t, srv, []spool.Item{item("a", "s1", 1)})
 			if resp.StatusCode != http.StatusServiceUnavailable {
 				t.Fatalf("call %d: status %d, want 503", i, resp.StatusCode)
@@ -540,7 +540,7 @@ func TestReceiverFailureInjection(t *testing.T) {
 		defer srv.Close()
 
 		rec.FailNext(-1, Fail503, 0)
-		for i := 0; i < 5; i++ {
+		for i := range 5 {
 			resp, _ := post(t, srv, []spool.Item{item("a", "s1", 1)})
 			if resp.StatusCode != http.StatusServiceUnavailable {
 				t.Fatalf("call %d: status %d, want 503", i, resp.StatusCode)

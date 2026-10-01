@@ -341,7 +341,7 @@ func TestPostsArePacedSoThisPosterIsNotWhyTheLimitIsReached(t *testing.T) {
 		},
 	})
 
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		if _, err := c.PostMessage(context.Background(), "C1", "x"); err != nil {
 			t.Fatalf("post %d: %v", i, err)
 		}

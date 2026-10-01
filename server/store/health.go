@@ -28,9 +28,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/loopai-hq/agent-sessions/internal/health"
 	"log/slog"
 	"time"
+
+	"github.com/loopai-hq/loop-sessions/internal/health"
 )
 
 const (

@@ -22,7 +22,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgconn"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/event"
 )
 
 const (
@@ -1241,7 +1241,7 @@ func TestSkillLogMessagesAreTheContractStrings(t *testing.T) {
 	}}
 	s, buf := skillStore(db)
 	one := []Ingest{typedTranscript("evt-t", "sess-m", "p1", "engg:git", "", 1)}
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		s.deriveSkillsAtIngest(context.Background(), &fakeTx{db: db}, one)
 	}
 	s.LogSkillPlatformSummary(context.Background(), at)

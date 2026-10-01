@@ -57,6 +57,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"math"
 	"net/http"
 	"path"
 	"regexp"
@@ -65,9 +66,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/health"
-	"github.com/loopai-hq/agent-sessions/internal/spool"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/health"
+	"github.com/loopai-hq/loop-sessions/internal/spool"
 )
 
 // The client-facing routes. They are constants because the agent has them
@@ -165,11 +166,12 @@ var ErrUnauthenticated = errors.New("ingest: no verified device identity")
 // reach a human: the agent stores the reason next to the quarantined item, and
 // somebody eventually reads a quarantine directory to find out what went wrong.
 const (
-	ReasonNoID        = "missing id"
-	ReasonNoSessionID = "missing session_id"
-	ReasonBadPayload  = "payload is not valid json"
-	ReasonInvalid     = "event failed validation"
-	ReasonBatchTooBig = "batch exceeds the server's size limit"
+	ReasonNoID           = "missing id"
+	ReasonNoSessionID    = "missing session_id"
+	ReasonBadPayload     = "payload is not valid json"
+	ReasonInvalid        = "event failed validation"
+	ReasonCaptureVersion = "capture_version is outside the int32 range"
+	ReasonBatchTooBig    = "batch exceeds the server's size limit"
 )
 
 // healthReportType is the event_type the server-catch line carries for a
@@ -221,9 +223,6 @@ func logEventType(t string) string {
 // because the skill-invocation route bounds its session_ref, prompt_id and
 // tool_use_id by the same rule, so one shape decides on both routes.
 var IDShape = regexp.MustCompile(`^[0-9A-Za-z._:-]{1,64}$`)
-
-// idShape is IDShape under the name this file grew up with.
-var idShape = IDShape
 
 // LogID bounds an id field on a log line the way logEventType bounds the
 // type: Validate only requires the ids to be non-empty, so they are the last
@@ -625,6 +624,16 @@ func (h *Handler) decodeItem(it spool.Item) (event.Event, json.RawMessage, strin
 	}
 	if err := ev.Validate(); err != nil {
 		return event.Event{Type: ev.Type}, nil, ReasonInvalid
+	}
+	// capture_version is stored in an int4 column and compared as int32 by
+	// the store's version-upgrade guard. The wire type is a Go int, so a
+	// device could send a value the conversion would wrap; it is refused
+	// here, before the store, so the store's int32() conversions are exact.
+	// The agent never sends anything but event.CaptureSchema (a small
+	// positive constant), so a value outside the range is a broken or
+	// hostile sender, not a schema it is worth accommodating.
+	if ev.CaptureVersion < 0 || ev.CaptureVersion > math.MaxInt32 {
+		return event.Event{Type: ev.Type}, nil, ReasonCaptureVersion
 	}
 	return ev, body, ""
 }

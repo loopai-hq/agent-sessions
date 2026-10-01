@@ -23,9 +23,12 @@ import (
 	"strings"
 )
 
-// Kind identifies the class of credential a redaction replaced.
+// Kind identifies the class of credential a redaction replaced. The value is
+// what the [REDACTED:<kind>] marker names, so a reader of a scrubbed
+// transcript can tell which rule fired without seeing what it removed.
 type Kind string
 
+// The kinds, one per rule in Rules.
 const (
 	KindAnthropicKey        Kind = "anthropic_key"
 	KindOpenAIKey           Kind = "openai_key"
@@ -415,7 +418,7 @@ func isPlaceholderPassword(v string) bool {
 // would readmit every snake_case English phrase.
 func looksRandom(v string) bool {
 	var hasUpper, hasLower, hasDigit, hasBase64Punct bool
-	for i := 0; i < len(v); i++ {
+	for i := range len(v) {
 		switch c := v[i]; {
 		case c >= 'A' && c <= 'Z':
 			hasUpper = true
@@ -480,7 +483,7 @@ func shannonEntropy(s string) float64 {
 		return 0
 	}
 	var freq [256]int
-	for i := 0; i < len(s); i++ {
+	for i := range len(s) {
 		freq[s[i]]++
 	}
 	n := float64(len(s))

@@ -26,7 +26,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/loopai-hq/agent-sessions/internal/health"
+	"github.com/loopai-hq/loop-sessions/internal/health"
 )
 
 // ---------------------------------------------------------------------------
@@ -392,7 +392,7 @@ func TestInTxCommitsOnlyWhatTheFunctionCompleted(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			db := &fakeDB{}
 			err := NewWithDB(db, nil).InTx(context.Background(), c.fn)
-			if err != c.wantErr {
+			if err != c.wantErr { //nolint:errorlint // identity is the assertion: InTx hands back the caller's own value, not a wrapper around it
 				t.Fatalf("error = %v, want the caller's own value %v; the caller matches its sentinels on this", err, c.wantErr)
 			}
 			if db.committed != c.wantCommitted || db.rolled != c.wantRolled {

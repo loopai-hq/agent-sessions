@@ -606,7 +606,7 @@ func BenchmarkScrubClean(b *testing.B) {
 	b.SetBytes(int64(len(in)))
 	b.ReportAllocs()
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		if r := Scrub(in); len(r.Counts) != 0 {
 			b.Fatalf("clean corpus produced redactions: %v", r.Counts)
 		}
@@ -618,7 +618,7 @@ func BenchmarkScrubDirty(b *testing.B) {
 	b.SetBytes(int64(len(in)))
 	b.ReportAllocs()
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		if r := Scrub(in); len(r.Counts) == 0 {
 			b.Fatal("dirty corpus produced no redactions")
 		}
@@ -632,7 +632,7 @@ func BenchmarkScrubPrefiltered(b *testing.B) {
 	b.SetBytes(int64(len(in)))
 	b.ReportAllocs()
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		if r := Scrub(in); len(r.Counts) != 0 {
 			b.Fatalf("prose corpus produced redactions: %v", r.Counts)
 		}

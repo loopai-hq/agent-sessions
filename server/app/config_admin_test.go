@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/server/store"
 )
 
 // adminEnv is bootEnv with an allowlist the ADMIN_EMAILS and DOMAIN_ALIASES

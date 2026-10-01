@@ -13,10 +13,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/skilllog"
-	"github.com/loopai-hq/agent-sessions/server/auth"
-	"github.com/loopai-hq/agent-sessions/server/ingest"
-	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/internal/skilllog"
+	"github.com/loopai-hq/loop-sessions/server/auth"
+	"github.com/loopai-hq/loop-sessions/server/ingest"
+	"github.com/loopai-hq/loop-sessions/server/store"
 )
 
 // The line messages and the rejection reasons (design 7.1). The strings
@@ -199,7 +199,7 @@ func (h *Handler) serveDevice(ctx context.Context, bearer string, req request, n
 		if err != nil {
 			return err
 		}
-		out.dup = !(res.Inserted || res.Changed)
+		out.dup = !res.Inserted && !res.Changed
 		out.clamped = row.TimeClamped
 		return nil
 	})
@@ -263,7 +263,7 @@ func (h *Handler) serveSource(ctx context.Context, bearer string, req request, n
 		if err != nil {
 			return err
 		}
-		out.dup = !(res.Inserted || res.Changed)
+		out.dup = !res.Inserted && !res.Changed
 		return nil
 	})
 	return out, err

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/server/ingest"
-	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/server/ingest"
+	"github.com/loopai-hq/loop-sessions/server/store"
 )
 
 // request is the wire body (design 4b). Every field is a pointer so an
@@ -53,7 +53,7 @@ type request struct {
 var loggableFields = func() map[string]bool {
 	fields := map[string]bool{"args": true, "body": true}
 	rt := reflect.TypeOf(request{})
-	for i := 0; i < rt.NumField(); i++ {
+	for i := range rt.NumField() {
 		if tag, _, _ := strings.Cut(rt.Field(i).Tag.Get("json"), ","); tag != "" {
 			fields[tag] = true
 		}

@@ -20,8 +20,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/normalize"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/normalize"
 )
 
 func seedTypedSession(t *testing.T, s *Store, email, sid, entrypoint string, at time.Time) {
@@ -776,7 +776,7 @@ func TestIntegrationLineageIsWrittenOnlyWithASource(t *testing.T) {
 		t.Fatal(err)
 	}
 	move := migrationStatement(t, "0015_session_lattice.sql", "parent_record_uuid = parent_session_id")
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		if _, err := s.db.Exec(ctx, move); err != nil {
 			t.Fatalf("fiction move run %d: %v", i+1, err)
 		}
@@ -873,7 +873,7 @@ func TestIntegrationEmptyBackfillIsSafeToRerun(t *testing.T) {
 		t.Fatal(err)
 	}
 	backfill := migrationStatement(t, "0016_empty_backfill.sql", "session_type = 'empty'")
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		if _, err := s.db.Exec(ctx, backfill); err != nil {
 			t.Fatalf("backfill run %d: %v", i+1, err)
 		}
@@ -1134,7 +1134,7 @@ func TestIntegrationOppositeOrderBatchesDoNotDeadlock(t *testing.T) {
 
 	const rounds = 40
 	errs := make(chan error, 2*rounds)
-	for i := 0; i < rounds; i++ {
+	for i := range rounds {
 		var wg sync.WaitGroup
 		wg.Add(2)
 		for _, order := range [][2]string{{"s-dl-a", "s-dl-b"}, {"s-dl-b", "s-dl-a"}} {

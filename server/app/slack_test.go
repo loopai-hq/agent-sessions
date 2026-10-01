@@ -15,11 +15,12 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgtype"
 
-	"github.com/loopai-hq/agent-sessions/server/auth"
-	"github.com/loopai-hq/agent-sessions/server/ingest"
-	"github.com/loopai-hq/agent-sessions/server/slack"
-	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/server/auth"
+	"github.com/loopai-hq/loop-sessions/server/ingest"
+	"github.com/loopai-hq/loop-sessions/server/slack"
+	"github.com/loopai-hq/loop-sessions/server/store"
 )
 
 // This file answers one question and it is the question this codebase has got
@@ -103,6 +104,7 @@ func (mirRows) FieldDescriptions() []pgconn.FieldDescription { return nil }
 func (mirRows) Values() ([]any, error)                       { return nil, nil }
 func (mirRows) RawValues() [][]byte                          { return nil }
 func (mirRows) Conn() *pgx.Conn                              { return nil }
+func (mirRows) TypeMap() *pgtype.Map                         { return pgtype.NewMap() }
 
 type mirRow struct{}
 

@@ -224,9 +224,10 @@ func ClassifyUser(text string, raw []byte, agentStream bool, firstInStream bool)
 // the final answer of its exchange is a property of the turn, decided by the
 // turn folder, not of the record.
 //
-// hasUsage is accepted so the call site states what it knows; a record with
-// neither text nor usage has no third kind to be, and lands as usage-only.
-func ClassifyAssistant(text string, hasUsage bool) Kind {
+// The second argument (whether the record carried usage) is accepted so the
+// call site states what it knows, and is not consulted: a record with neither
+// text nor usage has no third kind to be, and lands as usage-only.
+func ClassifyAssistant(text string, _ bool) Kind {
 	if strings.TrimSpace(text) != "" {
 		return KindAssistantText
 	}

@@ -14,9 +14,9 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/health"
-	"github.com/loopai-hq/agent-sessions/server/store/derive"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/health"
+	"github.com/loopai-hq/loop-sessions/server/store/derive"
 )
 
 // The properties worth pinning down in this package are which statement is
@@ -869,16 +869,16 @@ func TestSearchFiltersThenCapsThenRanksThenHighlights(t *testing.T) {
 	ranked := strings.Index(sql, "ranked AS")
 	rank := strings.Index(sql, "ts_rank(")
 	headline := strings.Index(sql, "ts_headline(")
-	cap := strings.Index(sql, "LIMIT $9")
+	capIdx := strings.Index(sql, "LIMIT $9")
 
-	if !(candidates < cap && cap < ranked) {
+	if candidates >= capIdx || capIdx >= ranked {
 		t.Errorf("the candidate cap is not applied before ranking:\n%s", sql)
 	}
-	if !(cap < rank) {
+	if capIdx >= rank {
 		t.Errorf("ts_rank runs before the candidate set is capped, which is the "+
 			"thing that blows the latency budget:\n%s", sql)
 	}
-	if !(ranked < headline) {
+	if ranked >= headline {
 		t.Errorf("ts_headline runs over more than the returned page:\n%s", sql)
 	}
 	if strings.Count(sql, "ts_headline(") != 1 {
@@ -1649,7 +1649,7 @@ func TestCursorRejectsAnythingWeDidNotIssue(t *testing.T) {
 
 func TestListSessionsPagesByKeysetAndReportsTheNextCursor(t *testing.T) {
 	rows := make([][]any, 0, 3)
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		rows = append(rows, sessionRow(fmt.Sprintf("sess-%d", i), "me@example.com"))
 	}
 	db := &fakeDB{stubs: []*stub{{match: "FROM sessions s", rows: rows}}}
@@ -2070,7 +2070,7 @@ func TestMigrateAppliesAndRecordsAFreshDatabase(t *testing.T) {
 
 func TestGeneratedIdentifiersAreUniqueAndWellShaped(t *testing.T) {
 	seen := map[string]bool{}
-	for i := 0; i < 2000; i++ {
+	for range 2000 {
 		id := newUUID()
 		if len(id) != 36 || id[14] != '4' {
 			t.Fatalf("newUUID produced %q", id)
@@ -2081,7 +2081,7 @@ func TestGeneratedIdentifiersAreUniqueAndWellShaped(t *testing.T) {
 		seen[id] = true
 	}
 	tokens := map[string]bool{}
-	for i := 0; i < 2000; i++ {
+	for range 2000 {
 		tok := newToken()
 		if len(tok) < 40 {
 			t.Fatalf("share token %q is too short to be a credential", tok)

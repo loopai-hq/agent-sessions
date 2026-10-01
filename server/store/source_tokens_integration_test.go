@@ -20,7 +20,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/server/auth"
+	"github.com/loopai-hq/loop-sessions/server/auth"
 )
 
 const (

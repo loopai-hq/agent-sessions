@@ -31,21 +31,32 @@ import (
 	"strings"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/backfill"
+	"github.com/loopai-hq/loop-sessions/internal/backfill"
 )
 
 // Tool identifies a supported agent harness.
 type Tool string
 
+// The harnesses discovery knows where to look for. Claude Code is captured
+// live and imported; Codex is imported and repaired from its rollouts; the
+// rest are located and reported so a fleet can see what it is not covering.
 const (
-	ClaudeCode    Tool = "claude_code"
+	// ClaudeCode is Anthropic's Claude Code CLI.
+	ClaudeCode Tool = "claude_code"
+	// ClaudeDesktop is the Claude desktop application.
 	ClaudeDesktop Tool = "claude_desktop"
-	Codex         Tool = "codex"
-	Cursor        Tool = "cursor"
-	Windsurf      Tool = "windsurf"
-	Aider         Tool = "aider"
-	Continue      Tool = "continue"
-	GeminiCLI     Tool = "gemini_cli"
+	// Codex is OpenAI's Codex CLI.
+	Codex Tool = "codex"
+	// Cursor is the Cursor editor.
+	Cursor Tool = "cursor"
+	// Windsurf is the Windsurf editor.
+	Windsurf Tool = "windsurf"
+	// Aider is the aider CLI.
+	Aider Tool = "aider"
+	// Continue is the Continue extension.
+	Continue Tool = "continue"
+	// GeminiCLI is Google's Gemini CLI.
+	GeminiCLI Tool = "gemini_cli"
 )
 
 // State is what we concluded about a tool on this machine.
@@ -485,7 +496,7 @@ func Summarize(findings []Finding, now time.Time) Summary {
 // the install UI and to fleet coverage reporting, so a half-written file would
 // be worse than none.
 func WriteSummary(path string, s Summary) error {
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		return err
 	}
 	b, err := json.MarshalIndent(s, "", "  ")
@@ -493,7 +504,7 @@ func WriteSummary(path string, s Summary) error {
 		return err
 	}
 	tmp := path + ".tmp"
-	if err := os.WriteFile(tmp, append(b, '\n'), 0o644); err != nil {
+	if err := os.WriteFile(tmp, append(b, '\n'), 0o600); err != nil {
 		return err
 	}
 	return os.Rename(tmp, path)

@@ -34,11 +34,11 @@ import (
 	"sort"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/health"
-	"github.com/loopai-hq/agent-sessions/server/fleet"
-	"github.com/loopai-hq/agent-sessions/server/store"
-	"github.com/loopai-hq/agent-sessions/server/web"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/health"
+	"github.com/loopai-hq/loop-sessions/server/fleet"
+	"github.com/loopai-hq/loop-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/server/web"
 )
 
 // webData adapts the store to the dashboard's persistence port.
@@ -237,7 +237,7 @@ func (d webData) Events(ctx context.Context, v web.Viewer, id string, q web.Even
 // for a single record. Reporting the event as absent instead would be worse than
 // the failure, because the transcript page linked to it a moment ago and the
 // reader would be told something they can see does not exist.
-func (d webData) Event(ctx context.Context, v web.Viewer, sessionID, eventID string) (event.Event, error) {
+func (d webData) Event(_ context.Context, _ web.Viewer, _, _ string) (event.Event, error) {
 	return event.Event{}, fmt.Errorf(
 		"%w: one event by id needs a store read keyed on (session_id, id), authorised and audited like store.GetSession",
 		errWebUnsupported)

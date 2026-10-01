@@ -23,9 +23,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/server/auth"
-	"github.com/loopai-hq/agent-sessions/server/ingest"
-	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/server/auth"
+	"github.com/loopai-hq/loop-sessions/server/ingest"
+	"github.com/loopai-hq/loop-sessions/server/store"
 )
 
 // ReconcilerRunsPath is the route the two reconcilers have compiled in.
@@ -245,8 +245,8 @@ func assembleRun(req reconcilerRunRequest, tok store.SourceToken, now time.Time)
 // unknown keys and a second document, measuring the bytes read rather than
 // the caller's Content-Length. The invocation route's decoder is bound to
 // its own request type, so this one takes a destination.
-func decodeBody(w http.ResponseWriter, r *http.Request, max int64, dst any) (int64, *verdict) {
-	counted := &countingReader{r: http.MaxBytesReader(w, r.Body, max)}
+func decodeBody(w http.ResponseWriter, r *http.Request, limit int64, dst any) (int64, *verdict) {
+	counted := &countingReader{r: http.MaxBytesReader(w, r.Body, limit)}
 	dec := json.NewDecoder(counted)
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(dst); err != nil {

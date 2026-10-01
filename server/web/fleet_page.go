@@ -17,13 +17,13 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/loopai-hq/agent-sessions/server/fleet"
+	"github.com/loopai-hq/loop-sessions/server/fleet"
 )
 
 // runbookBase is where the CTA runbook anchors resolve. The deploy README
 // holds them and the alert policies link there the same way, so a CTA row
 // and the alert that fired for it land the operator on one heading.
-const runbookBase = "https://github.com/loopai-hq/agent-sessions/blob/main/examples/deploy-gcp/README.md#"
+const runbookBase = "https://github.com/loopai-hq/loop-sessions/blob/main/examples/deploy-gcp/README.md#"
 
 // muteNoteMax bounds the note; a mute is a sentence, not a postmortem.
 const muteNoteMax = 200

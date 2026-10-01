@@ -16,6 +16,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // The fixtures every test in this package shares.
@@ -145,7 +146,7 @@ func writeSlackJSON(w http.ResponseWriter, v any) {
 // for something nothing depends on.
 func shortHash(s string) string {
 	var n uint32 = 2166136261
-	for i := 0; i < len(s); i++ {
+	for i := range len(s) {
 		n = (n ^ uint32(s[i])) * 16777619
 	}
 	return fmt.Sprintf("%08x", n)
@@ -583,6 +584,7 @@ func (r *fakeRows) FieldDescriptions() []pgconn.FieldDescription { return nil }
 func (r *fakeRows) Values() ([]any, error)                       { return nil, nil }
 func (r *fakeRows) RawValues() [][]byte                          { return nil }
 func (r *fakeRows) Conn() *pgx.Conn                              { return nil }
+func (r *fakeRows) TypeMap() *pgtype.Map                         { return pgtype.NewMap() }
 
 type valueRow struct{ values []any }
 
@@ -600,7 +602,7 @@ func assign(values []any, dest []any) error {
 	}
 	for i := range dest {
 		dv := reflect.ValueOf(dest[i])
-		if dv.Kind() != reflect.Ptr || dv.IsNil() {
+		if dv.Kind() != reflect.Pointer || dv.IsNil() {
 			return fmt.Errorf("fakeDB: destination %d is not a pointer", i)
 		}
 		v := reflect.ValueOf(values[i])

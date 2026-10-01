@@ -429,9 +429,9 @@ func busy(path string) error {
 // stubVersionRun replaces the sanity check's exec for one test and restores it.
 func stubVersionRun(t *testing.T, f func(ctx context.Context, path string) ([]byte, error)) {
 	t.Helper()
-	real := runVersion
+	saved := runVersion
 	runVersion = f
-	t.Cleanup(func() { runVersion = real })
+	t.Cleanup(func() { runVersion = saved })
 }
 
 // A staging file the kernel still counts as open for writing is not a bad

@@ -19,6 +19,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -29,7 +30,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/config"
+	"github.com/loopai-hq/loop-sessions/internal/config"
 )
 
 func runMirror(args []string) error {
@@ -140,7 +141,7 @@ func mirrorAPI(method, path string, body any) ([]byte, error) {
 		b, _ := json.Marshal(body)
 		rd = bytes.NewReader(b)
 	}
-	req, err := http.NewRequest(method, strings.TrimRight(cfg.Endpoint, "/")+path, rd)
+	req, err := http.NewRequestWithContext(context.Background(), method, strings.TrimRight(cfg.Endpoint, "/")+path, rd)
 	if err != nil {
 		return nil, err
 	}

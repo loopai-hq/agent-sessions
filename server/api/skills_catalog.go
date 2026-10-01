@@ -33,8 +33,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/skilllog"
-	"github.com/loopai-hq/agent-sessions/server/auth"
+	"github.com/loopai-hq/loop-sessions/internal/skilllog"
+	"github.com/loopai-hq/loop-sessions/server/auth"
 )
 
 // CatalogScope is the token scope the route accepts.

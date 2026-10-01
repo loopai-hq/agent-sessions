@@ -12,9 +12,9 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"github.com/loopai-hq/agent-sessions/server/fleet"
-	"github.com/loopai-hq/agent-sessions/server/ingest"
-	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/server/fleet"
+	"github.com/loopai-hq/loop-sessions/server/ingest"
+	"github.com/loopai-hq/loop-sessions/server/store"
 )
 
 // fleetDB is the least connection source the fleet evaluator's loop can be
@@ -137,7 +137,7 @@ func TestTheAssembledServerRunsTheFleetEvaluatorOnItsCadence(t *testing.T) {
 	stopped := make(chan error, 1)
 	go func() { stopped <- a.serve(ctx, ln) }()
 
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		select {
 		case <-db.ticked:
 		case <-time.After(5 * time.Second):

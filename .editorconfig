@@ -1,0 +1,31 @@
+# Editor defaults for every file in the tree. gofmt owns Go formatting and
+# overrides nothing here; the rest keeps shell, YAML and Markdown consistent
+# across editors so diffs carry changes rather than whitespace.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Go and the Makefile are tab-indented by their tools' rules.
+[{*.go,Makefile,go.mod,go.sum}]
+indent_style = tab
+
+# The shell scripts are tab-indented (install.sh, uninstall.sh); shellcheck
+# does not care, but a mixed file is hard to read.
+[*.sh]
+indent_style = tab
+
+[*.{yml,yaml,json,toml}]
+indent_style = space
+indent_size = 2
+
+# Two trailing spaces are a hard line break in Markdown.
+[*.md]
+trim_trailing_whitespace = false
+
+[*.sql]
+indent_style = space
+indent_size = 4

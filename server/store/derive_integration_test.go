@@ -18,7 +18,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/event"
 )
 
 const dvEmail = "derive@example.com"
@@ -124,7 +124,7 @@ func dualOriginSession(t *testing.T, s *Store, sid string, at time.Time, n int) 
 	var prompts []string
 	batch = append(batch, hookAt(sid+"-start", sid, dvEmail, event.SessionStarted, 1, at, "startup"))
 	seq := int64(2)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		base := at.Add(time.Duration(i) * 10 * time.Minute)
 		pid := fmt.Sprintf("%s-pid-%d", sid, i)
 		text := fmt.Sprintf("ask number %d", i)

@@ -12,13 +12,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/event"
 )
 
 func seedThread(t *testing.T, s *Store, email, sid, agent string, at time.Time, n int) {
 	t.Helper()
 	var batch []Ingest
-	for i := 0; i < n; i++ {
+	for i := range n {
 		it := ingestOf(sid+"-"+agent+"-"+string(rune('a'+i)), sid, email, event.UserPrompt, int64(i))
 		it.Event.AgentID = agent
 		it.Event.OccurredAt = at.Add(time.Duration(i) * time.Minute)

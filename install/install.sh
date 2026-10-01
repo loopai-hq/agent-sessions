@@ -20,6 +20,9 @@
 #   LOOP_SESSIONS_VERSION    version or "latest"      (default latest)
 #   LOOP_SESSIONS_BIN_DIR    install location         (default ~/.local/bin)
 #   LOOP_SESSIONS_NO_ENROLL  set to 1 to skip sign-in
+#   LOOP_SESSIONS_ENDPOINT   not read here; inherited by `loop-sessions install`
+#                            when this script runs it, which a binary with no
+#                            stamped endpoint (a GitHub release) needs
 #
 # POSIX sh only: people pipe this to /bin/sh, which on macOS is not bash.
 

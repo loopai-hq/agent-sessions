@@ -33,8 +33,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/backfill"
-	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/backfill"
+	"github.com/loopai-hq/loop-sessions/internal/event"
 )
 
 // HookEvent is the payload Claude Code delivers on stdin. Fields we do not use
@@ -501,7 +501,7 @@ func (f FileSeq) Next(sessionID string) int64 {
 
 	// Retry briefly: contention here is two hooks in the same session firing
 	// close together, which resolves in microseconds.
-	for attempt := 0; attempt < 50; attempt++ {
+	for range 50 {
 		lock := p + ".lock"
 		lf, err := os.OpenFile(lock, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o600)
 		if err != nil {

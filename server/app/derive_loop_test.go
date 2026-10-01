@@ -12,8 +12,8 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"github.com/loopai-hq/agent-sessions/server/ingest"
-	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/server/ingest"
+	"github.com/loopai-hq/loop-sessions/server/store"
 )
 
 // deriveDB is the least connection source the derive runner's loop can be
@@ -133,7 +133,7 @@ func TestTheDeriveRunnerRunsTheDirtyPassOnItsCadenceAndTheVersionedPassOnce(t *t
 
 	ctx, cancel := context.WithCancel(context.Background())
 	done := a.startDerive(ctx)
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		select {
 		case <-db.asked:
 		case <-time.After(5 * time.Second):

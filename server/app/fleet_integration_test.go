@@ -19,10 +19,10 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/health"
-	"github.com/loopai-hq/agent-sessions/server/fleet"
-	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/health"
+	"github.com/loopai-hq/loop-sessions/server/fleet"
+	"github.com/loopai-hq/loop-sessions/server/store"
 )
 
 // newFleetSchema gives a test its own migrated schema on the scratch
@@ -113,7 +113,7 @@ func TestIntegrationTwoFleetEvaluatorsProduceOneSetOfLines(t *testing.T) {
 	}
 	// Thirty lifecycle-only sessions on the quarantined device: the
 	// empty-start rule.
-	for i := 0; i < 30; i++ {
+	for i := range 30 {
 		if _, err := pool.Exec(ctx, `
 			INSERT INTO sessions (session_id, email, device_id, source, started_at, ended, session_type, empty_kind, cwd)
 			VALUES ($1, 'quar@example.com', $2::uuid, 'claude_code', $3, true, 'empty', 'aborted', '/home/quar')`,
@@ -257,7 +257,7 @@ func TestIntegrationTheTickReportsDropsAfterAGapAndCurrentBuildsThatAlternate(t 
 			t.Fatal(err)
 		}
 	}
-	for i := 0; i < 6; i++ {
+	for i := range 6 {
 		build := "788dcb3"
 		if i%2 == 1 {
 			build = "23713ea"

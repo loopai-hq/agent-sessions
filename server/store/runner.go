@@ -33,9 +33,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/normalize"
-	"github.com/loopai-hq/agent-sessions/server/store/derive"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/normalize"
+	"github.com/loopai-hq/loop-sessions/server/store/derive"
 )
 
 // deriveLockKey serialises versioned batches across instances. It is the
@@ -325,31 +325,31 @@ func deriveSteps() []deriveStep {
 		// a body, so it is not gated by the window: on the first pass the
 		// steps behind it would otherwise wait a day for nothing
 		// (adversarial finding 6).
-		deriveStep{name: "messages_kind", since: 3, run: perSession("messages_kind", func(ctx context.Context, s *Store, q Queryer, cfg DeriveConfig, version int, sid string) (int, error) {
+		deriveStep{name: "messages_kind", since: 3, run: perSession("messages_kind", func(ctx context.Context, s *Store, q Queryer, _ DeriveConfig, _ int, sid string) (int, error) {
 			return s.classifyMessages(ctx, q, sid)
 		})},
-		deriveStep{name: "titles", since: 3, run: perSession("titles", func(ctx context.Context, s *Store, q Queryer, cfg DeriveConfig, version int, sid string) (int, error) {
+		deriveStep{name: "titles", since: 3, run: perSession("titles", func(ctx context.Context, _ *Store, q Queryer, _ DeriveConfig, _ int, sid string) (int, error) {
 			changed, err := retitleSession(ctx, q, sid)
 			return boolRows(changed), err
 		})},
-		deriveStep{name: "turns", since: 3, run: perSession("turns", func(ctx context.Context, s *Store, q Queryer, cfg DeriveConfig, version int, sid string) (int, error) {
+		deriveStep{name: "turns", since: 3, run: perSession("turns", func(ctx context.Context, s *Store, q Queryer, _ DeriveConfig, version int, sid string) (int, error) {
 			n, err := s.foldSession(ctx, q, sid, version)
 			if err != nil {
 				return 0, err
 			}
 			return n, rollupFromTurns(ctx, q, sid)
 		})},
-		deriveStep{name: "rollups", since: 3, run: perSession("rollups", func(ctx context.Context, s *Store, q Queryer, cfg DeriveConfig, version int, sid string) (int, error) {
+		deriveStep{name: "rollups", since: 3, run: perSession("rollups", func(ctx context.Context, _ *Store, q Queryer, _ DeriveConfig, _ int, sid string) (int, error) {
 			return 1, rollupFromTurns(ctx, q, sid)
 		})},
-		deriveStep{name: "session_class", since: 3, run: perSession("session_class", func(ctx context.Context, s *Store, q Queryer, cfg DeriveConfig, version int, sid string) (int, error) {
+		deriveStep{name: "session_class", since: 3, run: perSession("session_class", func(ctx context.Context, s *Store, q Queryer, cfg DeriveConfig, _ int, sid string) (int, error) {
 			changed, err := s.classifySession(ctx, q, sid, cfg.Now(), s.healthHourlyExists(ctx, q))
 			return boolRows(changed), err
 		})},
-		deriveStep{name: "artifacts", bodyReading: true, since: 3, run: perSession("artifacts", func(ctx context.Context, s *Store, q Queryer, cfg DeriveConfig, version int, sid string) (int, error) {
+		deriveStep{name: "artifacts", bodyReading: true, since: 3, run: perSession("artifacts", func(ctx context.Context, _ *Store, q Queryer, _ DeriveConfig, _ int, sid string) (int, error) {
 			return rebuildSessionArtifacts(ctx, q, sid)
 		})},
-		deriveStep{name: "links", bodyReading: true, since: 3, run: perSession("links", func(ctx context.Context, s *Store, q Queryer, cfg DeriveConfig, version int, sid string) (int, error) {
+		deriveStep{name: "links", bodyReading: true, since: 3, run: perSession("links", func(ctx context.Context, _ *Store, q Queryer, _ DeriveConfig, _ int, sid string) (int, error) {
 			return rebuildSessionLinks(ctx, q, sid)
 		})},
 		// Skill invocations rebuild through the live path's derivation
@@ -358,7 +358,7 @@ func deriveSteps() []deriveStep {
 		// it unchanged, so this step bounds its wait and hands a lock wait
 		// back as errSkillLockWait, which perSession turns into the same
 		// batch again rather than a skipped session.
-		deriveStep{name: "skill_invocations", bodyReading: true, since: 4, run: perSession("skill_invocations", func(ctx context.Context, s *Store, q Queryer, cfg DeriveConfig, version int, sid string) (int, error) {
+		deriveStep{name: "skill_invocations", bodyReading: true, since: 4, run: perSession("skill_invocations", func(ctx context.Context, s *Store, q Queryer, _ DeriveConfig, _ int, sid string) (int, error) {
 			if _, err := q.Exec(ctx, "SET LOCAL lock_timeout = '5s'"); err != nil {
 				return 0, fmt.Errorf("store: bound the skill rebuild lock wait: %w", err)
 			}

@@ -36,13 +36,18 @@ func TestShedEvictsTheLeastRecentlyTouchedBucketAndResetsPerMinute(t *testing.T)
 func TestBucketLimiterRefillsAndSweeps(t *testing.T) {
 	l := newBucketLimiter(2, time.Second)
 	now := testNow
-	if !l.allow("d", now) || !l.allow("d", now) || l.allow("d", now) {
+	for range 2 {
+		if !l.allow("d", now) {
+			t.Fatal("burst of two, then refused")
+		}
+	}
+	if l.allow("d", now) {
 		t.Fatal("burst of two, then refused")
 	}
 	if !l.allow("d", now.Add(time.Second)) {
 		t.Error("one second refills one")
 	}
-	for i := 0; i < bucketSweepAt; i++ {
+	for i := range bucketSweepAt {
 		l.allow(string(rune('A'+i%26))+string(rune(i)), now)
 	}
 	before := len(l.seen)

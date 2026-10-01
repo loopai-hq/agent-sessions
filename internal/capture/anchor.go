@@ -4,8 +4,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/backfill"
-	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/backfill"
+	"github.com/loopai-hq/loop-sessions/internal/event"
 )
 
 // StopTailWaits is how long the daemon waits for a turn's answer to reach the
@@ -44,7 +44,7 @@ var StopTailWaits = []time.Duration{50 * time.Millisecond, 100 * time.Millisecon
 // copy offers, not proof: the same text twice under one prompt within the
 // age window is the residual. A hook that named no prompt,
 // from a harness that predates prompt_id, takes the tail on trust.
-func AnchorFor(transcriptPath, promptID string, copy *StopCopy) (backfill.Tail, bool) {
+func AnchorFor(transcriptPath, promptID string, stop *StopCopy) (backfill.Tail, bool) {
 	t, ok := backfill.LastAssistantRecord(transcriptPath)
 	if !ok || t.ToolUse || t.UUID == "" {
 		return backfill.Tail{}, false
@@ -55,7 +55,7 @@ func AnchorFor(transcriptPath, promptID string, copy *StopCopy) (backfill.Tail, 
 	if t.PromptID != promptID {
 		return backfill.Tail{}, false
 	}
-	if t.PromptAfter == promptID && !copy.matches(t) {
+	if t.PromptAfter == promptID && !stop.matches(t) {
 		return backfill.Tail{}, false
 	}
 	return t, true

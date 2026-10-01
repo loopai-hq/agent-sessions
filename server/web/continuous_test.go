@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/event"
 )
 
 // TestContinuousReaderIncludesCompleteCapturedAssistantText: the scrollable
@@ -99,7 +99,7 @@ func TestContinuousReaderHasScopedScriptAndBoundedContinuation(t *testing.T) {
 // ten minutes apart, for paging tests.
 func manyTurns(prompt event.Event, n int) []Turn {
 	var out []Turn
-	for i := 0; i < n; i++ {
+	for i := range n {
 		p := prompt
 		p.ID = "p" + string(rune('a'+i%26)) + string(rune('a'+i/26))
 		p.OccurredAt = prompt.OccurredAt.Add(time.Duration(i) * 10 * time.Minute)

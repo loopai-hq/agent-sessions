@@ -22,7 +22,7 @@ func TestSimultaneousRepairAsksAreAnsweredOnce(t *testing.T) {
 	codes := make([]int, n)
 	start := make(chan struct{})
 	var wg sync.WaitGroup
-	for i := 0; i < n; i++ {
+	for i := range n {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()

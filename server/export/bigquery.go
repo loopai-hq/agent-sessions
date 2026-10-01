@@ -198,7 +198,7 @@ func (b *BigQuery) do(ctx context.Context, method, api string, body []byte) (*ht
 			return resp, nil
 		}
 		// Drain the answer so the connection is reused, then wait.
-		io.Copy(io.Discard, io.LimitReader(resp.Body, 1<<16))
+		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 1<<16))
 		resp.Body.Close()
 		select {
 		case <-ctx.Done():

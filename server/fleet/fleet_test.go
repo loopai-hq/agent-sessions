@@ -120,7 +120,7 @@ func TestVersionStateFollowsTheManifestCommit(t *testing.T) {
 func TestCTAListRanksQuarantineFirstAndNeverHidesItBehindLag(t *testing.T) {
 	manifest := &Manifest{Commit: "788dcb3", BuildDate: now.Add(-72 * time.Hour)}
 	in := Inputs{Now: now, Manifest: manifest}
-	for i := 0; i < 25; i++ {
+	for i := range 25 {
 		email := string(rune('a'+i)) + "@example.com"
 		id := "d" + string(rune('a'+i))
 		in.Devices = append(in.Devices, Device{ID: id, Email: email})
@@ -139,7 +139,7 @@ func TestCTAListRanksQuarantineFirstAndNeverHidesItBehindLag(t *testing.T) {
 	if len(ev.CTAs) != 35 {
 		t.Fatalf("%d CTAs, want 10 quarantine + 25 lag", len(ev.CTAs))
 	}
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		c := ev.CTAs[i]
 		if c.Kind != "quarantine_nonempty" || c.Command != "loop-sessions doctor --replay-quarantine; loop-sessions doctor --redrive" || c.Anchor != "runbook-quarantine" {
 			t.Errorf("CTA %d = %+v, want a quarantine row with the replay verb first", i, c)

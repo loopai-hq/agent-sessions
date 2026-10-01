@@ -29,14 +29,14 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/config"
-	"github.com/loopai-hq/agent-sessions/internal/daemon"
-	"github.com/loopai-hq/agent-sessions/internal/discovery"
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/health"
-	"github.com/loopai-hq/agent-sessions/internal/hooks"
-	"github.com/loopai-hq/agent-sessions/internal/spool"
-	"github.com/loopai-hq/agent-sessions/internal/upgrade"
+	"github.com/loopai-hq/loop-sessions/internal/config"
+	"github.com/loopai-hq/loop-sessions/internal/daemon"
+	"github.com/loopai-hq/loop-sessions/internal/discovery"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/health"
+	"github.com/loopai-hq/loop-sessions/internal/hooks"
+	"github.com/loopai-hq/loop-sessions/internal/spool"
+	"github.com/loopai-hq/loop-sessions/internal/upgrade"
 )
 
 // Version is stamped at build time. BuildDate is stamped by `make release`
@@ -98,6 +98,17 @@ func main() {
 	}
 }
 
+// whoCanRead is the text install and status both print about where captured
+// sessions go. It states what the server enforces, no more, and each clause
+// names its code: store.canRead admits the owner, an admin and the holder of
+// a live share; store.ListSessions returns every session's first prompt and
+// metadata to an admin and writes no access_log row; GetSession, GetTimeline,
+// GetEvents, the turns view and search call store.recordAccess for any viewer
+// but the owner; store.CreateShare accepts the owner or an admin; retention
+// (server/app/config.go) and the BigQuery export (server/export) are the
+// operator's settings. Change the code and this text together.
+const whoCanRead = "Your captured sessions can be read by you and by the server's admins, who also see the first prompt and metadata of every session in the list; opening someone else's full session is recorded in the access log the admins can see. A colleague can read one of your sessions only through a share link that you or an admin create. How long sessions are kept, and whether anything is exported, is decided by the server operator."
+
 func usage(w io.Writer) {
 	fmt.Fprint(w, `loop-sessions - collate your local AI coding sessions
 
@@ -107,11 +118,13 @@ func usage(w io.Writer) {
   discover            re-scan this machine for agent session files
   backfill            import the sessions already on this machine
                       (--since all|30d|2026-07-01, --session <id>, --dry-run)
-  pause [--for 2h]    stop capturing until resumed
-  resume              start capturing again
+  pause [--for 2h]    stop capturing until resumed, or until the period ends
+  resume              start capturing again (ends a timed pause early)
   doctor              diagnose problems and say how to fix them
                       (--redrive: queue stuck items again;
                        --replay-quarantine: post one stuck item, print the verdict)
+  mirror              mirror your sessions to Slack: list, use <group>, off,
+                      attach <group> [--session <id>], status
   version             print the agent version
 
 Fleet operator actions:
@@ -182,7 +195,7 @@ func runDaemon(args []string) error {
 		logf("daemon: not delivering: %v", err)
 		return err
 	}
-	if cfg.Paused {
+	if cfg.IsPaused(time.Now()) {
 		// Paused means paused for delivery too, and a paused machine reads as a
 		// choice in the fleet view rather than as a broken one.
 		logf("daemon: capture is paused; not delivering")
@@ -267,7 +280,7 @@ func runDaemon(args []string) error {
 	runCtx, cancelRun := context.WithCancel(ctx)
 	defer cancelRun()
 	go startUpgradeCheck(runCtx, p, cfg)
-	go startCaptureRewalk(runCtx, p, cfg)
+	go startCaptureRewalk(p, cfg)
 	go runRepairIfDue(runCtx, p, cfg, false)
 	// The binary this daemon runs is watched for an upgrade (restart.go):
 	// a different build at the same path that runs ends the run through a
@@ -405,7 +418,7 @@ func runUpgradeNow(p config.Paths) error {
 		fmt.Println("Auto-upgrade is switched off in the config (disable_auto_upgrade); this machine stays on", Version)
 		return nil
 	}
-	if cfg.Paused {
+	if cfg.IsPaused(time.Now()) {
 		fmt.Println("Capture is paused, and a paused machine is left alone, binary included; run `loop-sessions resume` first. Staying on", Version)
 		return nil
 	}
@@ -499,7 +512,7 @@ func redriveParkedIfDue(p config.Paths, sp *spool.Spool, now time.Time) {
 // change delivery, the daemon, or the server contract and extract nothing new; a
 // re-walk for those is nine minutes of CPU and a few hundred megabytes on the
 // wire to produce rows the server already has and will discard.
-func startCaptureRewalk(ctx context.Context, p config.Paths, cfg config.Config) {
+func startCaptureRewalk(p config.Paths, cfg config.Config) {
 	if cfg.CaptureSchemaVersion >= event.CaptureSchema {
 		return
 	}
@@ -630,8 +643,13 @@ func printDiscovery(s discovery.Summary) {
 		for _, t := range s.NeedsAsk {
 			fmt.Printf("  %s\n", t)
 		}
-		fmt.Printf("\nIf you use them, tell me where they are:\n")
-		fmt.Printf("  loop-sessions discover --set <tool>=<path>\n")
+		// The mechanism is the config's "roots" map, which discover, backfill
+		// and repair all read; there is no flag for it yet, so the hint names
+		// the file rather than a command that does not exist.
+		fmt.Printf("\nIf you use them, tell me where their sessions are: add the directory to\n")
+		fmt.Printf("\"roots\" in %s, for example\n", config.Paths{}.ConfigFile())
+		fmt.Printf("  \"roots\": {\"%s\": \"/path/to/its/sessions\"}\n", s.NeedsAsk[0])
+		fmt.Printf("then run: loop-sessions discover\n")
 	}
 }
 
@@ -678,6 +696,7 @@ type statusView struct {
 	Email       string     `json:"email,omitempty"`
 	Paused      bool       `json:"paused"`
 	PausedSince *time.Time `json:"paused_since,omitempty"`
+	PausedUntil *time.Time `json:"paused_until,omitempty"`
 	Version     string     `json:"agent_version"`
 
 	// State and Summary are the verdict: one machine-readable enum and one
@@ -732,6 +751,10 @@ func printStatus(v statusView) {
 	// a claim about whether the machine works — and that line was printed by a
 	// laptop which had at that moment uploaded nothing, ever.
 	switch {
+	case v.Paused && v.PausedSince != nil && v.PausedUntil != nil:
+		fmt.Printf("Capture:  PAUSED since %s until %s\n", v.PausedSince.Format(time.RFC1123), v.PausedUntil.Format(time.RFC1123))
+	case v.Paused && v.PausedUntil != nil:
+		fmt.Printf("Capture:  PAUSED until %s\n", v.PausedUntil.Format(time.RFC1123))
 	case v.Paused && v.PausedSince != nil:
 		fmt.Printf("Capture:  PAUSED since %s\n", v.PausedSince.Format(time.RFC1123))
 	case v.Paused:
@@ -753,6 +776,7 @@ func printStatus(v statusView) {
 	if v.Spool.Quarantine > 0 {
 		fmt.Printf("Stuck:    %d item(s) will not retry on their own\n", v.Spool.Quarantine)
 	}
+	fmt.Printf("\n%s\n", whoCanRead)
 	if len(v.Problems) > 0 {
 		fmt.Println("\nProblems:")
 		for _, s := range v.Problems {
@@ -780,8 +804,11 @@ func collectStatus(p config.Paths, now time.Time) statusView {
 		}
 		return v
 	}
-	v.Email, v.Paused = cfg.Email, cfg.Paused
-	v.PausedSince = whenever(cfg.PausedSince)
+	v.Email, v.Paused = cfg.Email, cfg.IsPaused(now)
+	if v.Paused {
+		v.PausedSince = whenever(cfg.PausedSince)
+		v.PausedUntil = whenever(cfg.PausedUntil)
+	}
 
 	var (
 		st       spool.Stats
@@ -833,8 +860,8 @@ func collectStatus(p config.Paths, now time.Time) statusView {
 		SpoolErr:    spoolErr,
 		LastSuccess: sd.LastSuccess,
 		LastError:   currentFailure(sd),
-		Paused:      cfg.Paused,
-		PausedSince: cfg.PausedSince,
+		Paused:      cfg.IsPaused(now),
+		PausedSince: pausedSince(cfg, now),
 		SpoolDir:    p.SpoolDir(),
 		DiskFree:    spool.DiskFree,
 		Now:         func() time.Time { return now },
@@ -1044,13 +1071,16 @@ func runPause(args []string, pause bool) error {
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
+	if *forDur < 0 {
+		return fmt.Errorf("pause: --for wants a positive duration such as 2h, not %s", *forDur)
+	}
 	p := config.Paths{}
 	cfg, err := config.Load(p)
 	if err != nil {
 		return err
 	}
 	if pause {
-		cfg = cfg.Pause(time.Now())
+		cfg = cfg.Pause(time.Now(), *forDur)
 	} else {
 		cfg = cfg.Resume()
 	}
@@ -1059,7 +1089,10 @@ func runPause(args []string, pause bool) error {
 	}
 	if pause {
 		if *forDur > 0 {
-			fmt.Printf("Paused. Capture will not resume automatically yet; run `loop-sessions resume` when ready.\n")
+			// The deadline is honoured by every path that reads the config, so
+			// nothing has to be running for the pause to end.
+			fmt.Printf("Paused until %s. Capture resumes on its own then; run `loop-sessions resume` to end the pause sooner.\n",
+				cfg.PausedUntil.Format(time.RFC1123))
 		} else {
 			fmt.Println("Paused. Nothing will be captured or uploaded until you run `loop-sessions resume`.")
 		}
@@ -1098,10 +1131,14 @@ func runDoctor(args []string) error {
 		fmt.Printf("  [ok] identity    %s\n", cfg.Email)
 	}
 
-	if cfg.Paused {
+	switch {
+	case cfg.IsPaused(time.Now()) && !cfg.PausedUntil.IsZero():
+		fmt.Printf("  [--] capture     paused since %s until %s (this is a choice, not a fault)\n",
+			cfg.PausedSince.Format(time.RFC1123), cfg.PausedUntil.Format(time.RFC1123))
+	case cfg.IsPaused(time.Now()):
 		fmt.Printf("  [--] capture     paused since %s (this is a choice, not a fault)\n",
 			cfg.PausedSince.Format(time.RFC1123))
-	} else {
+	default:
 		fmt.Printf("  [ok] capture     on\n")
 	}
 

@@ -6,7 +6,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/upgrade"
+	"github.com/loopai-hq/loop-sessions/internal/upgrade"
 )
 
 // A daemon follows an upgrade of its own binary by restarting in place.
@@ -61,7 +61,7 @@ var probeRetryEvery = time.Minute
 // from start that runs, and, when it holds one that does not, the probe's
 // error. A stat error (the file is gone, an uninstall) and a same-digest
 // rewrite (the same build copied over itself) are neither.
-func binaryChanged(ctx context.Context, path, start string) (changed bool, refused error, fi os.FileInfo) {
+func binaryChanged(ctx context.Context, path, start string) (changed bool, fi os.FileInfo, refused error) {
 	fi, err := os.Stat(path)
 	if err != nil {
 		return false, nil, nil
@@ -71,15 +71,15 @@ func binaryChanged(ctx context.Context, path, start string) (changed bool, refus
 		// A file the daemon cannot read is treated like one that does not
 		// run: remembered, logged once, tried again on the minute, so a
 		// chmod that restores read permission is picked up.
-		return false, err, fi
+		return false, fi, err
 	}
 	if sum == start {
-		return false, nil, fi
+		return false, fi, nil
 	}
 	if err := probeBinary(ctx, path); err != nil {
-		return false, err, fi
+		return false, fi, err
 	}
-	return true, nil, fi
+	return true, fi, nil
 }
 
 func sameFile(a, b os.FileInfo) bool {
@@ -112,7 +112,7 @@ func watchBinary(ctx context.Context, path, start string, every time.Duration, c
 					continue
 				}
 			}
-			yes, err, fi := binaryChanged(ctx, path, start)
+			yes, fi, err := binaryChanged(ctx, path, start)
 			if fi != nil {
 				last = fi
 			}

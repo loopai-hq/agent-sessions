@@ -146,10 +146,13 @@ type RetentionPolicy struct {
 	Budget    time.Duration
 }
 
-// ExpiresBodies and DeletesSessions report whether each half is switched on.
+// ExpiresBodies reports whether the body half of the policy is switched on.
 // Zero is "keep forever", which is a policy a deployment may legitimately hold
 // and must state deliberately rather than fall into.
-func (p RetentionPolicy) ExpiresBodies() bool   { return p.BodyAfter > 0 }
+func (p RetentionPolicy) ExpiresBodies() bool { return p.BodyAfter > 0 }
+
+// DeletesSessions reports whether the session half is switched on; zero is
+// "keep forever", as for ExpiresBodies.
 func (p RetentionPolicy) DeletesSessions() bool { return p.SessionAfter > 0 }
 
 // Enabled reports whether this policy removes anything at all.

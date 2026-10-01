@@ -7,7 +7,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/loopai-hq/agent-sessions/internal/normalize"
+	"github.com/loopai-hq/loop-sessions/internal/normalize"
 )
 
 // Summary is everything the mirror knows about a session, and it is the whole
@@ -195,14 +195,14 @@ func clip(s string, n int) string {
 // feed that simply goes quiet is indistinguishable from a feed that broke. One
 // line, once a day, is what makes the difference visible without becoming part
 // of the noise it is reporting.
-func renderCapNotice(publicURL string, cap int, mode Mode) string {
+func renderCapNotice(publicURL string, ceiling int, mode Mode) string {
 	who := "You have"
 	if mode == ModeChannel {
 		who = "This channel has"
 	}
 	return fmt.Sprintf(
 		"%s reached the mirror's ceiling of %d session summaries in a day, so the rest of today's sessions will not be posted here. Everything is still captured: <%s/sessions|open the dashboard>.",
-		who, cap, publicURL)
+		who, ceiling, publicURL)
 }
 
 // ---------------------------------------------------------------- live thread

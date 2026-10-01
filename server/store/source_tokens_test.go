@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/server/auth"
+	"github.com/loopai-hq/loop-sessions/server/auth"
 )
 
 const tokenTestID = "12345678-1234-4123-8123-123456789abc"

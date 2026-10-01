@@ -16,9 +16,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/enroll"
-	"github.com/loopai-hq/agent-sessions/server/auth"
-	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/internal/enroll"
+	"github.com/loopai-hq/loop-sessions/server/auth"
+	"github.com/loopai-hq/loop-sessions/server/store"
 )
 
 // The Firebase project every test verifier is built against, and the ID token
@@ -94,13 +94,13 @@ func enrollDomains() []string { return testDomainsOf("dev@example.com", "dev@exa
 // newTestEnroll builds an Enroll over a fake verifier and store.
 func newTestEnroll(t *testing.T, v *enrollVerifier, devices *enrollDevices, log *slog.Logger) *Enroll {
 	t.Helper()
-	real, err := auth.NewVerifier(auth.VerifierOptions{ProjectID: enrollProjectID, Domains: enrollDomains()})
+	verifier, err := auth.NewVerifier(auth.VerifierOptions{ProjectID: enrollProjectID, Domains: enrollDomains()})
 	if err != nil {
 		t.Fatalf("verifier: %v", err)
 	}
 	e, err := NewEnroll(EnrollOptions{
 		Store:    &store.Store{},
-		Verifier: real,
+		Verifier: verifier,
 		Domains:  enrollDomains(),
 		Now:      func() time.Time { return enrollEpoch },
 		Logger:   log,
@@ -364,7 +364,7 @@ func TestEnrollMintsADistinctTokenEachTime(t *testing.T) {
 	e.limit = newEnrollLimiter(64, time.Minute)
 
 	seen := map[string]bool{}
-	for i := 0; i < 16; i++ {
+	for range 16 {
 		var out enroll.Result
 		res := postEnroll(e, enrollBody())
 		if err := json.NewDecoder(res.Body).Decode(&out); err != nil {
@@ -584,7 +584,7 @@ func TestEnrollRateLimitsByEmail(t *testing.T) {
 	e.now = func() time.Time { return now }
 	e.limit = newEnrollLimiter(3, time.Hour)
 
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		if res := postEnroll(e, enrollBody()); res.StatusCode != http.StatusOK {
 			t.Fatalf("enrollment %d: status = %d, want 200", i, res.StatusCode)
 		}
@@ -703,14 +703,16 @@ func TestEnrollLimiterSweepsOnlyRefilledEntries(t *testing.T) {
 	now := enrollEpoch
 
 	// Somebody who is out of budget right now.
-	if !l.allow("busy@example.com", now) || !l.allow("busy@example.com", now) {
-		t.Fatal("the first two attempts were refused")
+	for range 2 {
+		if !l.allow("busy@example.com", now) {
+			t.Fatal("the first two attempts were refused")
+		}
 	}
 	if l.allow("busy@example.com", now) {
 		t.Fatal("a third attempt was allowed")
 	}
 	// Enough distinct addresses to trip the sweep.
-	for i := 0; i < enrollLimiterSweepAt+1; i++ {
+	for i := range enrollLimiterSweepAt + 1 {
 		l.allow(string(rune('a'+i%26))+"-"+time.Duration(i).String()+"@example.com", now)
 	}
 	if l.allow("busy@example.com", now) {

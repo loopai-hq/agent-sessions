@@ -29,13 +29,13 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/capture"
-	"github.com/loopai-hq/agent-sessions/internal/config"
-	"github.com/loopai-hq/agent-sessions/internal/daemon"
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/pipeline"
-	"github.com/loopai-hq/agent-sessions/internal/scrub"
-	"github.com/loopai-hq/agent-sessions/internal/spool"
+	"github.com/loopai-hq/loop-sessions/internal/capture"
+	"github.com/loopai-hq/loop-sessions/internal/config"
+	"github.com/loopai-hq/loop-sessions/internal/daemon"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/pipeline"
+	"github.com/loopai-hq/loop-sessions/internal/scrub"
+	"github.com/loopai-hq/loop-sessions/internal/spool"
 )
 
 const (
@@ -232,7 +232,7 @@ func (r *hookRun) capture(phase *hookPhase) error {
 	// its daemon all the same. The session_ended event spooled below ships
 	// with any daemon.
 	ledger := capture.Ledger{Dir: r.p.StateDir()}
-	clear, err := ledger.Inflight(capture.Marker{
+	unmark, err := ledger.Inflight(capture.Marker{
 		SessionID: r.h.SessionID, HookEvent: r.h.HookEventName,
 		PromptID: r.h.PromptID, ToolUseID: r.h.ToolUseID,
 		TranscriptPath: r.h.TranscriptPath, AgentTranscriptPath: r.h.AgentTranscriptPath,
@@ -267,7 +267,7 @@ func (r *hookRun) capture(phase *hookPhase) error {
 	if err := ledger.Captured(r.h.SessionID, capture.EntriesOf(sink.events)); err != nil {
 		logf("hook: could not record what was captured: %v", err)
 	}
-	clear()
+	unmark()
 
 	phase.set(phasePost)
 	r.afterCapture(ledger)

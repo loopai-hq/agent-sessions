@@ -58,8 +58,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/normalize"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/normalize"
 )
 
 // maxLineBytes is the scanner's per-line ceiling. bufio.Scanner defaults to
@@ -414,15 +414,6 @@ type record struct {
 	ToolUseResult json.RawMessage `json:"toolUseResult"`
 
 	Message *message `json:"message"`
-}
-
-// originKind is the harness's own statement of who authored a user record,
-// or "" when it did not say.
-func (r record) originKind() string {
-	if r.Origin == nil {
-		return ""
-	}
-	return r.Origin.Kind
 }
 
 type message struct {
@@ -1287,13 +1278,13 @@ func slashCommandText(s string) (string, bool) {
 	return "", false
 }
 
-func between(s, open, close string) string {
-	i := strings.Index(s, open)
+func between(s, opener, closer string) string {
+	i := strings.Index(s, opener)
 	if i < 0 {
 		return ""
 	}
-	rest := s[i+len(open):]
-	j := strings.Index(rest, close)
+	rest := s[i+len(opener):]
+	j := strings.Index(rest, closer)
 	if j < 0 {
 		return ""
 	}
@@ -1468,12 +1459,6 @@ func (m *message) content() (string, []block) {
 		return "", bs
 	}
 	return "", nil
-}
-
-// textOf returns the record's prose regardless of content shape.
-func (m *message) textOf() string {
-	s, bs := m.content()
-	return prose(s, bs)
 }
 
 // flatten renders a tool_result body, which is a string in most records and an

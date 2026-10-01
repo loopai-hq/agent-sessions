@@ -16,10 +16,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/enroll"
-	"github.com/loopai-hq/agent-sessions/server/auth"
-	"github.com/loopai-hq/agent-sessions/server/store"
-	"github.com/loopai-hq/agent-sessions/server/web"
+	"github.com/loopai-hq/loop-sessions/internal/enroll"
+	"github.com/loopai-hq/loop-sessions/server/auth"
+	"github.com/loopai-hq/loop-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/server/web"
 )
 
 // w7Verifier stands in for auth.Verifier. The real one needs a Firebase-signed
@@ -54,13 +54,13 @@ func w7Domains() []string { return testDomainsOf("dev@example.com", "dev@example
 // w7SignIn builds a SignIn wired to a fake verifier and a fake roster.
 func w7SignIn(t *testing.T, v *w7Verifier, roster *w7Roster, log *slog.Logger) *SignIn {
 	t.Helper()
-	real, err := auth.NewVerifier(auth.VerifierOptions{ProjectID: w7Project, Domains: w7Domains()})
+	verifier, err := auth.NewVerifier(auth.VerifierOptions{ProjectID: w7Project, Domains: w7Domains()})
 	if err != nil {
 		t.Fatalf("verifier: %v", err)
 	}
 	s, err := NewSignIn(SignInOptions{
 		Cookies:           w7Cookies(t, func() time.Time { return w7Epoch }),
-		Verifier:          real,
+		Verifier:          verifier,
 		Store:             &store.Store{},
 		FirebaseAPIKey:    w7APIKey,
 		FirebaseProjectID: w7Project,

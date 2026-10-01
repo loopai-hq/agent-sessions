@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/config"
-	"github.com/loopai-hq/agent-sessions/internal/spool"
+	"github.com/loopai-hq/loop-sessions/internal/config"
+	"github.com/loopai-hq/loop-sessions/internal/spool"
 )
 
 // The whole of this file defends one property: `status` is run when something is
@@ -55,7 +55,7 @@ func newLaptop(t *testing.T, installedAgo time.Duration) *laptop {
 // evidence that separates "waiting" from "not moving".
 func (l *laptop) capture(t *testing.T, n int, queuedAgo time.Duration) {
 	t.Helper()
-	for i := 0; i < n; i++ {
+	for range n {
 		if err := l.sp.Add(spool.Item{Kind: "event", SessionID: "s1", Payload: json.RawMessage(`{"a":1}`)}); err != nil {
 			t.Fatal(err)
 		}
@@ -298,7 +298,7 @@ func TestStatusStillReportsTheUsersPause(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := config.Save(p, cfg.Pause(time.Now())); err != nil {
+	if err := config.Save(p, cfg.Pause(time.Now(), 0)); err != nil {
 		t.Fatal(err)
 	}
 

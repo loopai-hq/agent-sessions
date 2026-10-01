@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/event"
 )
 
 // ---------------------------------------------------------------------------
@@ -1020,8 +1020,8 @@ func TestScrubAppliedAndCounted(t *testing.T) {
 		if len(e.Raw) == 0 {
 			continue
 		}
-		var any map[string]json.RawMessage
-		if err := json.Unmarshal(e.Raw, &any); err != nil {
+		var obj map[string]json.RawMessage
+		if err := json.Unmarshal(e.Raw, &obj); err != nil {
 			t.Errorf("scrubbed Raw is not valid JSON: %v", err)
 		}
 	}

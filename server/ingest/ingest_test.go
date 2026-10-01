@@ -9,6 +9,7 @@ import (
 	"io"
 	"log/slog"
 	"maps"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -16,9 +17,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/health"
-	"github.com/loopai-hq/agent-sessions/internal/spool"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/health"
+	"github.com/loopai-hq/loop-sessions/internal/spool"
 )
 
 const (
@@ -350,6 +351,55 @@ func TestUnparseablePayloadIsRejectedNotAccepted(t *testing.T) {
 	}
 	if st.count() != 0 {
 		t.Fatalf("stored %d events", st.count())
+	}
+}
+
+func TestCaptureVersionOutsideInt32IsRejected(t *testing.T) {
+	st := newMemStore(testRates)
+	h := newHandler(t, st, goodDevices())
+
+	// The store converts capture_version to int32 for its int4 column, so a
+	// value the conversion would wrap must never reach it. The boundary
+	// values are accepted; one past them, and a negative, are rejected per
+	// item with their own reason, and nothing else in the batch is affected.
+	// The out-of-range values are built through int64 arithmetic so the
+	// file compiles where int is 32 bits wide (the conversion wraps to a
+	// negative there, which is still out of range).
+	atMax := mkEvent("at-max", 1, event.UserPrompt)
+	atMax.CaptureVersion = math.MaxInt32
+	zero := mkEvent("zero", 2, event.UserPrompt)
+	zero.CaptureVersion = 0
+	over := mkEvent("over", 3, event.UserPrompt)
+	over.CaptureVersion = int(int64(math.MaxInt32) + 1)
+	negative := mkEvent("negative", 4, event.UserPrompt)
+	negative.CaptureVersion = -1
+
+	w := postItems(t, h, []spool.Item{
+		mkItem(t, atMax), mkItem(t, over), mkItem(t, zero), mkItem(t, negative),
+	})
+	if w.Code != http.StatusOK {
+		t.Fatalf("status %d, body %s", w.Code, w.Body)
+	}
+	resp := decodeResponse(t, w)
+
+	wantAccepted := []string{"at-max", "zero"}
+	if strings.Join(resp.Accepted, ",") != strings.Join(wantAccepted, ",") {
+		t.Fatalf("accepted %v, want %v", resp.Accepted, wantAccepted)
+	}
+	want := []Reject{
+		{ID: "over", Reason: ReasonCaptureVersion},
+		{ID: "negative", Reason: ReasonCaptureVersion},
+	}
+	if len(resp.Rejected) != len(want) {
+		t.Fatalf("rejected %+v, want %+v", resp.Rejected, want)
+	}
+	for i, r := range resp.Rejected {
+		if r != want[i] {
+			t.Fatalf("rejected[%d] = %+v, want %+v", i, r, want[i])
+		}
+	}
+	if st.count() != 2 {
+		t.Fatalf("stored %d events, want 2", st.count())
 	}
 }
 

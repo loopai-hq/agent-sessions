@@ -11,18 +11,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/config"
-	"github.com/loopai-hq/agent-sessions/internal/discovery"
-	"github.com/loopai-hq/agent-sessions/internal/enroll"
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/hooks"
+	"github.com/loopai-hq/loop-sessions/internal/config"
+	"github.com/loopai-hq/loop-sessions/internal/discovery"
+	"github.com/loopai-hq/loop-sessions/internal/enroll"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/hooks"
 )
-
-// LaunchAgentLabel names the per-user agent. It contains both "agent-sessions"
-// and "loop-sessions" so the uninstaller's search finds it whichever term it
-// looks for, and so a person scanning their LaunchAgents folder can tell at a
-// glance what it belongs to.
-const LaunchAgentLabel = "io.github.loopkitchen.agent-sessions.loop-sessions"
 
 // defaultEndpoint may be stamped at build time (make build ENDPOINT=...). It
 // is not a secret: it is a URL people paste into a browser anyway.
@@ -113,6 +107,9 @@ func runInstall(args []string) error {
 	sum := discovery.Summarize(findings, time.Now())
 	fmt.Println()
 	printDiscovery(sum)
+	fmt.Println()
+	// Said before sign-in, because it is part of what the person is agreeing to.
+	fmt.Println(whoCanRead)
 	fmt.Println()
 
 	// Step 2: identity. Everything server-side joins on this, because a

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/loopai-hq/loop-sessions/security/advisories/new
+    about: Private vulnerability reporting. Never file a security problem as an issue; SECURITY.md has the details and the email fallback.
+  - name: Ask a question
+    url: https://github.com/loopai-hq/loop-sessions/blob/main/SUPPORT.md
+    about: Where to ask, what to run first (loop-sessions doctor), and what to redact before you paste anything.

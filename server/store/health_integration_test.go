@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/health"
+	"github.com/loopai-hq/loop-sessions/internal/health"
 )
 
 // healthClock is the "now" the rollup tests measure against, on the hour so
@@ -47,7 +47,7 @@ func TestIntegrationHealthRollupR8(t *testing.T) {
 	first := healthClock.Add(-time.Hour - time.Duration(reports-1)*5*time.Minute)
 	var wantDrops int64
 	disk, overflow := 0, 0
-	for i := 0; i < reports; i++ {
+	for i := range reports {
 		at := first.Add(time.Duration(i) * 5 * time.Minute)
 		if i%10 == 9 {
 			disk++
@@ -375,7 +375,7 @@ func TestIntegrationRecentBuildsSeeEveryDaemonAMachineRan(t *testing.T) {
 	now := time.Now().UTC()
 	// Six reports over the last half hour, alternating; the newest is the
 	// old daemon's.
-	for i := 0; i < 6; i++ {
+	for i := range 6 {
 		build := "788dcb3"
 		if i%2 == 1 {
 			build = "23713ea"

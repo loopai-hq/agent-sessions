@@ -1,7 +1,6 @@
 package web
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 	"net/url"
@@ -9,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/server/store/derive"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/server/store/derive"
 )
 
 // filters is the list form's state, kept as the raw strings the user typed so
@@ -846,7 +845,7 @@ func (s *Server) renderSession(w http.ResponseWriter, r *http.Request, v Viewer,
 	if view.Spend.Unpriced() {
 		view.Unpriced = modelsUsed(turnEvents(tp))
 	}
-	if s.slack != nil && det.Session.Email == v.Email {
+	if s.slack != nil && det.Email == v.Email {
 		view.ShowMirror = true
 		if ms, err := s.slack.SessionMirrors(ctx, id); err == nil {
 			view.Mirrors = ms
@@ -1086,7 +1085,7 @@ func (s *Server) handleEvent(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if len(e.Raw) > 0 {
-		view.Raw, t = textSegments(prettyJSON(json.RawMessage(e.Raw)), rawEventLimit, nil)
+		view.Raw, t = textSegments(prettyJSON(e.Raw), rawEventLimit, nil)
 		view.Truncated = view.Truncated || t
 	}
 	s.rnd.render(w, http.StatusOK, "event.html", view)

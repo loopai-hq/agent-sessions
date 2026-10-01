@@ -408,7 +408,7 @@ func TestIntegrationWithStatementTimeoutIsLocalToTheTransaction(t *testing.T) {
 
 	// Every connection in the pool, not merely a fresh one: the override must
 	// not have survived on the connection the transaction used.
-	for i := 0; i < 8; i++ {
+	for range 8 {
 		var after string
 		if err := p.QueryRow(ctx, `SHOW statement_timeout`).Scan(&after); err != nil {
 			t.Fatalf("SHOW after: %v", err)

@@ -19,8 +19,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/server/store/derive"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/server/store/derive"
 )
 
 const skillIntDevice = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
@@ -144,7 +144,7 @@ func runSkillStep(t *testing.T, s *Store) {
 		t.Fatal(err)
 	}
 	cfg := DeriveConfig{Window: derive.Window{Always: true}, RowsPerSec: 1_000_000, Sleep: noSleep}
-	for i := 0; i < 20; i++ {
+	for range 20 {
 		pass, err := s.RunDerive(ctx, cfg)
 		if err != nil {
 			t.Fatalf("RunDerive: %v", err)

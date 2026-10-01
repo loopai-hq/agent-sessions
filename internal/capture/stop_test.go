@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/loopai-hq/agent-sessions/internal/scrub"
+	"github.com/loopai-hq/loop-sessions/internal/scrub"
 )
 
 func TestStopVisibleResponse(t *testing.T) {

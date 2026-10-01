@@ -170,7 +170,7 @@ func New(o Options) (*Flow, error) {
 	}
 
 	// The IP literal, never the hostname: see the package comment.
-	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	ln, err := (&net.ListenConfig{}).Listen(context.Background(), "tcp", "127.0.0.1:0")
 	if err != nil {
 		return nil, fmt.Errorf("enroll: cannot bind a local port for sign-in: %w", err)
 	}
@@ -231,7 +231,7 @@ func (f *Flow) Run(ctx context.Context, m Machine) (Result, error) {
 		// the flow usable rather than dead-ending, and the listener is still
 		// bound while the person carries it to a browser.
 		return Result{}, fmt.Errorf("enroll: could not open a browser (%w); "+
-			"open this URL manually to continue:\n\n%s\n", err, f.SignInURL())
+			"open this URL manually to continue:\n\n%s", err, f.SignInURL())
 	}
 
 	select {
@@ -437,5 +437,5 @@ func openBrowser(u string) error {
 	default:
 		cmd = "xdg-open"
 	}
-	return exec.Command(cmd, append(args, u)...).Start()
+	return exec.CommandContext(context.Background(), cmd, append(args, u)...).Start()
 }

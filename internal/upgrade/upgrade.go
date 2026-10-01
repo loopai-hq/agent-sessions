@@ -360,7 +360,7 @@ func (o *Options) replace(ctx context.Context, url, want string) error {
 		// so does something on the path rewriting the download.
 		return fmt.Errorf("upgrade: refusing a download whose checksum is %s, not the published %s", short(got), short(want))
 	}
-	if err := os.Chmod(tmpName, 0o755); err != nil {
+	if err := os.Chmod(tmpName, 0o755); err != nil { //nolint:gosec // G302: the downloaded build has to be executable
 		return fmt.Errorf("upgrade: cannot make the new build executable: %w", err)
 	}
 	if err := o.sanityCheck(ctx, tmpName); err != nil {

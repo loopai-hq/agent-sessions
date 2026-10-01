@@ -9,12 +9,13 @@ package store
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/event"
 )
 
 // TestIntegrationGetTurnsPagesADualOriginSessionOncePerMoment: the reader's
@@ -141,7 +142,7 @@ func TestIntegrationGetTurnsPagesADualOriginSessionOncePerMoment(t *testing.T) {
 	}
 
 	// Authorisation and audit follow the transcript's rules.
-	if _, err := s.GetTurns(ctx, Viewer{Email: "other@example.com", Role: RoleMember}, sid, TurnRange{}); err != ErrNotFound {
+	if _, err := s.GetTurns(ctx, Viewer{Email: "other@example.com", Role: RoleMember}, sid, TurnRange{}); !errors.Is(err, ErrNotFound) {
 		t.Errorf("a stranger read the turns page: %v", err)
 	}
 	if n := countRows(t, `SELECT count(*) FROM access_log WHERE session_id = $1`, sid); n != 0 {
@@ -240,7 +241,7 @@ func TestIntegrationRepairListNamesWhatARewalkWouldComplete(t *testing.T) {
 		start.Event.Cwd = "/home/dev/work/api"
 		start.DeviceID = device
 		batch = append(batch, start)
-		for i := 0; i < 2; i++ {
+		for i := range 2 {
 			p := hookAt(fmt.Sprintf("%s-p%d", sid, i), sid, dvEmail, event.UserPrompt, int64(2+2*i), at.Add(time.Duration(i)*time.Minute), fmt.Sprintf("ask %d", i))
 			p.Event.PromptID = fmt.Sprintf("%s-pid-%d", sid, i)
 			p.DeviceID = device

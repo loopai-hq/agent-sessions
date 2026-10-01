@@ -49,7 +49,7 @@ set -uo pipefail
 # matching its own patterns when the gate runs over the repository.
 DEFAULT_PATTERNS='(^|[^A-Za-z0-9])(C0|U0|S0|G0)[A-Z0-9]{8,}([^A-Za-z0-9]|$)|/[U]sers/[a-z]|~/[L]oop/|AIza[0-9A-Za-z_-]{30,}|[0-9]{12}-compute@|[a-z0-9-]+\.[a-z]+[0-9]?\.run\.app|(^|[^a-z0-9-])[a-z]+(-[a-z]+)+-[0-9]{6}([^0-9]|$)|[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[a-z]{2,}'
 
-ALLOWED='engineering@tryloop\.ai|security@loopai\.com|github\.com/loopai-hq/(agent-sessions|loop-claude-plugins)|@[b]havathi-loop|@[s]undar-loop|[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+\.)*([A-Za-z0-9-]*[Ee]xample\.(com|org|net)|[A-Za-z0-9-]+\.(example|test|invalid|localhost))|[A-Za-z0-9._%+-]+@users\.noreply\.github\.com|noreply@[A-Za-z0-9.-]+|securetoken@system\.gserviceaccount\.com|AIza[A-Za-z]+0{8,}'
+ALLOWED='engineering@tryloop\.ai|security@loopai\.com|github\.com/loopai-hq/(loop-sessions|loop-plugins)|@[b]havathi-loop|@[s]undar-loop|[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+\.)*([A-Za-z0-9-]*[Ee]xample\.(com|org|net)|[A-Za-z0-9-]+\.(example|test|invalid|localhost))|[A-Za-z0-9._%+-]+@users\.noreply\.github\.com|noreply@[A-Za-z0-9.-]+|securetoken@system\.gserviceaccount\.com|AIza[A-Za-z]+0{8,}'
 
 if [ -n "${IDENTIFIER_GATE_PATTERNS:-}" ]; then
   PATTERNS="${IDENTIFIER_GATE_PATTERNS}|${DEFAULT_PATTERNS}"

@@ -12,7 +12,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/loopai-hq/agent-sessions/server/store/derive"
+	"github.com/loopai-hq/loop-sessions/server/store/derive"
 )
 
 // The bounds the contract states, pinned: a sub-batch of at most 5,000
@@ -84,7 +84,7 @@ func TestNextEventBatchHalvesToTheFloorAndThenStops(t *testing.T) {
 func TestParkingEvictsTheSoonestEntryWhenFull(t *testing.T) {
 	s := NewWithDB(&fakeDB{}, nil)
 	now := time.Date(2026, 9, 11, 3, 0, 0, 0, time.UTC)
-	for i := 0; i < dirtyParkedMax; i++ {
+	for i := range dirtyParkedMax {
 		s.parkSession(fmt.Sprintf("s-%05d", i), now.Add(time.Duration(i)*time.Millisecond))
 	}
 	if n := len(s.dirtyParked.rows); n != dirtyParkedMax {
@@ -194,8 +194,8 @@ func TestDeriveLogLinesCarryTheFieldsTheMetricsRead(t *testing.T) {
 	if failed["version"] != "788dcb3-build" || failed["derive_version"] != float64(DerivedSchema) {
 		t.Errorf("derive step failed line: version = %v derive_version = %v", failed["version"], failed["derive_version"])
 	}
-	if recover, _ := failed["recover"].(string); !strings.Contains(recover, fmt.Sprintf("UPDATE derive_jobs SET attempts = 0 WHERE version = %d AND step = 'turns'", DerivedSchema)) {
-		t.Errorf("the failure line's reset statement is %q", recover)
+	if reset, _ := failed["recover"].(string); !strings.Contains(reset, fmt.Sprintf("UPDATE derive_jobs SET attempts = 0 WHERE version = %d AND step = 'turns'", DerivedSchema)) {
+		t.Errorf("the failure line's reset statement is %q", reset)
 	}
 	group, _ := pass["pass"].(map[string]any)
 	if group["derive_version"] != float64(DerivedSchema) || group["version"] != nil {

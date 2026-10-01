@@ -6,11 +6,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/backfill"
-	"github.com/loopai-hq/agent-sessions/internal/capture"
-	"github.com/loopai-hq/agent-sessions/internal/daemon"
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/spool"
+	"github.com/loopai-hq/loop-sessions/internal/backfill"
+	"github.com/loopai-hq/loop-sessions/internal/capture"
+	"github.com/loopai-hq/loop-sessions/internal/daemon"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/spool"
 )
 
 // stopAnchorer anchors, on the way out of the spool, a hook Stop copy that was

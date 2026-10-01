@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/discovery"
-	"github.com/loopai-hq/agent-sessions/internal/spool"
+	"github.com/loopai-hq/loop-sessions/internal/discovery"
+	"github.com/loopai-hq/loop-sessions/internal/spool"
 )
 
 // ---------------------------------------------------------------------------
@@ -721,7 +721,7 @@ func TestDropsReportedPerReasonAndStable(t *testing.T) {
 	}
 
 	// Repeated builds over the same map must not reorder.
-	for n := 0; n < 20; n++ {
+	for range 20 {
 		var again []string
 		for _, c := range Build(i).Conditions {
 			if c.Kind == KindDropsRecorded {
@@ -1111,7 +1111,7 @@ func TestJSONRoundTripStable(t *testing.T) {
 
 	// Marshalling the same report repeatedly must be byte-identical, or the
 	// server cannot dedup or diff consecutive reports.
-	for n := 0; n < 20; n++ {
+	for range 20 {
 		again, err := json.Marshal(r)
 		if err != nil {
 			t.Fatalf("marshal: %v", err)

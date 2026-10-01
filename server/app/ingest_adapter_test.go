@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/health"
-	"github.com/loopai-hq/agent-sessions/server/auth"
-	"github.com/loopai-hq/agent-sessions/server/ingest"
-	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/health"
+	"github.com/loopai-hq/loop-sessions/server/auth"
+	"github.com/loopai-hq/loop-sessions/server/ingest"
+	"github.com/loopai-hq/loop-sessions/server/store"
 )
 
 // The properties this file defends are not properties of the twenty lines of
@@ -204,16 +204,6 @@ func (t *ingPGTx) event(id string) (ingEventRow, bool) {
 	defer t.db.mu.Unlock()
 	e, ok := t.db.events[id]
 	return e, ok
-}
-
-func (t *ingPGTx) haveEvent(id string) bool {
-	if _, ok := t.events[id]; ok {
-		return true
-	}
-	t.db.mu.Lock()
-	defer t.db.mu.Unlock()
-	_, ok := t.db.events[id]
-	return ok
 }
 
 func (t *ingPGTx) haveLedger(key string) bool {

@@ -48,13 +48,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/backfill"
-	"github.com/loopai-hq/agent-sessions/internal/config"
-	"github.com/loopai-hq/agent-sessions/internal/discovery"
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/pipeline"
-	"github.com/loopai-hq/agent-sessions/internal/scrub"
-	"github.com/loopai-hq/agent-sessions/internal/spool"
+	"github.com/loopai-hq/loop-sessions/internal/backfill"
+	"github.com/loopai-hq/loop-sessions/internal/config"
+	"github.com/loopai-hq/loop-sessions/internal/discovery"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/pipeline"
+	"github.com/loopai-hq/loop-sessions/internal/scrub"
+	"github.com/loopai-hq/loop-sessions/internal/spool"
 )
 
 const (
@@ -254,7 +254,7 @@ func importHistory(ctx context.Context, p config.Paths, cfg config.Config, req r
 	}
 	// A paused agent is paused for history too. Importing into a machine
 	// somebody has switched off would be the same betrayal as capturing on it.
-	if cfg.Paused {
+	if cfg.IsPaused(time.Now()) {
 		return errors.New("backfill: capture is paused, so nothing is being imported; run `loop-sessions resume` first")
 	}
 

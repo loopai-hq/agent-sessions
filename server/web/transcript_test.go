@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/event"
 )
 
 func ev(seq int64, typ event.Type, at time.Time, mut func(*event.Event)) event.Event {

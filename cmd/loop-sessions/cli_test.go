@@ -1,9 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/loopai-hq/agent-sessions/internal/hooks"
 	"io"
 	"os"
 	"path/filepath"
@@ -11,11 +11,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/capture"
-	"github.com/loopai-hq/agent-sessions/internal/config"
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/health"
-	"github.com/loopai-hq/agent-sessions/internal/spool"
+	"github.com/loopai-hq/loop-sessions/internal/capture"
+	"github.com/loopai-hq/loop-sessions/internal/config"
+	"github.com/loopai-hq/loop-sessions/internal/discovery"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/health"
+	"github.com/loopai-hq/loop-sessions/internal/hooks"
+	"github.com/loopai-hq/loop-sessions/internal/spool"
 )
 
 // captureStdout runs f and returns what it printed.
@@ -260,5 +262,116 @@ func TestDaemonRefreshesTheRegisteredHooksOncePerVersion(t *testing.T) {
 	refreshHooksIfDue(p)
 	if plan, _ := hooks.Preview(hooks.Options{SettingsPath: settings, Binary: self}); len(plan.Update) != 0 {
 		t.Fatalf("a new version did not refresh the hooks: %+v", plan)
+	}
+}
+
+// pause --for records a deadline, says so, and status shows it; when the
+// deadline has passed the machine reads as capturing again without anyone
+// running resume, and resume itself clears every pause field.
+func TestPauseForEndsOnItsOwnAndSaysSo(t *testing.T) {
+	hermeticHome(t, "https://example.invalid")
+	before := time.Now()
+	out := captureStdout(t, func() error { return runPause([]string{"--for", "2h"}, true) })
+	if !strings.Contains(out, "Paused until") || !strings.Contains(out, "resumes on its own") {
+		t.Fatalf("pause --for must say when it ends:\n%s", out)
+	}
+	cfg := mustConfig(t)
+	if !cfg.Paused || cfg.PausedUntil.Before(before.Add(2*time.Hour)) || cfg.PausedUntil.After(time.Now().Add(2*time.Hour)) {
+		t.Fatalf("config after pause --for 2h: %+v", cfg)
+	}
+
+	now := time.Now()
+	v := collectStatus(config.Paths{}, now)
+	if !v.Paused || v.PausedUntil == nil {
+		t.Fatalf("status inside the window: %+v", v)
+	}
+	status := captureStdout(t, func() error { printStatus(v); return nil })
+	if !strings.Contains(status, "PAUSED") || !strings.Contains(status, "until "+v.PausedUntil.Format(time.RFC1123)) {
+		t.Fatalf("status must show the deadline:\n%s", status)
+	}
+	if later := collectStatus(config.Paths{}, now.Add(3*time.Hour)); later.Paused || later.PausedUntil != nil {
+		t.Fatalf("status after the deadline still reads paused: %+v", later)
+	}
+
+	out = captureStdout(t, func() error { return runPause(nil, false) })
+	if !strings.Contains(out, "Resumed.") {
+		t.Fatalf("resume output:\n%s", out)
+	}
+	if cfg := mustConfig(t); cfg.Paused || !cfg.PausedSince.IsZero() || !cfg.PausedUntil.IsZero() {
+		t.Fatalf("resume left pause fields behind: %+v", cfg)
+	}
+}
+
+// A negative --for is refused rather than treated as "until resume".
+func TestPauseForRefusesANegativeDuration(t *testing.T) {
+	hermeticHome(t, "https://example.invalid")
+	if err := runPause([]string{"--for", "-1h"}, true); err == nil {
+		t.Fatal("pause --for -1h was accepted")
+	}
+	if cfg := mustConfig(t); cfg.Paused {
+		t.Fatal("a refused pause still paused the machine")
+	}
+}
+
+// The discover hint names the mechanism that exists (the config's roots map)
+// and not a flag that does not.
+func TestDiscoverHintNamesTheConfigRoots(t *testing.T) {
+	hermeticHome(t, "https://example.invalid")
+	out := captureStdout(t, func() error {
+		printDiscovery(discovery.Summary{NeedsAsk: []discovery.Tool{discovery.Codex}})
+		return nil
+	})
+	if strings.Contains(out, "--set") {
+		t.Fatalf("the hint still advertises --set:\n%s", out)
+	}
+	if !strings.Contains(out, `"roots"`) || !strings.Contains(out, `"codex"`) || !strings.Contains(out, config.Paths{}.ConfigFile()) {
+		t.Fatalf("the hint does not say where to put the path:\n%s", out)
+	}
+}
+
+// help lists every command a person can run, including mirror, and describes
+// pause --for as what it now is.
+func TestUsageListsMirrorAndTheTimedPause(t *testing.T) {
+	var b bytes.Buffer
+	usage(&b)
+	for _, want := range []string{"  mirror ", "pause [--for 2h]", "until the period ends", "  doctor ", "  backfill "} {
+		if !strings.Contains(b.String(), want) {
+			t.Errorf("help does not mention %q:\n%s", want, b.String())
+		}
+	}
+}
+
+// install says, before sign-in, who can read what it captures and where reads
+// are logged; status repeats it.
+func TestInstallAndStatusSayWhoCanRead(t *testing.T) {
+	hermeticHome(t, "https://example.invalid")
+	out := captureStdout(t, func() error { return runInstall([]string{"--skip-hooks", "--skip-backfill"}) })
+	if !strings.Contains(out, whoCanRead) {
+		t.Fatalf("install did not say who can read captured sessions:\n%s", out)
+	}
+	if i, j := strings.Index(out, whoCanRead), strings.Index(out, "Already signed in"); i < 0 || j < 0 || i > j {
+		t.Fatalf("the sentence must come before sign-in:\n%s", out)
+	}
+	status := captureStdout(t, func() error { return runStatus(nil) })
+	if !strings.Contains(status, whoCanRead) {
+		t.Fatalf("status did not repeat it:\n%s", status)
+	}
+	// The facts the text must keep stating, each one a thing the server
+	// enforces (see the comment on whoCanRead): admins see the list including
+	// the first prompt, a full read of someone else's session is audited, a
+	// share needs the owner or an admin, retention and export are the
+	// operator's.
+	for _, want := range []string{
+		"server's admins",
+		"first prompt",
+		"opening someone else's full session is recorded in the access log",
+		"share link that you or an admin create",
+		"How long sessions are kept",
+		"exported",
+		"server operator",
+	} {
+		if !strings.Contains(whoCanRead, want) {
+			t.Fatalf("whoCanRead no longer says %q:\n%s", want, whoCanRead)
+		}
 	}
 }

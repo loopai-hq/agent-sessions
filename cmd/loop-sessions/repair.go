@@ -24,10 +24,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/backfill"
-	"github.com/loopai-hq/agent-sessions/internal/config"
-	"github.com/loopai-hq/agent-sessions/internal/discovery"
-	"github.com/loopai-hq/agent-sessions/internal/scrub"
+	"github.com/loopai-hq/loop-sessions/internal/backfill"
+	"github.com/loopai-hq/loop-sessions/internal/config"
+	"github.com/loopai-hq/loop-sessions/internal/discovery"
+	"github.com/loopai-hq/loop-sessions/internal/scrub"
 )
 
 const (
@@ -70,7 +70,7 @@ func runRepairIfDue(ctx context.Context, p config.Paths, cfg config.Config, forc
 	if !force && !stampDue(p, stampRepairLast, repairEvery, now) {
 		return
 	}
-	if cfg.Paused {
+	if cfg.IsPaused(now) {
 		return
 	}
 	list, answered, err := fetchRepairList(ctx, p, cfg)

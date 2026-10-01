@@ -69,11 +69,17 @@ import (
 // first path segment of the object in the bucket.
 type Table string
 
+// The tables the export ships.
 const (
-	TableTurns        Table = "turns"
-	TableSessions     Table = "sessions"
-	TableMessages     Table = "messages"
-	TableEvents       Table = "events"
+	// TableTurns is the derived turns.
+	TableTurns Table = "turns"
+	// TableSessions is the sessions.
+	TableSessions Table = "sessions"
+	// TableMessages is the messages.
+	TableMessages Table = "messages"
+	// TableEvents is the raw events.
+	TableEvents Table = "events"
+	// TableHealthHourly is the hourly health rollup.
 	TableHealthHourly Table = "health_hourly"
 )
 
@@ -475,7 +481,7 @@ func timeoutOr(ctx context.Context, res *Result, err error) error {
 // partitionAttempts.
 func exportPartition(ctx context.Context, src Source, objs ObjectStore, p LoadJob) (rows, bytes int64, err error) {
 	for attempt := 1; ; attempt++ {
-		rows, bytes, err = 0, 0, nil
+		rows = 0
 		bytes, err = objs.Put(ctx, p.Object, func(w io.Writer) error {
 			gz := gzip.NewWriter(w)
 			n, err := src.CopyPartition(ctx, p.Table, p.Day, gz)
@@ -510,7 +516,7 @@ func exportBundles(ctx context.Context, src Source, objs ObjectStore, sessions [
 		}
 		mu.Unlock()
 	}
-	for i := 0; i < opt.BundleWorkers; i++ {
+	for range opt.BundleWorkers {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()

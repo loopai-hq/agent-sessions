@@ -1,0 +1,274 @@
+# golangci-lint configuration (v2 schema).
+#
+# `make lint` and the ci.yml `lint` job run this file with golangci-lint
+# v2.14.0. The linter set is explicit (`default: none`) so a golangci-lint
+# upgrade cannot silently add or drop a check; every exclusion below names
+# the rule, the path and the reason, so a reader can tell a known false
+# positive from a suppressed finding.
+#
+# Why these linters and not the kitchen sink:
+#   errcheck, govet, staticcheck, unused, ineffassign   correctness (the Go
+#                                                        toolchain's own set,
+#                                                        plus staticcheck)
+#   errorlint                                            errors are wrapped with
+#                                                        %w and compared with
+#                                                        errors.Is/As
+#   bodyclose, noctx                                     HTTP hygiene in the
+#                                                        client's delivery path
+#   gosec                                                the security nags that
+#                                                        are worth reading
+#   revive                                               doc comments on every
+#                                                        exported identifier, no
+#                                                        builtin shadowing
+#   misspell, unconvert, copyloopvar, intrange           mechanical cleanliness
+#   nolintlint                                           every //nolint carries
+#                                                        a linter and a reason
+#   depguard                                             the client (cmd/ and
+#                                                        internal/) imports the
+#                                                        standard library only
+# gocritic and unparam were tried and declined: on this code they produce style
+# opinions, not findings.
+
+version: "2"
+
+run:
+  # The integration suite (server/store, server/app ...) is behind this tag;
+  # without it those files would never be linted.
+  build-tags:
+    - integration
+  timeout: 10m
+
+linters:
+  default: none
+  enable:
+    - bodyclose
+    - copyloopvar
+    - depguard
+    - errcheck
+    - errorlint
+    - gosec
+    - govet
+    - ineffassign
+    - intrange
+    - misspell
+    - noctx
+    - nolintlint
+    - revive
+    - staticcheck
+    - unconvert
+    - unused
+
+  settings:
+    depguard:
+      rules:
+        # CONTRIBUTING.md: "Keep the client dependency-free." The binary a
+        # laptop runs and the packages it is built from import nothing outside
+        # the standard library and this module. Test files are held to the
+        # same rule so a test helper cannot smuggle a dependency in.
+        client-stdlib-only:
+          list-mode: strict
+          files:
+            - "**/cmd/**"
+            - "**/internal/**"
+            # The server binary lives under server/cmd/; it is not the client
+            # and may import the server's modules.
+            - "!**/server/**"
+          allow:
+            - $gostd
+            - github.com/loopai-hq/loop-sessions
+
+    errorlint:
+      errorf: true
+      asserts: true
+      comparison: true
+
+    gosec:
+      excludes:
+        # G104 (unhandled errors) is errcheck without errcheck's judgement:
+        # it flags the deferred Close and the Close on an error path that
+        # the std-error-handling preset below deliberately allows. One
+        # linter owns unhandled errors; that linter is errcheck.
+        - G104
+
+    misspell:
+      # No locale: the prose in this repository is British English on purpose
+      # ("honoured", "behaviour", "organisation"); a US locale would report
+      # ~400 of those as misspellings. Without a locale misspell flags only
+      # words that are wrong in every variant.
+      ignore-rules: []
+
+    nolintlint:
+      # A //nolint must say which linter it silences and why.
+      require-explanation: true
+      require-specific: true
+      allow-unused: false
+
+    revive:
+      rules:
+        # Every exported identifier gets a doc comment. Stuttering names
+        # (config.Config) are deliberate here and are not flagged.
+        - name: exported
+          arguments:
+            - disableStutteringCheck
+        - name: package-comments
+        - name: redefines-builtin-id
+        - name: unused-parameter
+
+  exclusions:
+    # std-error-handling: errcheck ignores the calls whose error the Go
+    # documentation itself ignores (fmt.Fprint* to a writer, ...).
+    # common-false-positives: the golangci-lint maintained list.
+    presets:
+      - std-error-handling
+      - common-false-positives
+    rules:
+      # Tests: a fixture that ignores a Close, a temporary file with a broad
+      # mode or an unclosed httptest body is not a defect in the product.
+      - path: _test\.go$
+        linters:
+          - bodyclose
+          - errcheck
+          - gosec
+      # Test helpers are exported for the package's own tests; a doc comment
+      # on each would say nothing a reader needs.
+      - path: _test\.go$
+        linters:
+          - revive
+        text: "^exported:"
+      # Test fakes implement the store, HTTP and Slack interfaces and ignore
+      # most of their arguments by design (65 of the 103 findings are an
+      # unused `ctx`). Keeping the parameter names is what lets a reader
+      # match the fake to the interface it stands in for.
+      - path: _test\.go$
+        linters:
+          - revive
+        text: "^unused-parameter:"
+      # noctx flags httptest.NewRequest in tests. A test request has no
+      # cancellation to propagate; the WithContext form adds nothing but a
+      # context.Background() on every line.
+      - path: _test\.go$
+        linters:
+          - noctx
+      # G101 (hardcoded credentials): internal/scrub declares the *kinds* of
+      # secret it redacts ("aws-secret-key", "github-token", ...) and its tests
+      # hold deliberately fake tokens shaped like real ones. Those strings are
+      # the detector, not a credential.
+      - path: ^internal/scrub/
+        linters:
+          - gosec
+        text: "G101"
+      # G404 (weak random): the delivery backoff in internal/drain jitters its
+      # retry delay with math/rand. Jitter is not a security decision; a
+      # predictable sequence there costs nothing.
+      - path: ^internal/drain/
+        linters:
+          - gosec
+        text: "G404"
+      # G710 (open redirect): the redirects in server/web target a fixed
+      # in-app path and never an external host: `target := "/sessions"` plus
+      # the encoded filter values (handleSearchRedirect in
+      # server/web/search.go) and `back := "/settings/notifications"` plus
+      # the encoded outcome (redirectOutcome in server/web/notifications.go).
+      # Inspected by hand.
+      - path: ^server/web/
+        linters:
+          - gosec
+        text: "G710"
+      # G101 (hardcoded credentials) on strings that only *mention* a
+      # credential: the names of the environment variables the server reads
+      # its tokens from (server/app/config.go), the GCE metadata URL a token
+      # is fetched from (server/export/token.go), and SQL text and sort keys
+      # that name the token columns (server/store). None holds a value.
+      - path: ^server/app/config\.go$
+        linters:
+          - gosec
+        text: "G101"
+      - path: ^server/export/token\.go$
+        linters:
+          - gosec
+        text: "G101"
+      - path: ^server/store/(analytics|source_tokens)\.go$
+        linters:
+          - gosec
+        text: "G101"
+      # G115 (integer overflow on conversion) in server/store's derive files:
+      # the int -> int32 conversions in turns.go, reads_turns.go and
+      # artifacts.go feed int4 columns with counts and indexes of items the
+      # process holds in memory for one batch (a turn's index, its tool-call,
+      # error and file counts, an artifact's occurrence count). Each is
+      # bounded by that batch, orders of magnitude below 2^31; a guard would
+      # be dead code. The capture-version conversions in store.go are wire
+      # input and are not covered here: ingest.decodeItem bounds the value
+      # to 0..MaxInt32 and each site carries its own //nolint saying so.
+      - path: ^server/store/(turns|reads_turns|artifacts)\.go$
+        linters:
+          - gosec
+        text: "G115"
+      # G115 (integer overflow on conversion) and unconvert in
+      # internal/spool/diskfree_unix.go: syscall.Statfs_t's Bsize and Bavail
+      # are int64/uint64 on Linux, uint32/uint64 on Darwin and uint64/int64
+      # on FreeBSD. The uint64 conversions the file needs on one GOOS are
+      # redundant on another, and gosec sees a signed-to-unsigned conversion
+      # only where the field is signed; both values are positive counts. An
+      # inline //nolint cannot say this: nolintlint reports it unused on the
+      # GOOS where the finding does not fire, so the file is excluded here
+      # and lints clean on all three.
+      - path: ^internal/spool/diskfree_unix\.go$
+        linters:
+          - gosec
+          - unconvert
+        text: "G115|unnecessary conversion"
+      # G124 (cookie attributes): every cookie the server sets is HttpOnly
+      # with an explicit SameSite; `Secure` is the runtime `secure` flag
+      # (true behind TLS, false for the demo server on plain 127.0.0.1),
+      # which gosec cannot see through. server/app/signin.go:722-744 and
+      # server/auth/session.go:278-300.
+      - path: ^server/(app/signin|auth/session)\.go$
+        linters:
+          - gosec
+        text: "G124"
+      # G703 (path traversal): internal/config resolves the Git common dir
+      # of the person's own working directory (gitDir/commondir), which is
+      # the client inspecting the machine it runs on; there is no untrusted
+      # input on the path.
+      - path: ^internal/config/config\.go$
+        linters:
+          - gosec
+        text: "G703"
+      # G704 (SSRF): the client posts to the endpoint the person enrolled
+      # with (cmd/loop-sessions/mirror.go), and the server fetches release
+      # assets from storage.googleapis.com with the bucket name from its own
+      # config and a path-escaped asset name (server/app/download.go).
+      # Reaching a configured host is the purpose of both calls.
+      - path: ^(cmd/loop-sessions/mirror|server/app/download)\.go$
+        linters:
+          - gosec
+        text: "G704"
+      # G710 (open redirect) in server/app/signin.go: the target is
+      # `localPath(...)`, which returns "/" for anything that is not a
+      # single-slash local path (signin.go:783-800).
+      - path: ^server/app/signin\.go$
+        linters:
+          - gosec
+        text: "G710"
+      # misspell: server/api/shares_test.go sends an unknown JSON field named
+      # "grantie" on purpose, to prove the decoder rejects it. It is a
+      # fixture, not a typo of "grantee".
+      - path: ^server/api/shares_test\.go$
+        linters:
+          - misspell
+        text: "grantie"
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/loopai-hq/loop-sessions
+
+issues:
+  # Report everything; a capped list hides the size of a regression.
+  max-issues-per-linter: 0
+  max-same-issues: 0

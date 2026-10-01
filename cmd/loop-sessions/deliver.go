@@ -36,11 +36,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/capture"
-	"github.com/loopai-hq/agent-sessions/internal/config"
-	"github.com/loopai-hq/agent-sessions/internal/daemon"
-	"github.com/loopai-hq/agent-sessions/internal/drain"
-	"github.com/loopai-hq/agent-sessions/internal/spool"
+	"github.com/loopai-hq/loop-sessions/internal/capture"
+	"github.com/loopai-hq/loop-sessions/internal/config"
+	"github.com/loopai-hq/loop-sessions/internal/daemon"
+	"github.com/loopai-hq/loop-sessions/internal/drain"
+	"github.com/loopai-hq/loop-sessions/internal/spool"
 )
 
 // eventsPath is the server's ingest route. It is duplicated here rather than
@@ -395,7 +395,7 @@ func launchDaemon(p config.Paths, h capture.HookEvent) error {
 	// so the pid is the same either way. Passing it explicitly matters because
 	// the daemon is a grandchild and its own getppid is the hook, which is about
 	// to exit.
-	cmd := exec.Command(self, "daemon",
+	cmd := exec.Command(self, "daemon", //nolint:noctx // the daemon is started detached and must outlive this hook; a context would end it with the hook
 		"--session", h.SessionID,
 		"--owner-pid", strconv.Itoa(os.Getppid()),
 		"--cwd", h.Cwd,

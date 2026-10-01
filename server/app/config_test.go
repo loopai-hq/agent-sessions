@@ -401,7 +401,7 @@ func TestConfigIgnoresTheWithdrawnSeedVariable(t *testing.T) {
 	}
 	rt := reflect.TypeOf(cfg)
 	rv := reflect.ValueOf(cfg)
-	for i := 0; i < rt.NumField(); i++ {
+	for i := range rt.NumField() {
 		name := strings.ToLower(rt.Field(i).Name)
 		if strings.Contains(name, "seed") || strings.Contains(name, "roster") {
 			t.Errorf("Config carries a field named %s", rt.Field(i).Name)
@@ -750,7 +750,7 @@ func bootRender(v reflect.Value) string {
 		return v.String()
 	case reflect.Slice:
 		var b strings.Builder
-		for i := 0; i < v.Len(); i++ {
+		for i := range v.Len() {
 			b.WriteString(bootRender(v.Index(i)))
 			b.WriteByte(' ')
 		}

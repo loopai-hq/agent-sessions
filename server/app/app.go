@@ -17,14 +17,14 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/loopai-hq/agent-sessions/server/admin"
-	"github.com/loopai-hq/agent-sessions/server/api"
-	"github.com/loopai-hq/agent-sessions/server/auth"
-	"github.com/loopai-hq/agent-sessions/server/fleet"
-	"github.com/loopai-hq/agent-sessions/server/ingest"
-	"github.com/loopai-hq/agent-sessions/server/slack"
-	"github.com/loopai-hq/agent-sessions/server/store"
-	"github.com/loopai-hq/agent-sessions/server/web"
+	"github.com/loopai-hq/loop-sessions/server/admin"
+	"github.com/loopai-hq/loop-sessions/server/api"
+	"github.com/loopai-hq/loop-sessions/server/auth"
+	"github.com/loopai-hq/loop-sessions/server/fleet"
+	"github.com/loopai-hq/loop-sessions/server/ingest"
+	"github.com/loopai-hq/loop-sessions/server/slack"
+	"github.com/loopai-hq/loop-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/server/web"
 )
 
 const (
@@ -785,7 +785,7 @@ func isHex(s string, n int) bool {
 	if len(s) != n {
 		return false
 	}
-	for i := 0; i < len(s); i++ {
+	for i := range len(s) {
 		c := s[i]
 		if (c < '0' || c > '9') && (c < 'a' || c > 'f') && (c < 'A' || c > 'F') {
 			return false
@@ -1057,7 +1057,7 @@ func readyHandler(ping func(context.Context) error, log *slog.Logger) http.Handl
 
 // Serve binds the configured port and serves until ctx is cancelled.
 func (a *App) Serve(ctx context.Context) error {
-	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", a.cfg.Port))
+	ln, err := (&net.ListenConfig{}).Listen(ctx, "tcp", fmt.Sprintf(":%d", a.cfg.Port))
 	if err != nil {
 		return fmt.Errorf("app: listen on port %d: %w", a.cfg.Port, err)
 	}

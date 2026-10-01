@@ -23,9 +23,9 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"github.com/loopai-hq/agent-sessions/internal/health"
-	"github.com/loopai-hq/agent-sessions/server/admin"
-	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/internal/health"
+	"github.com/loopai-hq/loop-sessions/server/admin"
+	"github.com/loopai-hq/loop-sessions/server/store"
 )
 
 // ---------------------------------------------------------------------------
@@ -430,7 +430,7 @@ func TestInTxReturnsTheCallersOwnErrorSoItsSentinelsStillMatch(t *testing.T) {
 			err := admNewStore(db).InTx(context.Background(), func(ctx context.Context, tx admin.Tx) error {
 				return tc.give
 			})
-			if err != tc.give {
+			if err != tc.give { //nolint:errorlint // identity is the assertion: InTx hands back the caller's own value, not a wrapper around it
 				t.Fatalf("InTx error = %#v, want the caller's own value %#v", err, tc.give)
 			}
 			if !errors.Is(err, sentinel) {

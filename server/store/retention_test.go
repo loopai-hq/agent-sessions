@@ -19,7 +19,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/event"
 )
 
 // retNow is the clock every test states explicitly, because a cutoff is
@@ -593,7 +593,7 @@ func TestASessionIsDeletedInTheOrderItsForeignKeysRequire(t *testing.T) {
 	switch {
 	case events < 0 || ledger < 0 || session < 0:
 		t.Fatalf("a session deletion is missing a step: %v", sqls)
-	case !(events < ledger && ledger < session):
+	case events >= ledger || ledger >= session:
 		t.Errorf("order was events=%d ledger=%d session=%d; the rollup must go last or its events are stranded with nothing to find them",
 			events, ledger, session)
 	}

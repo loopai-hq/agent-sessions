@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/normalize"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/normalize"
 )
 
 // Row is the column projection of one stored event: everything the fold
@@ -64,11 +64,16 @@ const (
 type Outcome string
 
 const (
-	OutcomeAnswered         Outcome = "answered"
-	OutcomeInterrupted      Outcome = "interrupted"
+	// OutcomeAnswered is a prompt that got its answer.
+	OutcomeAnswered Outcome = "answered"
+	// OutcomeInterrupted is a prompt whose answer the person cut short.
+	OutcomeInterrupted Outcome = "interrupted"
+	// OutcomeNoAnswerCaptured is a prompt with work but no answer on record.
 	OutcomeNoAnswerCaptured Outcome = "no_answer_captured"
-	OutcomeNoWork           Outcome = "no_work"
-	OutcomeInProgress       Outcome = "in_progress"
+	// OutcomeNoWork is a prompt nothing followed.
+	OutcomeNoWork Outcome = "no_work"
+	// OutcomeInProgress is the exchange still open when the fold ran.
+	OutcomeInProgress Outcome = "in_progress"
 	// HeadKey names the turn that holds a thread's rows from before its first
 	// prompt: a session whose head was not imported still has work to show.
 	HeadKey = "head"
@@ -772,7 +777,7 @@ func finish(t *turn, superseded map[string]string) {
 		case h.HasText:
 			tw = nearest(assistants, h, func(c *Row) bool { return c.HasText && c.TextHash == h.TextHash }, pairWindow)
 		case !h.HasUsage:
-			tw = nearest(assistants, h, func(c *Row) bool { return true }, 0)
+			tw = nearest(assistants, h, func(*Row) bool { return true }, 0)
 		}
 		if tw != nil {
 			roles[h] = RoleSuperseded

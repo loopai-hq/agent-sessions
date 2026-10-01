@@ -124,11 +124,11 @@ func BuildFileDiff(path, before, after string, created bool) FileDiff {
 	}
 
 	head := make([]DiffLine, 0, prefix)
-	for i := 0; i < prefix; i++ {
+	for i := range prefix {
 		head = append(head, DiffLine{Kind: DiffContext, Text: a[i], OldLine: i + 1, NewLine: i + 1})
 	}
 	tail := make([]DiffLine, 0, suffix)
-	for i := 0; i < suffix; i++ {
+	for i := range suffix {
 		oldIdx := len(a) - suffix + i
 		newIdx := len(b) - suffix + i
 		tail = append(tail, DiffLine{Kind: DiffContext, Text: a[oldIdx], OldLine: oldIdx + 1, NewLine: newIdx + 1})
@@ -261,14 +261,14 @@ func collapseContext(in []DiffLine, context int) []DiffLine {
 // early. A trailing newline does not produce a final empty line, because every
 // well-formed file has one and rendering it as a line the user must scroll past
 // is noise on every diff.
-func splitLines(s string, max int) ([]string, bool) {
+func splitLines(s string, limit int) ([]string, bool) {
 	if s == "" {
 		return nil, false
 	}
 	s = strings.TrimSuffix(s, "\n")
 	lines := strings.Split(s, "\n")
-	if len(lines) > max {
-		return lines[:max], true
+	if len(lines) > limit {
+		return lines[:limit], true
 	}
 	return lines, false
 }

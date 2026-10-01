@@ -15,8 +15,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/server/auth"
-	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/server/auth"
+	"github.com/loopai-hq/loop-sessions/server/store"
 )
 
 // EnrollCompletePath is where internal/enroll sends the Firebase ID token its
@@ -440,7 +440,7 @@ func ParseCLICallback(q url.Values) (CLICallback, error) {
 // this client mints, so refusing them costs nothing and removes the class of
 // bug where a template change makes the relay injectable.
 func isBase64URL(s string) bool {
-	for i := 0; i < len(s); i++ {
+	for i := range len(s) {
 		c := s[i]
 		switch {
 		case c >= 'A' && c <= 'Z', c >= 'a' && c <= 'z', c >= '0' && c <= '9':

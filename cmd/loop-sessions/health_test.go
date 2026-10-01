@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/config"
-	"github.com/loopai-hq/agent-sessions/internal/health"
-	"github.com/loopai-hq/agent-sessions/internal/hooks"
-	"github.com/loopai-hq/agent-sessions/internal/spool"
+	"github.com/loopai-hq/loop-sessions/internal/config"
+	"github.com/loopai-hq/loop-sessions/internal/health"
+	"github.com/loopai-hq/loop-sessions/internal/hooks"
+	"github.com/loopai-hq/loop-sessions/internal/spool"
 )
 
 // TestAHealthReportArrivesWithTheDeviceCredentialAndThisMachinesQueue is the
@@ -224,6 +224,33 @@ func TestAPausedMachineReportsAChoiceRatherThanAFault(t *testing.T) {
 	}
 	if rep.Worst() == health.LevelCritical {
 		t.Errorf("a machine that is merely paused reports critically: %v", kindsOf(rep))
+	}
+}
+
+// TestAnExpiredTimedPauseLeavesNoTraceInTheReport: once `pause --for` runs
+// out, the report says the machine is capturing and carries no paused_since,
+// exactly as status does; a stale timestamp beside Paused=false would read in
+// the fleet view as a machine that is paused but not saying so.
+func TestAnExpiredTimedPauseLeavesNoTraceInTheReport(t *testing.T) {
+	srv := newFleetServer(t)
+	defer srv.Close()
+
+	home := hermeticHome(t, srv.URL)
+	withConfig(t, func(c *config.Config) {
+		c.Paused = true
+		c.PausedSince = time.Now().Add(-3 * time.Hour)
+		c.PausedUntil = time.Now().Add(-time.Hour)
+	})
+
+	if err := mustReporter(t, home).Report(context.Background()); err != nil {
+		t.Fatalf("Report: %v", err)
+	}
+	rep := srv.reports()[0].report
+	if rep.Paused || !rep.PausedSince.IsZero() {
+		t.Errorf("an expired pause is still in the report: paused=%v since=%v", rep.Paused, rep.PausedSince)
+	}
+	if _, ok := findCondition(rep, health.KindPaused); ok {
+		t.Errorf("a paused condition after the deadline; conditions were %v", kindsOf(rep))
 	}
 }
 

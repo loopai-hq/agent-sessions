@@ -89,7 +89,7 @@ func TestASessionIsPostedOnceHoweverManyPassesRun(t *testing.T) {
 	db.due = []candidate{sampleCandidate("s-once", "ana@example.org", ModeChannel)}
 
 	m := testMirror(t, db, fs.client(t), nil)
-	for i := 0; i < 4; i++ {
+	for i := range 4 {
 		if _, err := m.pass(context.Background()); err != nil {
 			t.Fatalf("pass %d: %v", i, err)
 		}
@@ -400,7 +400,7 @@ func TestSummaryCarriesNoFieldThatCouldHoldTranscript(t *testing.T) {
 	}
 	var got []string
 	ty := reflect.TypeOf(Summary{})
-	for i := 0; i < ty.NumField(); i++ {
+	for i := range ty.NumField() {
 		got = append(got, ty.Field(i).Name)
 	}
 	sort.Strings(got)

@@ -34,7 +34,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/spool"
+	"github.com/loopai-hq/loop-sessions/internal/spool"
 )
 
 // Transport delivers a batch and reports what the server did with it.

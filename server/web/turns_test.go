@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/event"
 )
 
 // turnFixture builds one main-thread turn with a human prompt, one tool
@@ -89,7 +89,7 @@ func TestTurnCollapsesWorkUnderItsTimingLabel(t *testing.T) {
 	}
 	// The prompt is a bubble above the work and the final sits below it.
 	prompt, work, final := strings.Index(out, `class="blk blk-prompt"`), strings.Index(out, "work-summary"), strings.Index(out, `class="blk blk-assistant"`)
-	if !(prompt < work && work < final) {
+	if prompt >= work || work >= final {
 		t.Errorf("order prompt=%d work=%d final=%d", prompt, work, final)
 	}
 	// The tool result paired onto its call.
@@ -107,7 +107,7 @@ func TestTurnRendersASlashCommandAsAChip(t *testing.T) {
 	turn := turnFixture("answered")
 	turn.Kind = "slash_command"
 	turn.Events[0].Kind = "slash_command"
-	turn.Events[0].Event.Text = "<command-message>git is running</command-message>\n<command-name>/git</command-name>\n<command-args>--autonomous</command-args>"
+	turn.Events[0].Text = "<command-message>git is running</command-message>\n<command-name>/git</command-name>\n<command-args>--autonomous</command-args>"
 	tv := buildTurnView(turn, TranscriptOptions{Start: fixedNow.Add(-time.Hour)})
 	if tv.Command != "/git" || tv.Args != "--autonomous" {
 		t.Fatalf("command = %q args = %q", tv.Command, tv.Args)
@@ -174,8 +174,8 @@ func TestSubagentTurnsNestUnderTheTurnThatSpawnedThem(t *testing.T) {
 	later := turnFixture("no_work")
 	later.Index, later.StartedAt = 1, main.StartedAt.Add(10*time.Minute)
 	later.Events = later.Events[:1]
-	later.Events[0].Event.ID, later.PromptEventID = "p2", "p2"
-	later.Events[0].Event.OccurredAt = later.StartedAt
+	later.Events[0].ID, later.PromptEventID = "p2", "p2"
+	later.Events[0].OccurredAt = later.StartedAt
 
 	agentStart := main.StartedAt.Add(20 * time.Second)
 	task := event.Event{ID: "at", Seq: 1, Type: event.UserPrompt, OccurredAt: agentStart, Text: "Review the diff for races", AgentID: "agent-reviewer-0123456789abcdef"}
@@ -277,7 +277,7 @@ func TestHeadTurnRendersWithoutAPrompt(t *testing.T) {
 // result opens the collapsed work so the reader sees the match.
 func TestSearchMatchesOpenTheWorkTheyLandIn(t *testing.T) {
 	turn := turnFixture("answered")
-	turn.Events[2].Event.Tool.Output = "needle in the output"
+	turn.Events[2].Tool.Output = "needle in the output"
 	tv := buildTurnView(turn, TranscriptOptions{Terms: []string{"needle"}})
 	if !tv.Matched {
 		t.Fatal("the match inside the work was not noticed")

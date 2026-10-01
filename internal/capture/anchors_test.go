@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/backfill"
-	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/backfill"
+	"github.com/loopai-hq/loop-sessions/internal/event"
 )
 
 // The anchors: what lets a hook copy of a turn and the transcript copy of the
@@ -540,7 +540,7 @@ func decodeRune(s string) (rune, int) {
 
 func TestLedgerRecordsMarkersAndCapturedAnchors(t *testing.T) {
 	l := Ledger{Dir: t.TempDir()}
-	clear, err := l.Inflight(Marker{SessionID: "s1", HookEvent: "Stop", PromptID: probePrompt})
+	unmark, err := l.Inflight(Marker{SessionID: "s1", HookEvent: "Stop", PromptID: probePrompt})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -555,7 +555,7 @@ func TestLedgerRecordsMarkersAndCapturedAnchors(t *testing.T) {
 	if err := l.Captured("s1", EntriesOf(evs)); err != nil {
 		t.Fatal(err)
 	}
-	clear()
+	unmark()
 	c, err := l.Read("s1")
 	if err != nil {
 		t.Fatal(err)
