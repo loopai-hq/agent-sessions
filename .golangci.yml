@@ -166,9 +166,10 @@ linters:
         text: "G404"
       # G710 (open redirect): the redirects in server/web target a fixed
       # in-app path and never an external host: `target := "/sessions"` plus
-      # the encoded filter values (server/web/search.go:82) and
-      # `back := "/settings/notifications"` plus the encoded outcome
-      # (server/web/notifications.go:260). Inspected by hand.
+      # the encoded filter values (handleSearchRedirect in
+      # server/web/search.go) and `back := "/settings/notifications"` plus
+      # the encoded outcome (redirectOutcome in server/web/notifications.go).
+      # Inspected by hand.
       - path: ^server/web/
         linters:
           - gosec
@@ -190,13 +191,16 @@ linters:
         linters:
           - gosec
         text: "G101"
-      # G115 (integer overflow on conversion) in server/store: the int -> int32
-      # conversions feed int4 columns with counts and indexes of items the
+      # G115 (integer overflow on conversion) in server/store's derive files:
+      # the int -> int32 conversions in turns.go, reads_turns.go and
+      # artifacts.go feed int4 columns with counts and indexes of items the
       # process holds in memory for one batch (a turn's index, its tool-call,
-      # error and file counts, an event's capture version, an artifact's
-      # occurrence count). Each is bounded by that batch, orders of magnitude
-      # below 2^31; a guard would be dead code.
-      - path: ^server/store/
+      # error and file counts, an artifact's occurrence count). Each is
+      # bounded by that batch, orders of magnitude below 2^31; a guard would
+      # be dead code. The capture-version conversions in store.go are wire
+      # input and are not covered here: ingest.decodeItem bounds the value
+      # to 0..MaxInt32 and each site carries its own //nolint saying so.
+      - path: ^server/store/(turns|reads_turns|artifacts)\.go$
         linters:
           - gosec
         text: "G115"
