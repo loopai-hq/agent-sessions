@@ -60,7 +60,7 @@ ARG REVISION=
 # GHCR (and what makes the package inherit the repository's visibility);
 # `revision` is the full commit so it can be matched against the VCS stamp
 # the fleet page compares; `version`/`created` mirror the -X flags.
-LABEL org.opencontainers.image.source="https://github.com/loopai-hq/agent-sessions" \
+LABEL org.opencontainers.image.source="https://github.com/loopai-hq/loop-sessions" \
       org.opencontainers.image.title="loop-sessions-server" \
       org.opencontainers.image.description="The loop-sessions server: ingests, stores and serves AI coding session transcripts" \
       org.opencontainers.image.licenses="MIT" \

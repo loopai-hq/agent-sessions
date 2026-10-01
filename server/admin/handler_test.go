@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/health"
+	"github.com/loopai-hq/loop-sessions/internal/health"
 )
 
 var testNow = time.Date(2026, 8, 4, 12, 0, 0, 0, time.UTC)

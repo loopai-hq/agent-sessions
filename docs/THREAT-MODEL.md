@@ -151,16 +151,16 @@ Read it first: fetch `install.sh` and `install.sh.sha256` from the same
 release, check one against the other, read the script, then run it:
 
 ```sh
-base=https://github.com/loopai-hq/agent-sessions/releases/latest/download
+base=https://github.com/loopai-hq/loop-sessions/releases/latest/download
 curl -fsSLO "$base/install.sh" && curl -fsSLO "$base/install.sh.sha256"
 sha256sum -c install.sh.sha256      # shasum -a 256 -c on macOS
 less install.sh
-LOOP_SESSIONS_BASE_URL=https://github.com/loopai-hq/agent-sessions/releases/latest \
+LOOP_SESSIONS_BASE_URL=https://github.com/loopai-hq/loop-sessions/releases/latest \
   LOOP_SESSIONS_VERSION=download sh install.sh
 ```
 
 Both scripts are attested by the release workflow (`gh attestation verify
-install.sh --repo loopai-hq/agent-sessions`). The script itself is POSIX
+install.sh --repo loopai-hq/loop-sessions`). The script itself is POSIX
 `sh` with `set -eu`, defines every function before the calls at the
 end (a download truncated before that block executes nothing), fetches with
 `--proto '=https' --tlsv1.2`, refuses to install without a SHA-256 tool,

@@ -12,7 +12,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/loopai-hq/agent-sessions/server/store/derive"
+	"github.com/loopai-hq/loop-sessions/server/store/derive"
 )
 
 // The bounds the contract states, pinned: a sub-batch of at most 5,000

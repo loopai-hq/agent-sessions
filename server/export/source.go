@@ -5,7 +5,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/server/store"
 )
 
 // storeSource adapts the store's plain-typed export reads to Source. The

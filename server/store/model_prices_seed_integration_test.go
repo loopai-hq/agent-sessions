@@ -17,8 +17,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/server/ingest"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/server/ingest"
 )
 
 // seedModelPrices re-applies migration 0004's INSERT.

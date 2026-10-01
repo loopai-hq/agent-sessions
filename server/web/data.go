@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/health"
-	"github.com/loopai-hq/agent-sessions/server/fleet"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/health"
+	"github.com/loopai-hq/loop-sessions/server/fleet"
 )
 
 // Data is everything the dashboard needs from storage.
@@ -382,7 +382,7 @@ type Link struct {
 }
 
 // Label is what the link renders as. The classified short form when there is
-// one — "loopai-hq/agent-sessions#4" reads as a pull request in a way the URL
+// one — "loopai-hq/loop-sessions#4" reads as a pull request in a way the URL
 // does not — and otherwise the URL with its scheme stripped, because "https://"
 // repeated down a column carries no information.
 func (l Link) Label() string {

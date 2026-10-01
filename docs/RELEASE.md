@@ -322,8 +322,8 @@ its digest is attested like the binaries.
 GitHub serves release assets at two permanent URL shapes:
 
 ```
-https://github.com/loopai-hq/agent-sessions/releases/download/vX.Y.Z/<asset>
-https://github.com/loopai-hq/agent-sessions/releases/latest/download/<asset>
+https://github.com/loopai-hq/loop-sessions/releases/download/vX.Y.Z/<asset>
+https://github.com/loopai-hq/loop-sessions/releases/latest/download/<asset>
 ```
 
 Both are `<something>/<segment>/<asset>`, and `install.sh` builds its URLs as
@@ -333,13 +333,13 @@ today, with no code that knows about GitHub, in either of two forms:
 
 ```sh
 # a specific release
-curl -fsSL https://github.com/loopai-hq/agent-sessions/releases/download/vX.Y.Z/install.sh |
-  LOOP_SESSIONS_BASE_URL=https://github.com/loopai-hq/agent-sessions/releases/download \
+curl -fsSL https://github.com/loopai-hq/loop-sessions/releases/download/vX.Y.Z/install.sh |
+  LOOP_SESSIONS_BASE_URL=https://github.com/loopai-hq/loop-sessions/releases/download \
   LOOP_SESSIONS_VERSION=vX.Y.Z sh
 
 # whatever GitHub marks as the latest release
-curl -fsSL https://github.com/loopai-hq/agent-sessions/releases/latest/download/install.sh |
-  LOOP_SESSIONS_BASE_URL=https://github.com/loopai-hq/agent-sessions/releases/latest \
+curl -fsSL https://github.com/loopai-hq/loop-sessions/releases/latest/download/install.sh |
+  LOOP_SESSIONS_BASE_URL=https://github.com/loopai-hq/loop-sessions/releases/latest \
   LOOP_SESSIONS_VERSION=download sh
 ```
 
@@ -394,13 +394,13 @@ a signed statement, stored by GitHub, that this exact digest was produced by
 `release.yml` in this repository from this tag. Verify a downloaded file with
 
 ```sh
-gh attestation verify loop-sessions_linux_amd64 --repo loopai-hq/agent-sessions
+gh attestation verify loop-sessions_linux_amd64 --repo loopai-hq/loop-sessions
 ```
 
 `gh` computes the file's digest, fetches the attestations GitHub holds for
 it, and checks the Sigstore signature and that the signing workflow belongs
 to the repository named by `--repo`. To pin it to the workflow file as well,
-add `--signer-workflow loopai-hq/agent-sessions/.github/workflows/release.yml`.
+add `--signer-workflow loopai-hq/loop-sessions/.github/workflows/release.yml`.
 The image is verified the same way with `oci://ghcr.io/loopai-hq/loop-sessions-server:vX.Y.Z`
 in place of the file.
 
@@ -411,7 +411,7 @@ OIDC identity. The bundle is the `SHA256SUMS.sigstore.json` asset:
 ```sh
 cosign verify-blob \
   --bundle SHA256SUMS.sigstore.json \
-  --certificate-identity https://github.com/loopai-hq/agent-sessions/.github/workflows/release.yml@refs/tags/vX.Y.Z \
+  --certificate-identity https://github.com/loopai-hq/loop-sessions/.github/workflows/release.yml@refs/tags/vX.Y.Z \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   SHA256SUMS
 ```
@@ -457,10 +457,10 @@ is published that was not first shown to rebuild identically. To reproduce
 a published release yourself, clone the repository at the tag and build:
 
 ```sh
-git clone --branch vX.Y.Z https://github.com/loopai-hq/agent-sessions.git
-cd agent-sessions
+git clone --branch vX.Y.Z https://github.com/loopai-hq/loop-sessions.git
+cd loop-sessions
 make release ENDPOINT=
-diff dist/SHA256SUMS <(curl -fsSL https://github.com/loopai-hq/agent-sessions/releases/download/vX.Y.Z/SHA256SUMS)
+diff dist/SHA256SUMS <(curl -fsSL https://github.com/loopai-hq/loop-sessions/releases/download/vX.Y.Z/SHA256SUMS)
 ```
 
 An empty diff means your machine produced the same four binaries GitHub is

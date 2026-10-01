@@ -1,4 +1,4 @@
-module github.com/loopai-hq/agent-sessions
+module github.com/loopai-hq/loop-sessions
 
 go 1.26.0
 

@@ -13,7 +13,7 @@ Do not open a public issue for a security problem.
 
 1. Preferred: use GitHub's private vulnerability reporting. Open the
    repository's **Security** tab and choose **Report a vulnerability**
-   (<https://github.com/loopai-hq/agent-sessions/security/advisories/new>).
+   (<https://github.com/loopai-hq/loop-sessions/security/advisories/new>).
    The report is visible only to the maintainers until it is published.
 2. Otherwise, email `security@loopai.com`.
 
@@ -46,7 +46,7 @@ door on further reports from its sender.
 | `main` | yes, for self-hosters who build from source |
 | anything older than the newest release | no: upgrade; there are no maintained release branches |
 
-Releases are on [GitHub Releases](https://github.com/loopai-hq/agent-sessions/releases)
+Releases are on [GitHub Releases](https://github.com/loopai-hq/loop-sessions/releases)
 and can be verified by digest, build provenance and signature as
 [docs/RELEASE.md](docs/RELEASE.md#verifying-a-release) describes. The server
 image is `ghcr.io/loopai-hq/loop-sessions-server`.

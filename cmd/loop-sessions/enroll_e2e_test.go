@@ -13,7 +13,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/loopai-hq/agent-sessions/internal/config"
+	"github.com/loopai-hq/loop-sessions/internal/config"
 )
 
 // TestReinstallingKeepsTheSameDeviceRow is the test that would have caught the

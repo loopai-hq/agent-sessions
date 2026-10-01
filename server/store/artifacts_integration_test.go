@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/event"
 )
 
 // fileChange builds a file_changed event carrying a diff, which is the only
@@ -177,7 +177,7 @@ func TestIntegrationRedeliveringABatchChangesNothing(t *testing.T) {
 	batch := append(session(t, email, sid),
 		fileChange("fc-1", sid, email, "a.go", "one", 10, base, true),
 	)
-	batch[0].Event.Text = "opened https://github.com/loopai-hq/agent-sessions/pull/4"
+	batch[0].Event.Text = "opened https://github.com/loopai-hq/loop-sessions/pull/4"
 
 	ctx := context.Background()
 	if _, err := s.UpsertEvents(ctx, batch); err != nil {
@@ -219,8 +219,8 @@ func TestIntegrationLinksAreExtractedAndClassified(t *testing.T) {
 	mustPrincipal(t, s, email, RoleMember)
 
 	batch := session(t, email, sid)
-	batch[0].Event.Text = "see https://github.com/loopai-hq/agent-sessions/pull/4 and https://notion.so/example/runbook"
-	batch[1].Event.Text = "again https://github.com/loopai-hq/agent-sessions/pull/4"
+	batch[0].Event.Text = "see https://github.com/loopai-hq/loop-sessions/pull/4 and https://notion.so/example/runbook"
+	batch[1].Event.Text = "again https://github.com/loopai-hq/loop-sessions/pull/4"
 
 	if _, err := s.UpsertEvents(context.Background(), batch); err != nil {
 		t.Fatalf("ingest: %v", err)
@@ -237,7 +237,7 @@ func TestIntegrationLinksAreExtractedAndClassified(t *testing.T) {
 	if got[0].Kind != "pr" {
 		t.Errorf("first link kind = %q, want pr", got[0].Kind)
 	}
-	if got[0].Ref != "loopai-hq/agent-sessions#4" {
+	if got[0].Ref != "loopai-hq/loop-sessions#4" {
 		t.Errorf("ref = %q", got[0].Ref)
 	}
 	if got[0].Occurrences != 2 {
@@ -306,8 +306,8 @@ func TestIntegrationThePerSessionRebuildReproducesTheLivePath(t *testing.T) {
 		fileChange("fc-2", sid, email, "a.go", "two", 11, base.Add(time.Minute), false),
 		fileChange("fc-3", sid, email, "b.go", "bee", 12, base.Add(2*time.Minute), true),
 	)
-	batch[0].Event.Text = "opened https://github.com/loopai-hq/agent-sessions/pull/4 and https://notion.so/x"
-	batch[1].Event.Text = "again https://github.com/loopai-hq/agent-sessions/pull/4"
+	batch[0].Event.Text = "opened https://github.com/loopai-hq/loop-sessions/pull/4 and https://notion.so/x"
+	batch[1].Event.Text = "again https://github.com/loopai-hq/loop-sessions/pull/4"
 
 	ctx := context.Background()
 	if _, err := s.UpsertEvents(ctx, batch); err != nil {

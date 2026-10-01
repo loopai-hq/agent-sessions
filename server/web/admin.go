@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/server/fleet"
+	"github.com/loopai-hq/loop-sessions/server/fleet"
 )
 
 type principalsView struct {

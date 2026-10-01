@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/spool"
+	"github.com/loopai-hq/loop-sessions/internal/spool"
 )
 
 // ---------------------------------------------------------------------------

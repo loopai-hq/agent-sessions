@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/spool"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/spool"
 )
 
 // The lines this package promises the metrics layer. Their names are the
