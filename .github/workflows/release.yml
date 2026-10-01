@@ -11,11 +11,14 @@
 # `make verify`, govulncheck on the shipped binary, the image builds. It is
 # the dry run, and it is what a pull request touching the release path runs.
 # `publish` runs only for a `v*` tag (pushed, or dispatched with dry_run
-# unticked): it builds again from the same tag, attests and signs, pushes
-# the image, and creates the GitHub Release as a draft, uploads every asset,
-# then undrafts it. A draft with all its assets flipped once is the
-# GitHub-native form of the org channel's "binaries first, manifests last"
-# rule, and it is what makes immutable releases safe to turn on.
+# unticked): it builds again from the same tag, attests and signs, creates
+# the GitHub Release as a draft and uploads every asset, then builds,
+# pushes and attests the image, and only then undrafts the release. A draft
+# with all its assets flipped once is the GitHub-native form of the org
+# channel's "binaries first, manifests last" rule, and it is what makes
+# immutable releases safe to turn on. The image goes after the draft so
+# that a failure in the release steps leaves nothing in GHCR to clean up;
+# the recovery note before the draft step says what a failed run leaves.
 #
 # What the public binaries are: built with ENDPOINT empty, so they carry no
 # organisation's server address and ask for --endpoint at install time. The
@@ -92,6 +95,30 @@ jobs:
       - name: govulncheck on the shipped linux/amd64 binary
         run: go run "golang.org/x/vuln/cmd/govulncheck@${GOVULNCHECK_VERSION}" -mode binary dist/loop-sessions_linux_amd64
 
+      # The release-notes script is in this workflow's paths filter so that
+      # a change to it is exercised here, not first on a tag. The newest
+      # CHANGELOG section must extract to a non-empty body (a heading in the
+      # wrong shape would otherwise be found when a release has no notes);
+      # on a tag the script is also run for the tag, and either outcome is
+      # reported, because a prerelease with no section is legitimate and
+      # publish falls back to generated notes.
+      - name: release notes (dry run)
+        run: |
+          newest="$(sed -nE 's/^## \[([0-9]+\.[0-9]+\.[0-9]+[^]]*)\].*/v\1/p' CHANGELOG.md | head -n 1)"
+          test -n "$newest"
+          bash .github/scripts/changelog-section.sh "$newest" > /tmp/notes.md
+          test -s /tmp/notes.md
+          echo "release notes for ${newest} (the newest CHANGELOG section):"
+          cat /tmp/notes.md
+          case "${GITHUB_REF}" in
+            refs/tags/v*)
+              if bash .github/scripts/changelog-section.sh "${GITHUB_REF_NAME}" | grep -q .; then
+                echo "CHANGELOG.md has a section for ${GITHUB_REF_NAME}; publish will use it"
+              else
+                echo "no CHANGELOG.md section for ${GITHUB_REF_NAME}; publish will generate notes"
+              fi ;;
+          esac
+
       - name: build the server image (not pushed)
         run: |
           docker build \
@@ -161,8 +188,11 @@ jobs:
           echo "IMAGE=ghcr.io/${owner}/${IMAGE_NAME}" >> "$GITHUB_ENV"
           echo "BUILD_DATE=$(TZ=UTC git log -1 --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd)" >> "$GITHUB_ENV"
 
+      # VERSION is the tag by name rather than `git describe`, which would
+      # pick one of several tags on the same commit by its own rule; the
+      # stamp check below then compares latest.json against the same TAG.
       - name: build the client from the tag
-        run: make release ENDPOINT= && make verify
+        run: make release ENDPOINT= VERSION="${TAG}" && make verify
 
       - name: the stamp must name this commit and no local changes
         run: |
@@ -211,6 +241,56 @@ jobs:
             --certificate-oidc-issuer https://token.actions.githubusercontent.com \
             dist/SHA256SUMS
 
+      # The CHANGELOG section for this version is the release body when one
+      # exists; otherwise GitHub generates notes from the merged pull requests
+      # using the categories in .github/release.yml.
+      - name: release notes
+        run: |
+          bash .github/scripts/changelog-section.sh "${TAG}" > /tmp/notes.md
+          if [ -s /tmp/notes.md ]; then
+            echo "NOTES_FLAG=--notes-file=/tmp/notes.md" >> "$GITHUB_ENV"
+            cat /tmp/notes.md
+          else
+            echo "NOTES_FLAG=--generate-notes" >> "$GITHUB_ENV"
+            echo "no CHANGELOG.md section for ${TAG}; notes will be generated"
+          fi
+
+      # Order from here: the draft and its assets, then the image, then the
+      # undraft. Nothing is visible to anyone until the last step.
+      #
+      # Recovery when a step fails before the undraft: the run leaves a
+      # draft release (and, once the image step has run, image tags in
+      # GHCR), but no published release. Delete the draft in the Releases
+      # page or with `gh release delete vX.Y.Z --yes` (the tag stays), fix
+      # what failed, and re-run the workflow; the guard above refuses to
+      # start while the draft exists, because `gh release view` finds
+      # drafts too. Immutable releases bind a release's assets and tag only
+      # once it is undrafted, so deleting and remaking a draft is allowed.
+      # A re-run rebuilds the image, and its digest may differ (layer
+      # mtimes come from the checkout); the tags are re-pointed to the new
+      # digest and the old attestation refers to an image nothing names.
+      - name: create the release as a draft and upload every asset
+        run: |
+          gh release create "${TAG}" \
+            --draft --verify-tag \
+            --title "${TAG}" \
+            --prerelease="${PRERELEASE}" \
+            "${NOTES_FLAG}"
+          gh release upload "${TAG}" \
+            dist/loop-sessions_darwin_amd64 \
+            dist/loop-sessions_darwin_arm64 \
+            dist/loop-sessions_linux_amd64 \
+            dist/loop-sessions_linux_arm64 \
+            dist/SHA256SUMS \
+            dist/SHA256SUMS.sigstore.json \
+            dist/latest.json \
+            install/install.sh \
+            install/install.sh.sha256 \
+            install/uninstall.sh \
+            install/uninstall.sh.sha256 \
+            THIRD_PARTY_NOTICES.md
+          gh release view "${TAG}" --json isDraft,assets --jq '"draft: \(.isDraft), assets: \(.assets | length)"'
+
       - name: push the server image to GHCR
         run: |
           echo "${GH_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
@@ -234,39 +314,14 @@ jobs:
           subject-digest: ${{ env.IMAGE_DIGEST }}
           push-to-registry: true
 
-      # The CHANGELOG section for this version is the release body when one
-      # exists; otherwise GitHub generates notes from the merged pull requests
-      # using the categories in .github/release.yml.
-      - name: release notes
-        run: |
-          bash .github/scripts/changelog-section.sh "${TAG}" > /tmp/notes.md
-          if [ -s /tmp/notes.md ]; then
-            echo "NOTES_FLAG=--notes-file=/tmp/notes.md" >> "$GITHUB_ENV"
-            cat /tmp/notes.md
-          else
-            echo "NOTES_FLAG=--generate-notes" >> "$GITHUB_ENV"
-            echo "no CHANGELOG.md section for ${TAG}; notes will be generated"
-          fi
+      # The same check a person runs (RELEASE.md, "Verifying a release"),
+      # against the digest just pushed, before the release is undrafted:
+      # an image whose provenance does not verify is never behind a
+      # published release.
+      - name: verify the image attestation
+        run: gh attestation verify "oci://${IMAGE}@${IMAGE_DIGEST}" --repo "${GITHUB_REPOSITORY}"
 
-      - name: create the release as a draft, upload every asset, then publish
+      - name: publish the release
         run: |
-          gh release create "${TAG}" \
-            --draft --verify-tag \
-            --title "${TAG}" \
-            --prerelease="${PRERELEASE}" \
-            "${NOTES_FLAG}"
-          gh release upload "${TAG}" \
-            dist/loop-sessions_darwin_amd64 \
-            dist/loop-sessions_darwin_arm64 \
-            dist/loop-sessions_linux_amd64 \
-            dist/loop-sessions_linux_arm64 \
-            dist/SHA256SUMS \
-            dist/SHA256SUMS.sigstore.json \
-            dist/latest.json \
-            install/install.sh \
-            install/install.sh.sha256 \
-            install/uninstall.sh \
-            install/uninstall.sh.sha256 \
-            THIRD_PARTY_NOTICES.md
           gh release edit "${TAG}" --draft=false --latest="$([ "${PRERELEASE}" = "false" ] && echo true || echo false)"
           gh release view "${TAG}"
