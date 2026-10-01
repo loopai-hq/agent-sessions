@@ -4,30 +4,34 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Each
 released section's heading is `## [X.Y.Z] - YYYY-MM-DD` exactly, because the
-release workflow extracts it for the release notes.
+release workflow extracts it for the release notes; the date is the day the
+tag is cut and is set in the same change as the tag.
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-09-30
-
-### Changed
-- The repository is now `loopai-hq/loop-sessions`, matching the binary and
-  the product name; the Go module path follows
-  (`github.com/loopai-hq/loop-sessions`). The old `agent-sessions` URLs
-  redirect.
+## [0.1.0] - 2026-10-01
 
 The first public release: the client agent, the server, the dashboard and
-the example deployments, with releases people can download and verify.
+the example deployments, with releases people can download and verify. The
+repository is `loopai-hq/loop-sessions`, matching the binary and the
+product name, and the Go module path follows
+(`github.com/loopai-hq/loop-sessions`); GitHub redirects the old
+`agent-sessions` URLs once the rename is done (the first item of the
+pre-tag checklist in `docs/MAINTAINING.md`).
 
 ### Added
 - GitHub Releases for every `vX.Y.Z` tag, with the four agent binaries
   (`loop-sessions_{darwin,linux}_{amd64,arm64}`), `SHA256SUMS` and its
   keyless cosign signature `SHA256SUMS.sigstore.json`, `latest.json`,
   `install.sh` and `uninstall.sh` with their digests, and
-  `THIRD_PARTY_NOTICES.md`; every asset attested with build provenance
-  (`gh attestation verify <asset> --repo loopai-hq/loop-sessions`).
+  `THIRD_PARTY_NOTICES.md`. Every binary named in `SHA256SUMS`, both
+  scripts and the image digest are attested with build provenance
+  (`gh attestation verify <asset> --repo loopai-hq/loop-sessions`);
+  `SHA256SUMS` is signed with cosign; the remaining assets are covered by
+  the checksums and the signature, not by an attestation of their own.
 - The server image `ghcr.io/loopai-hq/loop-sessions-server`, tagged
-  `vX.Y.Z`, `sha-<full commit>` and `latest`, with OCI labels, attested.
+  `vX.Y.Z`, `sha-<full commit>` and `latest`, with OCI labels, attested;
+  the release workflow verifies the attestation before it publishes.
 - The installer works from GitHub Releases without a channel host
   (`LOOP_SESSIONS_BASE_URL=.../releases/latest LOOP_SESSIONS_VERSION=download`).
 - `pause --for <duration>`: capture and delivery pause for the period and

@@ -41,10 +41,19 @@ Route these to a team address or a channel, never to one login:
 None of these can be set from a pull request. The pre-tag checklist below
 lists the order; this is the what.
 
-- **Rulesets on `main`**: require the `ci` jobs (`lint`, `test`,
-  `integration`, `build`, `govulncheck`, `gitleaks`) and `identifier-gate`
-  to pass, require a pull request, linear history, no force-push, no
-  deletion. Add `dependency-review` for pull requests.
+- **Ruleset on `main`**, created once the rename pull request's merge
+  commit is in (its CI jobs are the ones required): require these checks
+  to pass, under the names the matrix jobs report, which are not the job
+  ids: `lint`, `test (ubuntu-latest)`, `test (macos-latest)`,
+  `integration (15)`, `integration (17)`, `build`, `govulncheck`,
+  `gitleaks`, and `identifier-gate`'s `gate`. Require a pull request, no
+  force-push, no deletion. Do not require linear history: a long-lived
+  branch such as the rename lands as a merge commit by design, and the
+  requirement would refuse it. Add `dependency-review` for pull requests.
+- **Ruleset on tags `v*`**: restrict creation, update and deletion to the
+  maintainers (the ruleset's bypass list and nobody else). A `v*` tag is
+  what runs `publish`, with the signing identity and GHCR credentials, so
+  without this anyone with write access can cut a signed release.
 - **Code scanning**: enable CodeQL **default setup** (not an advanced
   workflow; the two conflict and this repository ships none). Scorecard's
   SARIF lands in the same tab.
@@ -92,8 +101,12 @@ The parts that need a maintainer's judgement:
    `dry_run` ticked) on the commit you will tag; it builds, verifies,
    proves reproducibility and builds the image without publishing.
 3. Tag `vX.Y.Z` on `main` and push the tag. The workflow creates the release
-   as a draft, uploads every asset, and undrafts it; a `-rc` suffix makes it
-   a pre-release, which GitHub's `latest` alias skips.
+   as a draft, uploads every asset, pushes and attests the image, and
+   undrafts it; a `-rc` suffix makes it a pre-release, which GitHub's
+   `latest` alias and the image's `latest` tag both skip. For the first
+   release, and after any change to the release path, cut `vX.Y.Z-rc.1`
+   first and verify it as the checklist below says; a failed tag run is
+   recovered as [RELEASE.md](RELEASE.md#cutting-a-release) step 4 describes.
 4. Update the supported-versions table in [SECURITY.md](../SECURITY.md).
 
 Public binaries are built with `ENDPOINT` empty; an organisation that stamps
@@ -139,10 +152,16 @@ bytes on every run; that is harmless.
 
 **Before the first tag (and before undrafting the first pull request):**
 
+- [ ] Rename the repository to `loopai-hq/loop-sessions` in Settings
+      before merging the rename pull request: the tree, the module path,
+      the badges and the image's `source` label already assume the new
+      name, and GitHub redirects the old name to the new, never the other
+      way. Re-run CI on the renamed repository, then merge.
+- [ ] Create the `main` ruleset (the check names above, pull request
+      required, no force-push, no linear-history requirement) and the `v*`
+      tag ruleset, once the merge commit is in.
 - [ ] Enable CodeQL default setup, secret scanning with push protection,
       private vulnerability reporting and the dependency graph.
-- [ ] Create the `main` ruleset (required checks, pull request, linear
-      history, no force-push).
 - [ ] Enable Discussions and switch the questions links.
 - [ ] Enable immutable releases.
 - [ ] Route Dependabot, code-scanning, secret-scanning and workflow-failure
@@ -150,6 +169,14 @@ bytes on every run; that is harmless.
 - [ ] Add the `IDENTIFIER_GATE_PATTERNS` secret and confirm the gate log
       says it is using the extended pattern on a maintainer-authored PR.
 - [ ] Dry-run the release workflow.
+- [ ] Cut `v0.1.0-rc.1` first. A hyphenated tag takes the prerelease path
+      (no `latest` release, no `latest` image tag), so it exercises
+      `publish` end to end, signing and GHCR included, without moving what
+      installers resolve. From a laptop with no account, run the three
+      verification commands in RELEASE.md against every asset and
+      `gh attestation verify oci://ghcr.io/loopai-hq/loop-sessions-server@<digest>`
+      against the image, and run both installer one-liners from README
+      against the release. Only when all of that passes, tag `v0.1.0`.
 - [ ] Set homepage, description, topics and the social preview.
 
 **After a release:**
