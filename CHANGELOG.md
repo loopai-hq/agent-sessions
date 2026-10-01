@@ -34,10 +34,11 @@ the example deployments, with releases people can download and verify.
   resume on their own; `resume` ends it early; `status` and `doctor` show
   the deadline, and the health report stops reporting paused once it has
   passed (no new wire field). New config field `paused_until`.
-- `install` and `status` print who can read captured sessions (the owner,
-  the server's admins, a colleague through a shared link), that every read
-  by anyone but the owner is logged, and that retention is set by the
-  operator.
+- `install` and `status` print who can read captured sessions: the owner
+  and the server's admins, who also see every session's first prompt and
+  metadata in the list; a colleague only through a share link the owner or
+  an admin creates; a full read of someone else's session is written to the
+  access log; retention and any export are the operator's decision.
 - `mirror` is listed in `loop-sessions help`.
 - CI: golangci-lint v2 with a curated configuration (`.golangci.yml`,
   depguard holding the client to the standard library), a macOS test leg,

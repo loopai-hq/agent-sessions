@@ -201,15 +201,18 @@ chose to skip, and anything captured while the agent is paused.
 
 `install` prints this before you sign in, and `status` repeats it:
 
-> Your captured sessions can be read by you and by the server's admins, and
-> by a colleague only through a link you share; every read by anyone but you
-> is logged in the admin access log, and how long sessions are kept is set
-> by the server operator.
+> Your captured sessions can be read by you and by the server's admins, who
+> also see the first prompt and metadata of every session in the list;
+> opening someone else's full session is recorded in the access log the
+> admins can see. A colleague can read one of your sessions only through a
+> share link that you or an admin create. How long sessions are kept, and
+> whether anything is exported, is decided by the server operator.
 
 Colleagues cannot browse your sessions: a member of the server sees their
-own work and what has been shared with them, and nothing else. What the
-operator holds, and the controls they have, are in
-[docs/DATA-PROTECTION.md](../docs/DATA-PROTECTION.md).
+own work and what has been shared with them, and nothing else. Admins see
+every session in the list, first prompt included, and that list is not
+audited; opening one is. What the operator holds, and the controls they
+have, are in [docs/DATA-PROTECTION.md](../docs/DATA-PROTECTION.md).
 
 You can see the current state at any time:
 

@@ -12,13 +12,15 @@ the facts below are what the code does.
 
 ## What the engineer is told
 
-`loop-sessions install` prints, before sign-in, exactly this sentence, and
+`loop-sessions install` prints, before sign-in, exactly this text, and
 `loop-sessions status` repeats it:
 
-> Your captured sessions can be read by you and by the server's admins, and
-> by a colleague only through a link you share; every read by anyone but you
-> is logged in the admin access log, and how long sessions are kept is set by
-> the server operator.
+> Your captured sessions can be read by you and by the server's admins, who
+> also see the first prompt and metadata of every session in the list;
+> opening someone else's full session is recorded in the access log the
+> admins can see. A colleague can read one of your sessions only through a
+> share link that you or an admin create. How long sessions are kept, and
+> whether anything is exported, is decided by the server operator.
 
 It is printed before sign-in because it is part of what the person is
 agreeing to. `install` also prints every path it will touch, what it found
@@ -35,8 +37,8 @@ whether to trust it and lists the same inventory.
 | Health reports | the agent, on a fixed cadence | `health_reports`, hourly rollups, `health_latest` | hostname, OS and architecture, agent version and build, uptime, spool and disk counts, which harnesses were found and their versions, whether capture is paused, the agent's conditions. No session ids, project paths or prompt text, by construction (`internal/health`) |
 | Enrolment | the sign-in exchange at `install` | `principals`, `devices`, `device_tokens` | email, role, display name, who added the row and when; per device the hostname, OS, architecture, agent version, enrolled and last-seen times; a hash of the device token, never the token |
 | Usage and cost | ingest, from the events' token counts and `model_prices` | `usage_ledger` | per person, per model, tokens and derived cost |
-| Reads of other people's sessions | every read whose viewer is not the owner | `access_log` | viewer, session id, owner, how (`admin` or `share`), when |
-| Shares | a person sharing their own session | `shares` | who shared which session with which colleague (or with any signed-in employee), the link token, expiry, revocation |
+| Reads of other people's sessions | every full read (the session page, its timeline, events, turns, and a search that finds it) whose viewer is not the owner; the session list is not audited | `access_log` | viewer, session id, owner, how (`admin` or `share`), when |
+| Shares | the owner or an admin sharing a session | `shares` | who shared which session with which colleague (or with any signed-in employee), the link token, expiry, revocation |
 | Skill usage | ingest, and emitters that are not a laptop | `skill_invocations` and the catalog tables | which skill a person or platform invoked, when, with what outcome |
 | Slack mirror | only when a person turns it on | `slack_prefs`, `slack_posts`, `slack_groups` | the person's mirror preference and which sessions were posted where |
 | Admin actions | the roster and fleet pages | `admin_actions`, `principal_changes`, `fleet_mutes` | who promoted, disabled, muted whom, and when |
@@ -64,7 +66,7 @@ learn that a colleague ran something.
 | Role | Sees | Recorded |
 |---|---|---|
 | Member (the default for any allowed-domain account on first sign-in) | their own sessions, and sessions shared with them or with everyone | a read through a share writes an `access_log` row (`via = share`) |
-| Admin | every session, the fleet page, the roster, the access log | every read of someone else's session writes an `access_log` row (`via = admin`) in the same transaction as the read, so an admin cannot read without leaving the row |
+| Admin | every session, the fleet page, the roster, the access log; the session list shows every person's sessions with their first prompt and metadata, and an admin can create a share link for any session | opening someone else's session (the page, timeline, events, turns, or a search that finds it) writes an `access_log` row (`via = admin`) in the same transaction as the read, so an admin cannot read a transcript without leaving the row; browsing the list, which shows first prompts, writes none (`store.ListSessions` says why) |
 | Owner | their own sessions | no row: reading your own work is not an access event |
 
 The access log is visible to admins at `/admin/access`. Admin actions on the
@@ -102,6 +104,14 @@ may do; a disabled row is refused even though its domain is allowed.
 - **Scrubbing**: twenty credential kinds on the laptop, the same rules again
   at ingest, and a count of what the agent missed so a stale agent is
   visible.
+- **Export**: off unless you configure it. The `export` subcommand
+  (`server/export`, the `EXPORT_*` variables in
+  [OPERATIONS.md](OPERATIONS.md#configuration)) copies sessions, message
+  text and event bodies (without the raw transcript line) to a BigQuery
+  dataset you own, each row carrying the owner and the addresses allowed to
+  see it. Whoever can query that dataset reads it there, and the access log
+  does not see those reads: the dataset's own access control and audit are
+  yours to set.
 
 ## Controls the engineer has
 
