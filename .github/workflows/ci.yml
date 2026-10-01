@@ -238,3 +238,8 @@ jobs:
         with:
           fail-on-severity: moderate
           allow-licenses: MIT, BSD-2-Clause, BSD-3-Clause, ISC, Apache-2.0
+          # golang.org/x modules carry Google's PATENTS grant beside their BSD-3
+          # licence, which the action reports as a non-SPDX expression
+          # (LicenseRef-scancode-google-patent-license-golang) and rejects.
+          # The grant only widens what BSD-3 allows; both are BSD-3 for us.
+          allow-dependencies-licenses: pkg:golang/golang.org/x/sync, pkg:golang/golang.org/x/text
