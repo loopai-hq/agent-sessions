@@ -1429,7 +1429,9 @@ func (s *Store) insertEvents(ctx context.Context, q Queryer, items []Ingest) (ma
 		}
 		tools = append(tools, toolName)
 		bodies = append(bodies, body)
-		captureVersions = append(captureVersions, int32(it.Event.CaptureVersion))
+		// capture_version is int4; ingest.decodeItem refuses a value outside
+		// 0..MaxInt32 before the store sees it, so the conversion is exact.
+		captureVersions = append(captureVersions, int32(it.Event.CaptureVersion)) //nolint:gosec // G115: bounded by ingest validation, see above
 		k := keys[i]
 		promptIDs = append(promptIDs, k.prompt)
 		recordUUIDs = append(recordUUIDs, k.record)
@@ -1666,7 +1668,8 @@ func (s *Store) upgradeByIdentity(ctx context.Context, q Queryer, items []Ingest
 			// Same id: the ordinary insert's version guard decides.
 			continue
 		}
-		if int32(it.Event.CaptureVersion) <= version[storedID] {
+		// Exact: ingest.decodeItem bounds capture_version to 0..MaxInt32.
+		if int32(it.Event.CaptureVersion) <= version[storedID] { //nolint:gosec // G115: bounded by ingest validation, see above
 			continue
 		}
 		body, err := ingestBody(it)
@@ -1683,7 +1686,7 @@ func (s *Store) upgradeByIdentity(ctx context.Context, q Queryer, items []Ingest
 		upBodies = append(upBodies, body)
 		upModels = append(upModels, it.Event.Model)
 		upTools = append(upTools, toolName)
-		upVersions = append(upVersions, int32(it.Event.CaptureVersion))
+		upVersions = append(upVersions, int32(it.Event.CaptureVersion)) //nolint:gosec // G115: bounded by ingest validation, see insertEvents
 		upPrompt = append(upPrompt, k.prompt)
 		upRecord = append(upRecord, k.record)
 		upParent = append(upParent, k.parentRecord)
