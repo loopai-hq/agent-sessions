@@ -42,9 +42,9 @@ door on further reports from its sender.
 
 | Version | Supported |
 |---|---|
-| `v0.1.0` and later `v0.x` releases | yes: fixes land on `main` and ship in the next release; the newest release is the one to run |
+| the newest release | yes: fixes land on `main` and ship in the next release |
 | `main` | yes, for self-hosters who build from source |
-| anything older than the newest release | no: upgrade; there are no maintained release branches |
+| any older release | no: upgrade; there are no maintained release branches |
 
 Releases are on [GitHub Releases](https://github.com/loopai-hq/loop-sessions/releases)
 and can be verified by digest, build provenance and signature as

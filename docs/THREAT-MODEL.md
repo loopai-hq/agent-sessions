@@ -156,8 +156,16 @@ curl -fsSLO "$base/install.sh" && curl -fsSLO "$base/install.sh.sha256"
 sha256sum -c install.sh.sha256      # shasum -a 256 -c on macOS
 less install.sh
 LOOP_SESSIONS_BASE_URL=https://github.com/loopai-hq/loop-sessions/releases/latest \
-  LOOP_SESSIONS_VERSION=download sh install.sh
+  LOOP_SESSIONS_VERSION=download \
+  LOOP_SESSIONS_ENDPOINT=https://sessions.example.com sh install.sh
 ```
+
+Run from a terminal rather than a pipe, the script goes on to sign you in
+with `loop-sessions install`, and a public binary carries no server
+address, so the endpoint is part of the command (the piped one-liner
+stops before sign-in and tells you to run `install --endpoint` yourself).
+`LOOP_SESSIONS_NO_ENROLL=1` in place of the endpoint installs the binary
+and leaves sign-in for later.
 
 Both scripts are attested by the release workflow (`gh attestation verify
 install.sh --repo loopai-hq/loop-sessions`). The script itself is POSIX

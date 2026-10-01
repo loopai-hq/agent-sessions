@@ -272,6 +272,7 @@ outcome than a hook entry that lingers for a minute.
 | `LOOP_SESSIONS_VERSION` | `latest` | the path segment under the base: a channel (`latest`, `canary`) on an organisation's host, `download` under GitHub's `releases/latest`, or a tag under `releases/download`; the script validates nothing about it |
 | `LOOP_SESSIONS_BIN_DIR` | `~/.local/bin` | install somewhere else |
 | `LOOP_SESSIONS_NO_ENROLL` | unset | set to `1` to skip sign-in |
+| `LOOP_SESSIONS_ENDPOINT` | unset | not read by the script, but inherited by the `loop-sessions install` it runs when it has a terminal: a release binary carries no server address and needs this (or `--endpoint`) to sign in |
 
 Downloads are HTTPS-only, including across redirects, so a server cannot
 downgrade the connection partway through. Plain HTTP is permitted only for

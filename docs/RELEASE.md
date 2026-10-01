@@ -186,6 +186,7 @@ nobody chose.
 | `LOOP_SESSIONS_VERSION` | `latest` | the channel (`latest` or `canary`); the script uses it as a path segment and validates nothing about it, which is what lets a GitHub tag or `download` stand in for a channel (see [GitHub Releases](#github-releases)) |
 | `LOOP_SESSIONS_BIN_DIR` | `~/.local/bin` | where the binary lands |
 | `LOOP_SESSIONS_NO_ENROLL` | unset | `1` skips the sign-in hand-off |
+| `LOOP_SESSIONS_ENDPOINT` | unset | not read by the script; inherited by the `loop-sessions install` it hands off to, which needs it (or `--endpoint`) when the binary carries no stamped endpoint, as a GitHub release binary does not |
 
 and then, in order (`download_and_verify`, `install_binary`):
 
