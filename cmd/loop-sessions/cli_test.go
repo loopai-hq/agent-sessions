@@ -356,4 +356,22 @@ func TestInstallAndStatusSayWhoCanRead(t *testing.T) {
 	if !strings.Contains(status, whoCanRead) {
 		t.Fatalf("status did not repeat it:\n%s", status)
 	}
+	// The facts the text must keep stating, each one a thing the server
+	// enforces (see the comment on whoCanRead): admins see the list including
+	// the first prompt, a full read of someone else's session is audited, a
+	// share needs the owner or an admin, retention and export are the
+	// operator's.
+	for _, want := range []string{
+		"server's admins",
+		"first prompt",
+		"opening someone else's full session is recorded in the access log",
+		"share link that you or an admin create",
+		"How long sessions are kept",
+		"exported",
+		"server operator",
+	} {
+		if !strings.Contains(whoCanRead, want) {
+			t.Fatalf("whoCanRead no longer says %q:\n%s", want, whoCanRead)
+		}
+	}
 }

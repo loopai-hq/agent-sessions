@@ -99,10 +99,12 @@ browser, not the agent: the sign-in page loads the Firebase SDK from
 names exactly those origins.
 
 Who can read a captured session is what `install` and `status` print: **you
-and the server's admins, and a colleague only through a link you share; every
-read by anyone but you is logged in the admin access log, and how long
-sessions are kept is set by the server operator.** The data inventory, the
-audit row and the retention controls are in
+and the server's admins, who also see the first prompt and metadata of every
+session in the list; opening someone else's full session is recorded in the
+access log the admins can see. A colleague can read one of your sessions only
+through a share link that you or an admin create. How long sessions are kept,
+and whether anything is exported, is decided by the server operator.** The
+data inventory, the audit row, the export and the retention controls are in
 [docs/DATA-PROTECTION.md](docs/DATA-PROTECTION.md).
 
 ## How this differs from Claude Code's own telemetry

@@ -98,12 +98,16 @@ func main() {
 	}
 }
 
-// whoCanRead is the sentence install and status both print about where captured
-// sessions go. It states what the server enforces, no more: store.canRead lets
-// a session be read by its owner, by an admin, or through a share link, and
-// store.recordAccess writes every read by anyone but the owner to the access
-// log an admin can list; retention is the server's own setting.
-const whoCanRead = "Your captured sessions can be read by you and by the server's admins, and by a colleague only through a link you share; every read by anyone but you is logged in the admin access log, and how long sessions are kept is set by the server operator."
+// whoCanRead is the text install and status both print about where captured
+// sessions go. It states what the server enforces, no more, and each clause
+// names its code: store.canRead admits the owner, an admin and the holder of
+// a live share; store.ListSessions returns every session's first prompt and
+// metadata to an admin and writes no access_log row; GetSession, GetTimeline,
+// GetEvents, the turns view and search call store.recordAccess for any viewer
+// but the owner; store.CreateShare accepts the owner or an admin; retention
+// (server/app/config.go) and the BigQuery export (server/export) are the
+// operator's settings. Change the code and this text together.
+const whoCanRead = "Your captured sessions can be read by you and by the server's admins, who also see the first prompt and metadata of every session in the list; opening someone else's full session is recorded in the access log the admins can see. A colleague can read one of your sessions only through a share link that you or an admin create. How long sessions are kept, and whether anything is exported, is decided by the server operator."
 
 func usage(w io.Writer) {
 	fmt.Fprint(w, `loop-sessions - collate your local AI coding sessions
