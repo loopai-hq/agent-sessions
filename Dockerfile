@@ -32,6 +32,12 @@ COPY . .
 # cheaper than rewriting this file when it does.
 ARG MAIN_PKG=./server/cmd/loop-sessions-server
 ARG VERSION=dev
+# BUILD_DATE is RFC 3339 UTC, the commit time by the Makefile's rule. There
+# is no fallback here because a Dockerfile cannot compute one that the LABEL
+# below would also see; every caller (ci.yml, release.yml, cloudbuild.yaml,
+# the deploy README) computes it from git with a wall-clock fallback for a
+# tree without .git. Empty is tolerated, not wanted: the server then shows
+# no build time on the fleet page and the `created` label is empty.
 ARG BUILD_DATE=
 
 # CGO off produces a static binary, which is the only kind the distroless

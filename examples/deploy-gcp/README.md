@@ -312,8 +312,8 @@ there is no client credential anywhere in the flow.
 ```bash
 docker build \
   --build-arg VERSION="$TAG" \
-  --build-arg BUILD_DATE="$(TZ=UTC git log -1 --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd)" \
-  --build-arg REVISION="$(git rev-parse HEAD)" \
+  --build-arg BUILD_DATE="$(TZ=UTC git log -1 --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  --build-arg REVISION="$(git rev-parse HEAD 2>/dev/null || true)" \
   -t "${REGION}-docker.pkg.dev/${PROJECT}/loop-sessions/server:${TAG}" \
   .
 
