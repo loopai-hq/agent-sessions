@@ -15,7 +15,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/loopai-hq/agent-sessions/server/ingest"
+	"github.com/loopai-hq/loop-sessions/server/ingest"
 )
 
 // RegisterIngest restates the ingest handler's route list, because the

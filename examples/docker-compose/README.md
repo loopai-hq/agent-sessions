@@ -146,8 +146,8 @@ make build
 ./loop-sessions install --endpoint http://127.0.0.1:8080
 
 # or the released binary, verified against SHA256SUMS by the installer
-curl -fsSL https://github.com/loopai-hq/agent-sessions/releases/latest/download/install.sh |
-  LOOP_SESSIONS_BASE_URL=https://github.com/loopai-hq/agent-sessions/releases/latest \
+curl -fsSL https://github.com/loopai-hq/loop-sessions/releases/latest/download/install.sh |
+  LOOP_SESSIONS_BASE_URL=https://github.com/loopai-hq/loop-sessions/releases/latest \
   LOOP_SESSIONS_VERSION=download sh
 loop-sessions install --endpoint http://127.0.0.1:8080
 ```

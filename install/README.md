@@ -9,8 +9,8 @@ leaves your machine, who can read it, and how to remove it.
 **From GitHub Releases**, which is where the public downloads it:
 
 ```sh
-curl -fsSL https://github.com/loopai-hq/agent-sessions/releases/latest/download/install.sh |
-  LOOP_SESSIONS_BASE_URL=https://github.com/loopai-hq/agent-sessions/releases/latest \
+curl -fsSL https://github.com/loopai-hq/loop-sessions/releases/latest/download/install.sh |
+  LOOP_SESSIONS_BASE_URL=https://github.com/loopai-hq/loop-sessions/releases/latest \
   LOOP_SESSIONS_VERSION=download sh
 loop-sessions install --endpoint https://sessions.example.com
 ```
@@ -40,7 +40,7 @@ shell with no dependencies beyond `curl` or `wget`, `awk`, `sed`, and
 check one against the other, and read it:
 
 ```sh
-base=https://github.com/loopai-hq/agent-sessions/releases/latest/download
+base=https://github.com/loopai-hq/loop-sessions/releases/latest/download
 curl -fsSLO "$base/install.sh" && curl -fsSLO "$base/install.sh.sha256"
 sha256sum -c install.sh.sha256      # shasum -a 256 -c install.sh.sha256 on macOS
 less install.sh
@@ -135,7 +135,7 @@ If you would rather not trust the script's own check, do it yourself:
 
 ```sh
 # 1. fetch the manifest and the binary for your platform
-base=https://github.com/loopai-hq/agent-sessions/releases/latest/download
+base=https://github.com/loopai-hq/loop-sessions/releases/latest/download
 curl -fsSLO "$base/SHA256SUMS"
 curl -fsSLO "$base/loop-sessions_darwin_arm64"
 
@@ -158,7 +158,7 @@ same bytes and the same `SHA256SUMS`, and CI proves it on every commit by
 building twice. You can rebuild and compare:
 
 ```sh
-git clone --branch vX.Y.Z https://github.com/loopai-hq/agent-sessions && cd agent-sessions
+git clone --branch vX.Y.Z https://github.com/loopai-hq/loop-sessions && cd loop-sessions
 make release ENDPOINT=
 shasum -a 256 dist/loop-sessions_darwin_arm64
 ```
@@ -265,7 +265,7 @@ outcome than a hook entry that lingers for a minute.
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `LOOP_SESSIONS_BASE_URL` | none, **required** | where releases are fetched from: `https://github.com/loopai-hq/agent-sessions/releases/latest` or `https://sessions.example.com/dl` |
+| `LOOP_SESSIONS_BASE_URL` | none, **required** | where releases are fetched from: `https://github.com/loopai-hq/loop-sessions/releases/latest` or `https://sessions.example.com/dl` |
 | `LOOP_SESSIONS_VERSION` | `latest` | the path segment under the base: a channel (`latest`, `canary`) on an organisation's host, `download` under GitHub's `releases/latest`, or a tag under `releases/download`; the script validates nothing about it |
 | `LOOP_SESSIONS_BIN_DIR` | `~/.local/bin` | install somewhere else |
 | `LOOP_SESSIONS_NO_ENROLL` | unset | set to `1` to skip sign-in |

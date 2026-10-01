@@ -10,6 +10,12 @@ release workflow extracts it for the release notes.
 
 ## [0.1.0] - 2026-09-30
 
+### Changed
+- The repository is now `loopai-hq/loop-sessions`, matching the binary and
+  the product name; the Go module path follows
+  (`github.com/loopai-hq/loop-sessions`). The old `agent-sessions` URLs
+  redirect.
+
 The first public release: the client agent, the server, the dashboard and
 the example deployments, with releases people can download and verify.
 
@@ -19,7 +25,7 @@ the example deployments, with releases people can download and verify.
   keyless cosign signature `SHA256SUMS.sigstore.json`, `latest.json`,
   `install.sh` and `uninstall.sh` with their digests, and
   `THIRD_PARTY_NOTICES.md`; every asset attested with build provenance
-  (`gh attestation verify <asset> --repo loopai-hq/agent-sessions`).
+  (`gh attestation verify <asset> --repo loopai-hq/loop-sessions`).
 - The server image `ghcr.io/loopai-hq/loop-sessions-server`, tagged
   `vX.Y.Z`, `sha-<full commit>` and `latest`, with OCI labels, attested.
 - The installer works from GitHub Releases without a channel host
@@ -111,5 +117,5 @@ the example deployments, with releases people can download and verify.
   device token can do, the third-party script on the sign-in page, and the
   read-then-run form of the installer.
 
-[Unreleased]: https://github.com/loopai-hq/agent-sessions/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/loopai-hq/agent-sessions/releases/tag/v0.1.0
+[Unreleased]: https://github.com/loopai-hq/loop-sessions/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/loopai-hq/loop-sessions/releases/tag/v0.1.0

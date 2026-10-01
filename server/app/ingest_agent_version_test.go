@@ -12,10 +12,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/health"
-	"github.com/loopai-hq/agent-sessions/internal/spool"
-	"github.com/loopai-hq/agent-sessions/server/ingest"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/health"
+	"github.com/loopai-hq/loop-sessions/internal/spool"
+	"github.com/loopai-hq/loop-sessions/server/ingest"
 )
 
 // uaStore is the ingest port as the adapter's callers see it, recording the

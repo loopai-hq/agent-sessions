@@ -38,7 +38,7 @@
     "links": [
       {
         "displayName": "Runbook: parked",
-        "url": "https://github.com/loopai-hq/agent-sessions/blob/main/examples/deploy-gcp/README.md#runbook-parked"
+        "url": "https://github.com/loopai-hq/loop-sessions/blob/main/examples/deploy-gcp/README.md#runbook-parked"
       },
       {
         "displayName": "/admin/fleet",

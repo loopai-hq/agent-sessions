@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/health"
+	"github.com/loopai-hq/loop-sessions/internal/health"
 )
 
 // healthClock is the "now" the rollup tests measure against, on the hour so

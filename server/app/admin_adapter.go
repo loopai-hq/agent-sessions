@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/server/admin"
-	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/server/admin"
+	"github.com/loopai-hq/loop-sessions/server/store"
 )
 
 // adminStore adapts the store to the admin package's persistence port.

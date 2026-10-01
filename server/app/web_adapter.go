@@ -34,11 +34,11 @@ import (
 	"sort"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
-	"github.com/loopai-hq/agent-sessions/internal/health"
-	"github.com/loopai-hq/agent-sessions/server/fleet"
-	"github.com/loopai-hq/agent-sessions/server/store"
-	"github.com/loopai-hq/agent-sessions/server/web"
+	"github.com/loopai-hq/loop-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/health"
+	"github.com/loopai-hq/loop-sessions/server/fleet"
+	"github.com/loopai-hq/loop-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/server/web"
 )
 
 // webData adapts the store to the dashboard's persistence port.

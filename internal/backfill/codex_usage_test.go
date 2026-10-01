@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/loopai-hq/agent-sessions/internal/event"
+	"github.com/loopai-hq/loop-sessions/internal/event"
 )
 
 // Codex token accounting. Codex sessions were tool-rich and token-free from the

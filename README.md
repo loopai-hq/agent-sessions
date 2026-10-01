@@ -10,15 +10,15 @@ list, full transcripts with tool calls and diffs, search, cost, per-skill
 usage, and a fleet page that says which laptops are reporting and which are
 not.
 
-The product and the binary are `loop-sessions`; the repository is
-`agent-sessions`. It is not affiliated with or endorsed by Anthropic.
+The product, the binary and the repository are all `loop-sessions`. It is
+not affiliated with or endorsed by Anthropic.
 
-[![ci](https://github.com/loopai-hq/agent-sessions/actions/workflows/ci.yml/badge.svg)](https://github.com/loopai-hq/agent-sessions/actions/workflows/ci.yml)
-[![identifier-gate](https://github.com/loopai-hq/agent-sessions/actions/workflows/identifier-gate.yml/badge.svg)](https://github.com/loopai-hq/agent-sessions/actions/workflows/identifier-gate.yml)
-[![scorecard](https://api.scorecard.dev/projects/github.com/loopai-hq/agent-sessions/badge)](https://scorecard.dev/viewer/?uri=github.com/loopai-hq/agent-sessions)
-[![release](https://img.shields.io/github/v/release/loopai-hq/agent-sessions)](https://github.com/loopai-hq/agent-sessions/releases)
-[![license](https://img.shields.io/github/license/loopai-hq/agent-sessions)](LICENSE)
-[![Go Reference](https://pkg.go.dev/badge/github.com/loopai-hq/agent-sessions.svg)](https://pkg.go.dev/github.com/loopai-hq/agent-sessions)
+[![ci](https://github.com/loopai-hq/loop-sessions/actions/workflows/ci.yml/badge.svg)](https://github.com/loopai-hq/loop-sessions/actions/workflows/ci.yml)
+[![identifier-gate](https://github.com/loopai-hq/loop-sessions/actions/workflows/identifier-gate.yml/badge.svg)](https://github.com/loopai-hq/loop-sessions/actions/workflows/identifier-gate.yml)
+[![scorecard](https://api.scorecard.dev/projects/github.com/loopai-hq/loop-sessions/badge)](https://scorecard.dev/viewer/?uri=github.com/loopai-hq/loop-sessions)
+[![release](https://img.shields.io/github/v/release/loopai-hq/loop-sessions)](https://github.com/loopai-hq/loop-sessions/releases)
+[![license](https://img.shields.io/github/license/loopai-hq/loop-sessions)](LICENSE)
+[![Go Reference](https://pkg.go.dev/badge/github.com/loopai-hq/loop-sessions.svg)](https://pkg.go.dev/github.com/loopai-hq/loop-sessions)
 
 | The session list | One session, with tool calls and diffs |
 |---|---|
@@ -52,13 +52,13 @@ through the three Firebase values, the first admin and the ports. The
 published image is `ghcr.io/loopai-hq/loop-sessions-server`.
 
 **3. The agent, on a laptop.** Binaries are on
-[GitHub Releases](https://github.com/loopai-hq/agent-sessions/releases); the
+[GitHub Releases](https://github.com/loopai-hq/loop-sessions/releases); the
 installer verifies the SHA-256 before anything is made executable and never
 uses `sudo`:
 
 ```sh
-curl -fsSL https://github.com/loopai-hq/agent-sessions/releases/latest/download/install.sh |
-  LOOP_SESSIONS_BASE_URL=https://github.com/loopai-hq/agent-sessions/releases/latest \
+curl -fsSL https://github.com/loopai-hq/loop-sessions/releases/latest/download/install.sh |
+  LOOP_SESSIONS_BASE_URL=https://github.com/loopai-hq/loop-sessions/releases/latest \
   LOOP_SESSIONS_VERSION=download sh
 loop-sessions install --endpoint https://sessions.example.com
 ```

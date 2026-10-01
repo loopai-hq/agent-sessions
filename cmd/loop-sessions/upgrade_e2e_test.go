@@ -15,8 +15,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/internal/capture"
-	"github.com/loopai-hq/agent-sessions/internal/config"
+	"github.com/loopai-hq/loop-sessions/internal/capture"
+	"github.com/loopai-hq/loop-sessions/internal/config"
 )
 
 // TestAStaleAgentUpgradesItselfWhenAHookRuns is the test that proves the wiring
@@ -239,7 +239,7 @@ func buildAgentVersion(t *testing.T, path, version string) {
 	t.Helper()
 	cmd := exec.Command("go", "build",
 		"-ldflags", "-X main.Version="+version,
-		"-o", path, "github.com/loopai-hq/agent-sessions/cmd/loop-sessions")
+		"-o", path, "github.com/loopai-hq/loop-sessions/cmd/loop-sessions")
 	if out, err := cmd.CombinedOutput(); err != nil {
 		t.Fatalf("build the agent at %s: %v\n%s", version, err, out)
 	}

@@ -75,7 +75,7 @@ linters:
             - "!**/server/**"
           allow:
             - $gostd
-            - github.com/loopai-hq/agent-sessions
+            - github.com/loopai-hq/loop-sessions
 
     errorlint:
       errorf: true
@@ -262,7 +262,7 @@ formatters:
   settings:
     goimports:
       local-prefixes:
-        - github.com/loopai-hq/agent-sessions
+        - github.com/loopai-hq/loop-sessions
 
 issues:
   # Report everything; a capped list hides the size of a regression.

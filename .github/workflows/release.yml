@@ -3,7 +3,7 @@
 # One checkout of one tag produces both halves, the cross-compiled client and
 # the server image, and publishes them where anyone can fetch and verify them:
 #
-#   https://github.com/loopai-hq/agent-sessions/releases/download/vX.Y.Z/<asset>
+#   https://github.com/loopai-hq/loop-sessions/releases/download/vX.Y.Z/<asset>
 #   ghcr.io/loopai-hq/loop-sessions-server:vX.Y.Z
 #
 # Two jobs. `build` runs on every trigger and proves the release is sound

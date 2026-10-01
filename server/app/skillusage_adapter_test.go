@@ -17,11 +17,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/server/admin"
-	"github.com/loopai-hq/agent-sessions/server/auth"
-	"github.com/loopai-hq/agent-sessions/server/ingest"
-	"github.com/loopai-hq/agent-sessions/server/skillusage"
-	"github.com/loopai-hq/agent-sessions/server/store"
+	"github.com/loopai-hq/loop-sessions/server/admin"
+	"github.com/loopai-hq/loop-sessions/server/auth"
+	"github.com/loopai-hq/loop-sessions/server/ingest"
+	"github.com/loopai-hq/loop-sessions/server/skillusage"
+	"github.com/loopai-hq/loop-sessions/server/store"
 )
 
 // RegisterSkillUsage restates the handler's route list on the server's

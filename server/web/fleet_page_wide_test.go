@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loopai-hq/agent-sessions/server/fleet"
+	"github.com/loopai-hq/loop-sessions/server/fleet"
 )
 
 // TestFleetPageRendersAFleetWideRowWithoutAPersonAndMutesItUnderTheSentinel
