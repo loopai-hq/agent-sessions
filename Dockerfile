@@ -11,9 +11,11 @@
 # on every tag; the same file builds on every pull request so a change that
 # breaks the image is found before it is merged.
 #
-# The base is pinned to the patch release named by go.mod's toolchain line,
-# and Dependabot's docker entry moves the two together (a minor bump is
-# ignored there so the Go major/minor only ever changes through go.mod).
+# The base is pinned to the patch release named by go.mod's toolchain line.
+# Dependabot's docker entry moves this line on its own (a minor bump is
+# ignored there so the Go major/minor only ever changes through go.mod) and
+# nothing moves go.mod's toolchain with it, so ci.yml's build job fails
+# when the two disagree; bump both in one change.
 FROM golang:1.26.8-bookworm AS build
 
 WORKDIR /src

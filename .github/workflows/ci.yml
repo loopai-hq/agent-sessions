@@ -138,6 +138,21 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      # The Dockerfile's base image is pinned to the patch release named by
+      # go.mod's toolchain line. Dependabot's docker entry moves the one and
+      # its gomod entry never moves the other, so the two can drift by a
+      # patch without anyone deciding it; this fails the build when they do.
+      - name: the Dockerfile's Go matches go.mod's toolchain
+        run: |
+          want="$(sed -nE 's/^toolchain go([0-9]+\.[0-9]+\.[0-9]+)$/\1/p' go.mod)"
+          have="$(sed -nE 's/^FROM golang:([0-9]+\.[0-9]+\.[0-9]+)-[a-z0-9]+ AS build$/\1/p' Dockerfile)"
+          test -n "$want" && test -n "$have"
+          if [ "$want" != "$have" ]; then
+            echo "Dockerfile builds with golang:${have} but go.mod's toolchain is go${want}" >&2
+            exit 1
+          fi
+          echo "Dockerfile and go.mod agree on Go ${want}"
+
       - name: cross-compile the client (must link on every platform)
         run: make release ENDPOINT= && make verify
 

@@ -497,19 +497,35 @@ is available at any time.
    `latest` tag.
 4. **What the workflow does on the tag**, in order, in `.github/workflows/release.yml`:
    the `build` job as in step 2; then `publish`, which builds again from the
-   tag, checks the binary's VCS stamp and `latest.json` name this commit,
-   writes `install.sh.sha256` and `uninstall.sh.sha256`, attests the four
+   tag (`VERSION` is the tag by name, not `git describe`), checks the
+   binary's VCS stamp and `latest.json` name this commit, writes
+   `install.sh.sha256` and `uninstall.sh.sha256`, attests the four
    binaries (`subject-checksums: dist/SHA256SUMS`) and the two scripts,
-   signs `SHA256SUMS` with cosign, verifies both, builds and pushes the
-   image to GHCR and attests its digest, then creates the GitHub Release as
-   a **draft**, uploads every asset, and only then flips it to published
-   (`gh release edit --draft=false`). The draft-then-publish order is the
-   binaries-first rule in GitHub's terms: nobody can observe a release
-   whose assets are still uploading. The job's first step refuses to run
-   if a release for the tag already exists, before anything is built,
-   pushed or signed. Only pushes to this repository's owner
-   publish (`if: github.repository_owner == 'loopai-hq'`); a fork gets the
-   dry run.
+   signs `SHA256SUMS` with cosign, verifies both, creates the GitHub
+   Release as a **draft** and uploads every asset, then builds and pushes
+   the image to GHCR, attests its digest and verifies that attestation
+   (`gh attestation verify oci://…@sha256:…`), and only then flips the
+   release to published (`gh release edit --draft=false`). The
+   draft-then-publish order is the binaries-first rule in GitHub's terms:
+   nobody can observe a release whose assets are still uploading, and the
+   image is pushed only once the draft holds every asset. The job's first
+   step refuses to run if a release for the tag already exists, before
+   anything is built, pushed or signed. Both jobs run only in this
+   repository's owner's copy (`if: github.repository_owner == 'loopai-hq'`);
+   in a fork the workflow is skipped entirely, dry run included.
+
+   **If a tag run fails before the last step**, it leaves a draft release
+   and, if the image step had run, image tags in GHCR, but nothing
+   published. Delete the draft (the Releases page, or
+   `gh release delete vX.Y.Z --yes`; the tag stays), fix the cause, and
+   re-run the workflow from the Actions tab. The first step refuses to
+   start while the draft exists, because `gh release view` finds drafts
+   too, so the delete is not optional. Immutable releases bind a release's
+   assets and tag only once it is undrafted, which is why a draft can be
+   deleted and remade. A re-run rebuilds the image, and its digest may
+   differ (layer mtimes come from the checkout); the image tags are
+   re-pointed to the new digest, and the earlier attestation names an
+   image nothing refers to.
 5. **Repository settings this relies on** (one-time, in Settings):
    *immutable releases* enabled, so that once a release is published its
    assets and its tag cannot be changed, which is exactly why the workflow
