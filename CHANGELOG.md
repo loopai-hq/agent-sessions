@@ -9,7 +9,7 @@ tag is cut and is set in the same change as the tag.
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-10-01
+## [0.1.0] - 2026-10-06
 
 The first public release: the client agent, the server, the dashboard and
 the example deployments, with releases people can download and verify. The
